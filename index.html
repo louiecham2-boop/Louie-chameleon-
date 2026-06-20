@@ -160,8 +160,9 @@
   .cal-d{font-size:12px;font-weight:700;color:var(--muted)}
   .cal-chip{font-size:10.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:5px;padding:2px 4px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
   .dj-banner{background:var(--brand-soft);border:1px solid var(--line2);color:var(--brand-ink);border-radius:11px;padding:11px 14px;margin-bottom:13px;font-weight:700;font-size:14.5px}
-  .modal-bg{position:fixed;inset:0;background:rgba(15,22,32,.46);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px}
-  .modal{background:#fff;border-radius:16px;width:100%;max-width:430px;max-height:92vh;overflow:auto;padding:18px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+  .modal-bg{position:fixed;inset:0;background:rgba(15,22,32,.46);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px;overscroll-behavior:contain}
+  body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:430px;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:18px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
   .modal-h{font-weight:800;font-size:18px;margin-bottom:6px}
   .modal label{display:block;font-weight:700;font-size:13px;margin:11px 2px 5px;color:var(--ink)}
   .modal input,.modal select,.modal textarea{width:100%;border:1px solid var(--line2);border-radius:9px;padding:11px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
@@ -501,7 +502,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v114</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v118</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -532,6 +533,12 @@
     <div class="modal-foot">
       <button id="remClose" class="btn primary">הבנתי</button>
     </div>
+  </div>
+</div>
+<div id="notifyModal" class="modal-bg" style="display:none;z-index:99">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-h" id="notifyMsg" style="font-weight:700;font-size:15.5px;line-height:1.55;white-space:pre-line">⚠️</div>
+    <div class="modal-foot"><button id="notifyOk" class="btn primary">הבנתי</button></div>
   </div>
 </div>
 <div id="confirmModal" class="modal-bg" style="display:none;z-index:90">
@@ -586,9 +593,9 @@
     <label>שעה</label><input id="aTime" type="time" dir="ltr">
     <label>מותג</label><select id="aBrand"><option value="louie">לואי</option><option value="kamilion">קמיליון</option></select>
     <label>שם האירוע / אולם (לא חובה)</label><input id="aLabel" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-    <label>מפעיל / הגברה</label><input id="aOp" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="שם המפעיל">
-    <label>די-ג׳יי</label><input id="aDj" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="שם הדי-ג׳יי">
-    <label>צלם / וידאו</label><input id="aPhotog" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="שם הצלם">
+    <label>מפעיל / הגברה</label><select id="aOp" dir="rtl"></select>
+    <label>די-ג׳יי</label><select id="aDj" dir="rtl"></select>
+    <label>צלם / וידאו</label><select id="aPhotog" dir="rtl"></select>
     <label>הערות (לא חובה)</label><textarea id="aNotes" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     <div class="modal-foot">
       <button id="aSave" class="btn primary">שמירה</button>
@@ -859,9 +866,9 @@ const SEC_LOGISTICS={title:'לוגיסטיקה ותשלומים',kind:'info',fie
 ]};
 const OPS_FIELDS=[
   F('eventManager','מנהל אירוע','text'),
-  F('operator','מפעיל','text'),
-  F('dj','די.ג׳יי','text'),
-  F('photographer','צלם','text'),
+  F('operator','מפעיל','crew'),
+  F('dj','די.ג׳יי','crew'),
+  F('photographer','צלם','crew'),
   F('rigger1','ראגר','text'),
   F('rigger2','ראגר שני','text'),
   F('bartender','ברמנית','text'),
@@ -949,8 +956,8 @@ const EVENT_TYPES={
     ]},
     {title:'צוות ותפעול',kind:'ops',fields:[
       F('eventManager','מנהל אירוע','text'),
-      F('dj','די.ג׳יי','text'),
-      F('photographer','צלם','text'),
+      F('dj','די.ג׳יי','crew'),
+      F('photographer','צלם','crew'),
       F('dishwasher','שוטף כלים','text'),
       F('waiter1','מלצר 1','text'),F('waiter2','מלצר 2','text'),F('waiter3','מלצר 3','text'),
     ]},
@@ -980,8 +987,8 @@ const EVENT_TYPES={
     ]},
     {title:'צוות ותפעול',kind:'ops',fields:[
       F('eventManager','מנהל אירוע','text'),
-      F('dj','די.ג׳יי','text'),
-      F('photographer','צלם','text'),
+      F('dj','די.ג׳יי','crew'),
+      F('photographer','צלם','crew'),
       F('bartender','ברמן/ית','text'),
       F('dishwasher','שוטף כלים','text'),
       F('waiter1','מלצר 1','text'),F('waiter2','מלצר 2','text'),F('waiter3','מלצר 3','text'),
@@ -1059,6 +1066,38 @@ function roleState(v){
   if(!s||['לשבץ','לעדכן','-','—'].includes(s)) return 'need';
   if(/^(לא צריך|אין צורך|לא צריך|ללא|אין|לא רלוונטי)$/.test(s)||/^לא\s*צריך/.test(s)||/^אין\s*צורך/.test(s)) return 'none';
   return 'set';
+}
+function roleEditVal(v){ return roleState(v)==='set' ? (v||'') : ''; }
+/* ===== בחירת צוות מתוך רשימת העובדים + אכיפת טופס 101 ===== */
+function hasForm101(w){ return !!(w && (w.form101 || w.form101url || w.form101file)); }
+function crewRoleFor(key){
+  if(key==='dj') return 'dj';
+  if(key==='photographer'||key==='photog'||key==='ee_photographer') return 'photographer';
+  return 'operator'; // operator / op / ee_operator
+}
+function workersForCrew(key){
+  const role=crewRoleFor(key);
+  return (MEM.workers||[]).filter(w=>w.role===role||w.role==='manager').sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));
+}
+function crewOptionsHTML(key,cur){
+  cur=cur||''; const ws=workersForCrew(key); let found=false;
+  let h='<option value="">— בחר/י מהרשימה —</option>'
+    +'<option value="לא צריך"'+((roleState(cur)==='none')?' selected':'')+'>לא צריך</option>';
+  ws.forEach(w=>{ const has=hasForm101(w); const nm=esc(w.name||''); const sel=(cur===w.name)?' selected':''; if(cur===w.name) found=true;
+    const mark=(w.role==='manager'?' (מנהל)':'')+(has?'':' — חסר 101');
+    h+='<option value="'+nm+'" data-w101="'+(has?'1':'0')+'"'+sel+'>'+nm+mark+'</option>'; });
+  if(cur && roleState(cur)==='set' && !found){ h+='<option value="'+esc(cur)+'" selected data-w101="0">'+esc(cur)+' (לא ברשימה)</option>'; }
+  return h;
+}
+function notify(msg){ const m=$('#notifyModal'); if(!m){ try{alert(msg);}catch(e){} return; } $('#notifyMsg').textContent=msg; m.style.display='flex'; }
+function guardCrewSelect(s){
+  if(!s) return true;
+  const opt=s.options[s.selectedIndex];
+  if(s.value && s.value!=='לא צריך' && opt && opt.dataset.w101==='0' && s.value!==s.dataset.prev){
+    notify('לא ניתן לשבץ את "'+s.value+'" — אין טופס 101 מסומן בכרטיס העובד.\nיש לסמן טופס 101 בכרטיס העובד, ואז לשבץ.');
+    s.value=s.dataset.prev||''; return false;
+  }
+  s.dataset.prev=s.value; return true;
 }
 async function quickAssign(rid,aid,roleKey,name){
   let a=aid?MEM.assignments.find(x=>x.id===aid):(rid?MEM.assignments.find(x=>x.reportId===rid):null);
@@ -1346,6 +1385,10 @@ function fieldHTML(fld,val){
     const opts='<option value="">בחר/י שעה</option>'+presets.map(p=>`<option value="${p}" ${val===p?'selected':''}>${p}</option>`).join('')+`<option value="__other__" ${isOther?'selected':''}>אחר…</option>`;
     return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hh}</label><div class="etime" data-key="${fld.key}"><select class="et-sel">${opts}</select><input type="time" class="et-other" value="${isOther?esc(val):''}" style="${isOther?'':'display:none'}"></div></div>`;
   }
+  if(fld.type==='crew'){
+    const rq=fld.req?'<span class="reqm"> *</span>':'';
+    return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hint}</label><select class="crew-sel" data-key="${fld.key}" dir="rtl">${crewOptionsHTML(fld.key,val)}</select></div>`;
+  }
   if(fld.type==='select'){
     const rq=fld.req?'<span class="reqm"> *</span>':'';
     const opts='<option value="">בחר/י…</option>'+(fld.opts||[]).map(o=>`<option value="${esc(o)}" ${val===o?'selected':''}>${esc(o)}</option>`).join('');
@@ -1516,6 +1559,9 @@ function bindInputs(app){
     other.oninput=()=>{ current.fields[key]=other.value; if(other.value) clr(); markDirty(); };
   });
   app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); }; });
+  app.querySelectorAll('select.crew-sel[data-key]').forEach(s=>{ s.dataset.prev=s.value;
+    s.onchange=()=>{ if(!guardCrewSelect(s)) return; current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); };
+  });
   app.querySelectorAll('.hebdate-btn:not([disabled])').forEach(b=>b.onclick=()=>openHebCal(b.dataset.key));
   app.querySelectorAll('.chefmenu').forEach(c=>bindChefmenu(c));
   app.querySelectorAll('.checks').forEach(g=>{
@@ -1840,7 +1886,7 @@ function remDateTime(f){
 }
 function computeReminders(){
   const out=[]; if(!MEM||!MEM.reports) return out;
-  MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&r.type!=='endreport').forEach(r=>{
+  MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&r.type!=='endreport'&&r.brand===BRAND).forEach(r=>{
     const f=r.fields; const du=daysUntil(f.eventDate); if(du==null||du<0) return;
     const bname=BRAND_NAME[r.brand]||''; const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'אירוע';
     const whoRaw=String(f.celebrant||f.contact||'').replace(/\s+/g,' ').trim();
@@ -1915,7 +1961,7 @@ function openReminders(){
 function closeReminders(){ const m=$('#remindersModal'); if(m) m.style.display='none'; }
 function updateRemNotif(){
   const bar=$('#remNotif'); if(!bar) return;
-  if(CHEF_MODE){ bar.style.display='none'; return; }
+  if(CHEF_MODE || VIEW==='chef'){ bar.style.display='none'; bar.innerHTML=''; return; }
   const list=computeReminders();
   if(!list.length){ bar.style.display='none'; bar.innerHTML=''; return; }
   const top=list[0];
@@ -1930,7 +1976,7 @@ function updateRemNotif(){
 function refreshBell(){
   updateRemNotif();
   const bell=$('#remBell'); if(!bell) return;
-  if(CHEF_MODE){ bell.classList.remove('show'); return; }
+  if(CHEF_MODE || VIEW==='chef'){ bell.classList.remove('show'); return; }
   const n=computeReminders().length;
   $('#remCount').textContent=n;
   bell.classList.toggle('show',n>0);
@@ -2023,9 +2069,8 @@ function renderSchedList(){
       <div class="sched-mcards">${g.rows.map(cardHTML).join('')}</div>
     </div>`; }).join('');
   body.querySelectorAll('.sched-mhead').forEach(h=>h.onclick=(e)=>{ e.stopPropagation(); const g=h.closest('.sched-mgroup'); const mon=g.dataset.mon; schedCollapse[mon]=!schedCollapse[mon]; g.classList.toggle('collapsed', !!schedCollapse[mon]); });
-  body.querySelectorAll('.sc-need').forEach(b=>b.onclick=async(e)=>{ e.stopPropagation();
-    const card=b.closest('.sched-card'); const labels={op:'שם המפעיל',dj:'שם הדי-ג׳יי',photog:'שם הצלם'};
-    const name=await askInput(labels[b.dataset.role]); if(name) quickAssign(card.dataset.rid,card.dataset.aid,b.dataset.role,name);
+  body.querySelectorAll('.sc-need').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
+    const card=b.closest('.sched-card'); openAssignForRow(card.dataset.rid,card.dataset.aid);
   });
   body.querySelectorAll('.sc-skip').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const card=b.closest('.sched-card'); quickAssign(card.dataset.rid,card.dataset.aid,b.dataset.role,'לא צריך'); });
   body.querySelectorAll('.sc-none').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const card=b.closest('.sched-card'); quickAssign(card.dataset.rid,card.dataset.aid,b.dataset.role,''); });
@@ -2039,7 +2084,7 @@ function openAssignForRow(rid,aid){
   $('#aTime').value=(r&&r.fields.eventTime&&/^[0-9]/.test(r.fields.eventTime))?r.fields.eventTime:'';
   $('#aBrand').value=r?r.brand:BRAND;
   $('#aLabel').value=r?(((EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'')+(r.fields.celebrant?' · '+r.fields.celebrant:'')):'';
-  $('#aOp').value=r?(r.fields.operator||''):''; $('#aDj').value=r?(r.fields.dj||''):''; $('#aPhotog').value=r?(r.fields.photographer||''):''; $('#aNotes').value='';
+  setCrewSel($('#aOp'),'operator', r?r.fields.operator:''); setCrewSel($('#aDj'),'dj', r?r.fields.dj:''); setCrewSel($('#aPhotog'),'photographer', r?r.fields.photographer:''); $('#aNotes').value='';
   $('#aDel').style.display='none';
   $('#aModalTitle').textContent='שיבוץ צוות לאירוע';
   const sm=$('#schedModal'); sm.dataset.reportId=rid||''; sm.style.display='flex';
@@ -2080,9 +2125,9 @@ function openAssign(id,presetDate){
   $('#aTime').value=a?(a.time||''):'';
   $('#aBrand').value=a?(a.brand||BRAND):BRAND;
   $('#aLabel').value=a?(a.label||''):'';
-  $('#aOp').value=a?(a.op||''):'';
-  $('#aDj').value=a?(a.dj||''):'';
-  $('#aPhotog').value=a?(a.photog||''):'';
+  setCrewSel($('#aOp'),'operator', a?a.op:'');
+  setCrewSel($('#aDj'),'dj', a?a.dj:'');
+  setCrewSel($('#aPhotog'),'photographer', a?a.photog:'');
   $('#aNotes').value=a?(a.notes||''):'';
   $('#aDel').style.display=id?'':'none';
   $('#aModalTitle').textContent=id?'עריכת שיבוץ':'שיבוץ חדש';
@@ -2151,6 +2196,7 @@ function openWorker(id){
   editingWorker=id||null;
   const w=id?MEM.workers.find(x=>x.id===id):null;
   $('#wName').value=w?(w.name||''):'';
+  { const wn=$('#wName'); if(wn) wn.oninput=()=>{ const v=wn.value; const f=v.replace(/[^\u05D0-\u05EA\u05F3\u05F4'’\s]/g,''); if(f!==v){ let pos=(wn.selectionStart||v.length)-(v.length-f.length); if(pos<0)pos=0; wn.value=f; try{ wn.setSelectionRange(pos,pos); }catch(e){} } }; }
   $('#wRole').value=w?(w.role||'dj'):'dj';
   $('#wPhone').value=w?(w.phone||''):'';
   $('#wContract').checked=w?!!w.contract:false;
@@ -2265,11 +2311,27 @@ function setView(v){
   refreshBell();
 }
 function syncBrandUI(){ document.querySelectorAll('#brandSwitch button').forEach(b=>b.classList.toggle('on',b.dataset.brand===BRAND)); }
+/* ===== נעילת גלילת הרקע כשחלון (מודאל) פתוח — מונע שהמסך מאחור ייגלל ===== */
+(function(){
+  let _y=0;
+  function anyOpen(){ return Array.prototype.some.call(document.querySelectorAll('.modal-bg'),m=>m.style.display && m.style.display!=='none'); }
+  function sync(){ const open=anyOpen(); const has=document.body.classList.contains('modal-open');
+    if(open && !has){ _y=window.scrollY||window.pageYOffset||0; document.body.style.top=(-_y)+'px'; document.body.classList.add('modal-open'); }
+    else if(!open && has){ document.body.classList.remove('modal-open'); document.body.style.top=''; window.scrollTo(0,_y); }
+  }
+  try{ const obs=new MutationObserver(sync);
+    document.querySelectorAll('.modal-bg').forEach(m=>obs.observe(m,{attributes:true,attributeFilter:['style']}));
+  }catch(e){}
+})();
 
-document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=()=>{ BRAND=b.dataset.brand; applyBrand(); syncBrandUI(); if(VIEW==='new') renderPicker(); else if(VIEW==='sched') renderSched(); else if(VIEW==='chef') renderChef(); else if(VIEW==='endreport') renderEndHome(); else renderArchive(); });
+document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=()=>{ BRAND=b.dataset.brand; applyBrand(); syncBrandUI(); if(VIEW==='new') renderPicker(); else if(VIEW==='sched') renderSched(); else if(VIEW==='chef') renderChef(); else if(VIEW==='endreport') renderEndHome(); else renderArchive(); refreshBell(); });
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 { const m=$('#hebCalModal'); if(m){ const p=$('#hcPrev'),n=$('#hcNext'),cc=$('#hcCancel'),cl=$('#hcClear'); if(p)p.onclick=()=>hebCalNav(-1); if(n)n.onclick=()=>hebCalNav(1); if(cc)cc.onclick=closeHebCal; if(cl)cl.onclick=hebCalClear; m.onclick=e=>{ if(e.target===m) closeHebCal(); }; } }
-{ const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; m.onclick=(e)=>{ if(e.target===m) closeAssign(); }; } }
+{ const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; m.onclick=(e)=>{ if(e.target===m) closeAssign(); };
+  ['#aOp','#aDj','#aPhotog'].forEach(id=>{ const s=$(id); if(s) s.onchange=()=>guardCrewSelect(s); });
+} }
+function setCrewSel(el,roleKey,val){ if(!el) return; el.innerHTML=crewOptionsHTML(roleKey, val||''); el.dataset.prev=el.value; }
+{ const b=$('#notifyOk'); if(b) b.onclick=()=>{ const m=$('#notifyModal'); if(m) m.style.display='none'; }; const m=$('#notifyModal'); if(m) m.onclick=e=>{ if(e.target===m) m.style.display='none'; }; }
 { const m=$('#workerModal'); if(m){ $('#wSave').onclick=saveWorker; $('#wCancel').onclick=closeWorker; $('#wDel').onclick=()=>{ if(editingWorker) deleteWorker(editingWorker); }; m.onclick=e=>{ if(e.target===m) closeWorker(); }; } }
 { const m=$('#cateringModal'); if(m){ $('#cSave').onclick=saveCater; $('#cCancel').onclick=closeCater; $('#cDel').onclick=()=>{ if(editingCater) deleteCater(editingCater); }; m.onclick=e=>{ if(e.target===m) closeCater(); }; } }
 
@@ -2363,7 +2425,7 @@ function kidsCardHTML(r){
   const diet=[];
   if(f.glutenLactose) diet.push('רגישויות: '+esc(f.glutenLactose));
   if(f.vegMeals) diet.push('צמחוני: '+esc(f.vegMeals));
-  return `<div class="chef-card ${done?'done':''}" data-id="${r.id}">
+  return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
     <div class="cf-sec"><div class="cf-h">תפריט ילדים</div><div class="cf-big">${esc(f.kidsMenu)}</div></div>
     ${diet.length?`<div class="cf-diet">${diet.join(' · ')}</div>`:''}
@@ -2379,7 +2441,7 @@ function adultsCardHTML(r){
   if(f.glutenLactose) diet.push('רגישויות: '+esc(f.glutenLactose));
   if(f.vegPersonal) diet.push('צמחוני: '+esc(f.vegPersonal));
   if(f.veganPersonal) diet.push('טבעוני: '+esc(f.veganPersonal));
-  return `<div class="chef-card ${done?'done':''}" data-id="${r.id}">
+  return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
     ${missing.length?`<div class="cf-missing">⛔ חסרה בחירה בתפריט — ${missing.join(' · ')}</div>`:''}
     ${adults?`<div class="cf-sec"><div class="cf-h">תפריט מבוגרים</div><div class="cf-big">${adults}</div></div>`:''}
@@ -2389,6 +2451,32 @@ function adultsCardHTML(r){
     <button type="button" class="btn cf-done ${done?'on':''}" data-done="${r.id}" data-tab="adults">${done?'✓ הוכן / אושר':'סמן כהוכן / אושר'}</button>
     ${done&&f.chefDoneAdultsAt?`<div class="cf-doneat">סומן: ${esc(f.chefDoneAdultsAt)}</div>`:''}
   </div>`;
+}
+let CHEF_REM_CACHE=[];
+function chefMenuReminders(){
+  const out=[]; if(!MEM||!MEM.reports) return out;
+  MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&r.type!=='endreport').forEach(r=>{
+    if(!CHEF_MODE && r.brand!==BRAND) return;
+    const f=r.fields; const du=daysUntil(f.eventDate); if(du==null||du<0) return;
+    if(du<=10 && !chefHasMenu(r)){
+      const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'אירוע';
+      const whoRaw=String(f.celebrant||f.contact||'').replace(/\s+/g,' ').trim();
+      const who=whoRaw.length>32?(whoRaw.slice(0,32).trim()+'…'):whoRaw;
+      out.push({ic:'🍽️',level:(du<=1?'red':'amber'),wlevel:(du<=1?'red':'amber'),
+        problem:'עדיין לא נבחר תפריט',
+        name:et+(who?(' · '+who):'')+(CHEF_MODE?(' · '+(BRAND_NAME[r.brand]||'')):''),
+        datetime:remDateTime(f), when:(du===0?'היום':(du===1?'מחר':('בעוד '+du+' ימים'))),
+        rid:r.id, brand:r.brand, sort:f.eventDate});
+    }
+  });
+  out.sort((a,b)=>(a.sort||'').localeCompare(b.sort||''));
+  return out;
+}
+function chefRemBannerHTML(){
+  const list=chefMenuReminders(); if(!list.length) return '';
+  CHEF_REM_CACHE=list;
+  return '<div class="chef-rem rem-banner"><div class="rem-banner-h">🍽️ אירועים קרובים שעדיין ללא תפריט <span class="bnum">'+list.length+'</span></div>'
+    +'<div class="rem-list">'+list.map(remItemHTML).join('')+'</div></div>';
 }
 function renderChef(){
   const app=$('#app'); if(!app) return;
@@ -2415,6 +2503,7 @@ function renderChef(){
   }
   app.innerHTML=`<div class="chef-wrap">
     <div class="chef-head"><div class="chef-title">👨‍🍳 תפריטים למטבח</div>${CHEF_MODE?'<button type="button" class="btn ghost sm" id="chefLogout">יציאה</button>':''}</div>
+    ${chefRemBannerHTML()}
     <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · לפי תאריך. חודשים שעברו מכווצים — גללו למעלה לפתיחה. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
     <div class="rubric-tabs chef-tabs">
       <button data-ctab="kids" class="${isKids?'on':''}">🧒 תפריטי ילדים (${kidsReps.length})</button>
@@ -2423,11 +2512,21 @@ function renderChef(){
     ${cards}
   </div>`;
   app.querySelectorAll('.chef-tabs button').forEach(b=>b.onclick=()=>{ CHEF_TAB=b.dataset.ctab; renderChef(); });
+  app.querySelectorAll('.chef-rem .rem-item').forEach(b=>b.onclick=()=>{ const rm=CHEF_REM_CACHE[+b.dataset.ri]; if(!rm) return;
+    if(CHEF_MODE){ toast('התפריט עדיין לא נבחר — באחריות המשרד'); return; }
+    if(rm.brand&&rm.brand!==BRAND){ BRAND=rm.brand; applyBrand(); syncBrandUI(); }
+    VIEW='archive'; document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on')); openById(rm.rid);
+  });
   app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; const grp=h.parentElement; const nowCol=grp.classList.contains('collapsed'); CHEF_COLLAPSED[k]=!nowCol; grp.classList.toggle('collapsed',!nowCol); });
   app.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>chefToggleDone(b.dataset.done,b.dataset.tab));
   app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>chefEditReport(b.dataset.edit));
   const lo=$('#chefLogout'); if(lo) lo.onclick=chefLogout;
-  setTimeout(()=>{ const t=app.querySelector('.chef-mgroup:not(.collapsed)'); if(t){ try{ t.scrollIntoView({behavior:'auto',block:'start'}); }catch(e){} } },70);
+  setTimeout(()=>{ const today=new Date().toISOString().slice(0,10);
+    const cards=[...app.querySelectorAll('.chef-card[data-date]')];
+    let t=cards.find(c=>c.dataset.date && c.dataset.date>=today && !c.closest('.chef-mgroup.collapsed'));
+    if(!t) t=app.querySelector('.chef-mgroup:not(.collapsed)');
+    if(t){ try{ t.scrollIntoView({behavior:'auto',block:'start'}); }catch(e){} }
+  },70);
 }
 async function chefToggleDone(id,tab){
   const r=MEM.reports.find(x=>x.id===id); if(!r) return; r.fields=r.fields||{};
