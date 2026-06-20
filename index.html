@@ -489,6 +489,8 @@
   .rem-tx .rt-when.amber{background:#fbf0db;color:#8a5a10}
   .rem-go{align-self:center;color:var(--muted);font-size:20px;flex-shrink:0}
   .rem-empty{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 2px}
+  .load-old{width:100%;justify-content:center;margin:4px 0 14px;background:var(--brand-soft);border-color:var(--line2);color:var(--brand-ink);font-weight:800}
+  .load-old.ghost{background:transparent}
   .rem-notif{display:flex;align-items:center;gap:11px;max-width:980px;margin:10px auto 0;width:calc(100% - 32px);background:#b3261e;color:#fff;border-radius:13px;padding:12px 15px;cursor:pointer;box-shadow:0 6px 18px rgba(179,38,30,.28);animation:remPop .35s ease}
   @keyframes remPop{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
   .rem-notif:hover{filter:brightness(1.05)}
@@ -502,7 +504,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v120</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v123</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -678,6 +680,15 @@ async function initCloud(){
 
 let HIST_LOADED=false;
 function histCutoff(){ const d=new Date(); d.setMonth(d.getMonth()-6); d.setDate(1); return d.toISOString().slice(0,10); }
+/* ===== הצגת אירועים עדכניים בלבד (מיומיים אחורה והלאה) + כפתור "טען קודמים" ===== */
+const RECENT_BACK_DAYS=2;
+function recentCutoffIso(){ const d=new Date(); d.setDate(d.getDate()-RECENT_BACK_DAYS); return d.toISOString().slice(0,10); }
+let SHOW_OLD={archive:false,chef:false,sched:false,cater:false};
+function loadOlderBarHTML(area,olderCount){
+  if(SHOW_OLD[area]) return '<button type="button" class="btn ghost load-old" data-area="'+area+'">⬆️ הצג רק אירועים עדכניים</button>';
+  if(!olderCount) return '';
+  return '<button type="button" class="btn load-old" data-area="'+area+'">📂 טען אירועים קודמים ('+olderCount+')</button>';
+}
 function repInWin(r){ const c=histCutoff(); const d=r&&r.fields&&r.fields.eventDate; return !!(d&&d>=c); }
 function rowInWin(r){ const c=histCutoff(); const d=r&&r.date; return !!(d&&d>=c); }
 function mergeWin(key,recent,inWin){ const older=MEM[key].filter(x=>!inWin(x)); MEM[key]=older.concat(recent); }
@@ -1671,12 +1682,18 @@ function buildTree(q,autoScroll){
       return dateNeedles(f.eventDate).some(x=>norm(x).includes(nq));
     });
   }
-  if(!list.length){ tree.innerHTML=`<div class="empty"><div class="ic">🗂️</div><h3>${q?'אין תוצאות':'אין עדיין דוחות'}</h3><p>${q?'נסה חיפוש אחר':'דוחות חדשים יופיעו כאן מסודרים לפי חודשים'}</p></div>`; return; }
+  let olderCount=0;
+  if(!q && !SHOW_OLD.archive){
+    const cutoff=recentCutoffIso();
+    list=list.filter(r=>{ const d=r.fields.eventDate; if(!d) return true; if(d>=cutoff) return true; olderCount++; return false; });
+  }
+  const olderBar=q?'':loadOlderBarHTML('archive',olderCount);
+  if(!list.length){ tree.innerHTML=olderBar+`<div class="empty"><div class="ic">🗂️</div><h3>${q?'אין תוצאות':'אין אירועים עדכניים'}</h3><p>${q?'נסה חיפוש אחר':'אירועים מהיומיים האחרונים והלאה יופיעו כאן. ' + (olderCount?'לחצו "טען אירועים קודמים" לראות ישנים.':'')}</p></div>`; tree.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.archive=!SHOW_OLD.archive; buildTree(q); }); return; }
   const groups={};
   list.forEach(r=>{ const iso=r.fields.eventDate; let y='ללא תאריך',m=99,mName='ללא תאריך'; if(iso){const d=new Date(iso+'T00:00'); y=d.getFullYear(); m=d.getMonth(); mName=MONTHS[m];} groups[y]=groups[y]||{}; const mk=iso?m:99; groups[y][mk]=groups[y][mk]||{name:mName,items:[]}; groups[y][mk].items.push(r); });
   const years=Object.keys(groups).sort((a,b)=>(a==='ללא תאריך'?1:b==='ללא תאריך'?-1:a-b));
   const _now=new Date(); const curY=_now.getFullYear(); const curM=_now.getMonth();
-  tree.innerHTML=years.map(y=>{
+  tree.innerHTML=olderBar+years.map(y=>{
     const months=groups[y]; const total=Object.values(months).reduce((s,m)=>s+m.items.length,0);
     const isPastYear=(y!=='ללא תאריך' && +y<curY);
     const yOpen=('y'+y in archState)?archState['y'+y]:!isPastYear; const mks=Object.keys(months).sort((a,b)=>a-b);
@@ -1703,6 +1720,7 @@ function buildTree(q,autoScroll){
       }).join('')}
       </div></div>`;
   }).join('');
+  tree.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.archive=!SHOW_OLD.archive; buildTree(q); });
   tree.querySelectorAll('.year-head').forEach(h=>h.onclick=()=>{ const y=h.dataset.y; const cur=h.dataset.open==='1'; archState['y'+y]=!cur; buildTree(q,false); });
   tree.querySelectorAll('.month-head').forEach(h=>h.onclick=()=>{ const mEl=h.parentElement; const mid=mEl.dataset.m; mEl.classList.toggle('collapsed'); archState['m'+mid]=!mEl.classList.contains('collapsed'); });
   tree.querySelectorAll('[data-del]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); deleteById(b.dataset.del); });
@@ -1940,15 +1958,31 @@ let REM_CACHE=[];
 function goToReminder(rm){
   closeReminders();
   if(rm.brand && rm.brand!==BRAND){ BRAND=rm.brand; applyBrand(); syncBrandUI(); }
-  if(rm.kind==='crew'||rm.kind==='catering'||rm.kind==='assign'){
-    VIEW='sched'; SCHEDTAB=rm.tab||'assign';
+  if(rm.kind==='crew' || rm.kind==='assign'){
+    VIEW='sched'; SCHEDTAB='assign';
     document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view==='sched'));
-    renderSched(); window.scrollTo({top:0,behavior:'smooth'});
+    renderSched();
+    const a=(MEM.assignments||[]).find(x=>x.reportId===rm.rid) || (MEM.assignments||[]).find(x=>x.date===rm.sort && x.brand===rm.brand) || null;
+    setTimeout(()=>openAssignForRow(rm.rid, a?a.id:''),130);
+  } else if(rm.kind==='catering'){
+    VIEW='sched'; SCHEDTAB='catering';
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view==='sched'));
+    renderSched();
+    const c=(MEM.catering||[]).find(x=>x.reportId===rm.rid) || (MEM.catering||[]).find(x=>x.date===rm.sort && x.brand===rm.brand) || null;
+    setTimeout(()=>openCaterForRow(rm.rid, c?c.id:''),130);
   } else {
-    // ביטחון / תפריט — נפתח את הדוח עצמו לעריכה בדיוק במקום שצריך לטפל
-    VIEW='archive';
-    document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));
-    openById(rm.rid);
+    // ביטחון / תפריט — פתיחת הדוח עצמו במצב עריכה, וגלילה לשדה הרלוונטי
+    const r=MEM.reports.find(x=>x.id===rm.rid);
+    if(r){ current=r; BRAND=r.brand; EDITING=true; VIEW='archive';
+      document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));
+      applyBrand(); syncBrandUI(); renderForm();
+      setTimeout(()=>{
+        const keys=(rm.kind==='security')?['securityCheck']:['kidsMenu','adultsMenuPick','menu','sides'];
+        let el=null; for(const k of keys){ el=document.querySelector('[data-key="'+k+'"]'); if(el) break; }
+        if(el){ const sec=el.closest('.section'); if(sec) sec.classList.remove('collapsed'); try{ el.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){} }
+        else { try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+      },180);
+    }
   }
   refreshBell();
 }
@@ -2052,8 +2086,11 @@ function eventRows(){
 let schedCollapse={};
 function renderSchedList(){
   const body=$('#schedBody'); if(!body) return;
-  const rows=eventRows();
-  if(!rows.length){ body.innerHTML=`<div class="empty"><div class="ic">🗓️</div><h3>אין אירועים עדיין</h3><p>תאריכי האירועים מהדוחות יופיעו כאן אוטומטית. אפשר גם להוסיף שיבוץ ידני בכפתור למעלה.</p></div>`; return; }
+  let rows=eventRows();
+  let olderCount=0;
+  if(!SHOW_OLD.sched){ const cutoff=recentCutoffIso(); const before=rows.length; rows=rows.filter(r=>(r.date||'')>=cutoff); olderCount=before-rows.length; }
+  const olderBar=loadOlderBarHTML('sched',olderCount);
+  if(!rows.length){ body.innerHTML=olderBar+`<div class="empty"><div class="ic">🗓️</div><h3>אין אירועים עדכניים</h3><p>אירועים מהיומיים האחרונים והלאה יופיעו כאן. ${olderCount?'לחצו "טען אירועים קודמים" לראות ישנים.':'אפשר גם להוסיף שיבוץ ידני בכפתור למעלה.'}</p></div>`; body.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.sched=!SHOW_OLD.sched; renderSchedList(); }); return; }
   const role=(lbl,key,v)=>{ const st=roleState(v);
     let inner;
     if(st==='need') inner=`<button type="button" class="sc-need" data-role="${key}">לשבץ</button><button type="button" class="sc-skip" data-role="${key}">לא צריך</button>`;
@@ -2072,12 +2109,13 @@ function renderSchedList(){
     </div>`; };
   const groups=[]; let cur=null;
   rows.forEach(row=>{ const mon=(row.date||'').slice(0,7)||'none'; if(!cur||cur.mon!==mon){ cur={mon,label:monLabel(row.date),rows:[]}; groups.push(cur); } cur.rows.push(row); });
-  body.innerHTML=groups.map(g=>{
+  body.innerHTML=olderBar+groups.map(g=>{
     const col=schedCollapse[g.mon]?' collapsed':'';
     return `<div class="sched-mgroup${col}" data-mon="${g.mon}">
       <div class="sched-sec sched-mhead"><span>${g.label}</span><span class="sec-count">${g.rows.length}</span><button type="button" class="sec-collapse" aria-label="כווץ חודש">▾</button></div>
       <div class="sched-mcards">${g.rows.map(cardHTML).join('')}</div>
     </div>`; }).join('');
+  body.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.sched=!SHOW_OLD.sched; renderSchedList(); });
   body.querySelectorAll('.sched-mhead').forEach(h=>h.onclick=(e)=>{ e.stopPropagation(); const g=h.closest('.sched-mgroup'); const mon=g.dataset.mon; schedCollapse[mon]=!schedCollapse[mon]; g.classList.toggle('collapsed', !!schedCollapse[mon]); });
   body.querySelectorAll('.sc-need').forEach(b=>b.onclick=(e)=>{ e.stopPropagation();
     const card=b.closest('.sched-card'); openAssignForRow(card.dataset.rid,card.dataset.aid);
@@ -2258,9 +2296,12 @@ function cateringRows(){
 }
 function renderCatering(){
   const rb=$('#rubricBody'); if(!rb) return;
-  const rows=cateringRows();
-  let h=`<p class="sub">תאריכי האירועים מהדוחות מופיעים אוטומטית. מלאו כמות מול הלקוח ומול הקייטרינג — ✓ תואם · ⚠️ פער.</p>`;
-  if(!rows.length){ rb.innerHTML=h+`<div class="empty"><div class="ic">🍽️</div><h3>אין אירועים עדיין</h3><p>צרו דוח עם תאריך והוא יופיע כאן לבדיקה</p></div>`; return; }
+  let rows=cateringRows();
+  let olderCount=0;
+  if(!SHOW_OLD.cater){ const cutoff=recentCutoffIso(); const before=rows.length; rows=rows.filter(r=>(r.date||'')>=cutoff); olderCount=before-rows.length; }
+  const olderBar=loadOlderBarHTML('cater',olderCount);
+  let h=`<p class="sub">מציג אירועים עדכניים. מלאו כמות מול הלקוח ומול הקייטרינג — ✓ תואם · ⚠️ פער.</p>`+olderBar;
+  if(!rows.length){ rb.innerHTML=h+`<div class="empty"><div class="ic">🍽️</div><h3>אין אירועים עדכניים</h3><p>${olderCount?'לחצו "טען אירועים קודמים" לראות ישנים.':'צרו דוח עם תאריך והוא יופיע כאן לבדיקה'}</p></div>`; rb.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.cater=!SHOW_OLD.cater; renderCatering(); }); return; }
   const cell=v=>v?esc(v):'<span class="xempty">—</span>';
   h+='<div class="xwrap"><table class="xtab"><thead><tr><th class="xhd">תאריך</th><th>אירוע</th><th>מול הלקוח</th><th>מול הקייטרינג</th><th></th></tr></thead><tbody>';
   let lastMon=null;
@@ -2274,6 +2315,7 @@ function renderCatering(){
     </tr>`; });
   h+='</tbody></table></div>';
   rb.innerHTML=h;
+  rb.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.cater=!SHOW_OLD.cater; renderCatering(); });
   rb.querySelectorAll('tbody tr:not(.mrow)').forEach(tr=>tr.onclick=()=>openCaterForRow(tr.dataset.rid,tr.dataset.cid));
 }
 function openCaterForRow(rid,cid){
@@ -2472,7 +2514,7 @@ function chefMenuReminders(){
       const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'אירוע';
       const whoRaw=String(f.celebrant||f.contact||'').replace(/\s+/g,' ').trim();
       const who=whoRaw.length>32?(whoRaw.slice(0,32).trim()+'…'):whoRaw;
-      out.push({ic:'🍽️',level:(du<=1?'red':'amber'),wlevel:(du<=1?'red':'amber'),
+      out.push({ic:'🍽️',level:(du<=1?'red':'amber'),wlevel:(du<=1?'red':'amber'),kind:'menu',
         problem:'עדיין לא נבחר תפריט',
         name:et+(who?(' · '+who):'')+(CHEF_MODE?(' · '+(BRAND_NAME[r.brand]||'')):''),
         datetime:remDateTime(f), when:(du===0?'היום':(du===1?'מחר':('בעוד '+du+' ימים'))),
@@ -2495,9 +2537,12 @@ function renderChef(){
   const kidsReps=all.filter(chefHasKids).sort(byDate);
   const adultsReps=all.filter(chefHasAdults).sort(byDate);
   const isKids=CHEF_TAB!=='adults';
-  const reps=isKids?kidsReps:adultsReps;
+  let reps=isKids?kidsReps:adultsReps;
+  let olderCount=0;
+  if(!SHOW_OLD.chef){ const cutoff=recentCutoffIso(); const before=reps.length; reps=reps.filter(r=>(r.fields.eventDate||'')>=cutoff); olderCount=before-reps.length; }
+  const olderBarChef=loadOlderBarHTML('chef',olderCount);
   let cards;
-  if(!reps.length){ cards=`<div class="wempty">— אין עדיין ${isKids?'תפריטי ילדים':'תפריטי מבוגרים'} —</div>`; }
+  if(!reps.length){ cards=`<div class="wempty">— אין ${isKids?'תפריטי ילדים':'תפריטי מבוגרים'} עדכניים ${olderCount?'(יש '+olderCount+' ישנים — לחצו "טען אירועים קודמים")':''} —</div>`; }
   else {
     const builder=isKids?kidsCardHTML:adultsCardHTML;
     const curYM=new Date().toISOString().slice(0,7);
@@ -2514,29 +2559,25 @@ function renderChef(){
   app.innerHTML=`<div class="chef-wrap">
     <div class="chef-head"><div class="chef-title">👨‍🍳 תפריטים למטבח</div>${CHEF_MODE?'<button type="button" class="btn ghost sm" id="chefLogout">יציאה</button>':''}</div>
     ${chefRemBannerHTML()}
-    <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · לפי תאריך. חודשים שעברו מכווצים — גללו למעלה לפתיחה. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
+    <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · מציג אירועים עדכניים. ל"טען אירועים קודמים" לחצו על הכפתור. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
     <div class="rubric-tabs chef-tabs">
       <button data-ctab="kids" class="${isKids?'on':''}">🧒 תפריטי ילדים (${kidsReps.length})</button>
       <button data-ctab="adults" class="${!isKids?'on':''}">🍽️ תפריטי מבוגרים (${adultsReps.length})</button>
     </div>
+    ${olderBarChef}
     ${cards}
   </div>`;
   app.querySelectorAll('.chef-tabs button').forEach(b=>b.onclick=()=>{ CHEF_TAB=b.dataset.ctab; renderChef(); });
+  app.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.chef=!SHOW_OLD.chef; renderChef(); });
   app.querySelectorAll('.chef-rem .rem-item').forEach(b=>b.onclick=()=>{ const rm=CHEF_REM_CACHE[+b.dataset.ri]; if(!rm) return;
     if(CHEF_MODE){ toast('התפריט עדיין לא נבחר — באחריות המשרד'); return; }
-    if(rm.brand&&rm.brand!==BRAND){ BRAND=rm.brand; applyBrand(); syncBrandUI(); }
-    VIEW='archive'; document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('on')); openById(rm.rid);
+    goToReminder(rm);
   });
   app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; const grp=h.parentElement; const nowCol=grp.classList.contains('collapsed'); CHEF_COLLAPSED[k]=!nowCol; grp.classList.toggle('collapsed',!nowCol); });
   app.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>chefToggleDone(b.dataset.done,b.dataset.tab));
   app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>chefEditReport(b.dataset.edit));
   const lo=$('#chefLogout'); if(lo) lo.onclick=chefLogout;
-  setTimeout(()=>{ const today=new Date().toISOString().slice(0,10);
-    const cards=[...app.querySelectorAll('.chef-card[data-date]')];
-    let t=cards.find(c=>c.dataset.date && c.dataset.date>=today && !c.closest('.chef-mgroup.collapsed'));
-    if(!t) t=app.querySelector('.chef-mgroup:not(.collapsed)');
-    if(t){ try{ t.scrollIntoView({behavior:'auto',block:'start'}); }catch(e){} }
-  },70);
+  try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
 }
 async function chefToggleDone(id,tab){
   const r=MEM.reports.find(x=>x.id===id); if(!r) return; r.fields=r.fields||{};
