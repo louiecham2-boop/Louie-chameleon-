@@ -498,7 +498,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v111</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v113</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -1596,7 +1596,7 @@ function renderArchive(){
   const app=$('#app');
   app.innerHTML=`
     <h1 class="page">ארכיון הדוחות — ${BRAND_NAME[BRAND]}</h1>
-    <p class="sub">הדוחות מסודרים אוטומטית בתיקיות לפי שנה ← חודש ← תאריך האירוע.</p>
+    <p class="sub">הדוחות מסודרים אוטומטית בתיקיות לפי שנה ← חודש ← תאריך האירוע. אירועים שכבר עברו מכווצים — גללו למעלה ולחצו על החודש כדי לפתוח.</p>
     <div class="arch-tools">
       <div class="search"><span class="mag">⌕</span><input id="searchBox" dir="rtl" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="חיפוש לפי שם, תאריך (10/6), טלפון או סוג אירוע..."></div>
       <button class="btn" id="newFromArch">+ דוח חדש</button>
@@ -1626,13 +1626,17 @@ function buildTree(q,autoScroll){
   const groups={};
   list.forEach(r=>{ const iso=r.fields.eventDate; let y='ללא תאריך',m=99,mName='ללא תאריך'; if(iso){const d=new Date(iso+'T00:00'); y=d.getFullYear(); m=d.getMonth(); mName=MONTHS[m];} groups[y]=groups[y]||{}; const mk=iso?m:99; groups[y][mk]=groups[y][mk]||{name:mName,items:[]}; groups[y][mk].items.push(r); });
   const years=Object.keys(groups).sort((a,b)=>(a==='ללא תאריך'?1:b==='ללא תאריך'?-1:a-b));
+  const _now=new Date(); const curY=_now.getFullYear(); const curM=_now.getMonth();
   tree.innerHTML=years.map(y=>{
     const months=groups[y]; const total=Object.values(months).reduce((s,m)=>s+m.items.length,0);
-    const yOpen=archState['y'+y]!==false; const mks=Object.keys(months).sort((a,b)=>a-b);
+    const isPastYear=(y!=='ללא תאריך' && +y<curY);
+    const yOpen=('y'+y in archState)?archState['y'+y]:!isPastYear; const mks=Object.keys(months).sort((a,b)=>a-b);
     return `<div class="year">
-      <div class="year-head" data-y="${y}"><span class="arr">${yOpen?'▾':'▸'}</span><span>${y}</span><span class="yc">${total} דוחות</span></div>
+      <div class="year-head" data-y="${y}" data-open="${yOpen?1:0}"><span class="arr">${yOpen?'▾':'▸'}</span><span>${y}</span><span class="yc">${total} דוחות</span></div>
       <div class="y-body" style="${yOpen?'':'display:none'}">
-      ${mks.map(mk=>{ const m=months[mk]; const mid=y+'-'+mk; const mOpen=archState['m'+mid]!==false;
+      ${mks.map(mk=>{ const m=months[mk]; const mid=y+'-'+mk;
+        const isPastMonth=(y!=='ללא תאריך') && (+y<curY || (+y===curY && +mk<curM));
+        const mOpen=('m'+mid in archState)?archState['m'+mid]:!isPastMonth;
         const items=m.items.slice().sort((a,b)=>(a.fields.eventDate||'').localeCompare(b.fields.eventDate||''));
         return `<div class="month ${mOpen?'':'collapsed'}" data-m="${mid}">
           <div class="month-head"><span class="folder">📁</span><span>${esc(m.name)} ${y!=='ללא תאריך'?y:''}</span><span class="mc">${m.items.length}</span><span class="arr">▾</span></div>
@@ -1650,8 +1654,8 @@ function buildTree(q,autoScroll){
       }).join('')}
       </div></div>`;
   }).join('');
-  tree.querySelectorAll('.year-head').forEach(h=>h.onclick=()=>{ const y=h.dataset.y; archState['y'+y]=!(archState['y'+y]!==false); buildTree(q); });
-  tree.querySelectorAll('.month-head').forEach(h=>h.onclick=()=>{ const mid=h.parentElement.dataset.m; archState['m'+mid]=!(archState['m'+mid]!==false); h.parentElement.classList.toggle('collapsed'); });
+  tree.querySelectorAll('.year-head').forEach(h=>h.onclick=()=>{ const y=h.dataset.y; const cur=h.dataset.open==='1'; archState['y'+y]=!cur; buildTree(q,false); });
+  tree.querySelectorAll('.month-head').forEach(h=>h.onclick=()=>{ const mEl=h.parentElement; const mid=mEl.dataset.m; mEl.classList.toggle('collapsed'); archState['m'+mid]=!mEl.classList.contains('collapsed'); });
   tree.querySelectorAll('[data-del]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); deleteById(b.dataset.del); });
   tree.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); openById(b.dataset.pdf,true); });
   tree.querySelectorAll('.row').forEach(row=>row.onclick=(e)=>{ if(e.target.closest('[data-del],[data-pdf]')) return; openById(row.dataset.id,false); });
@@ -1836,7 +1840,8 @@ function computeReminders(){
   MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&r.type!=='endreport').forEach(r=>{
     const f=r.fields; const du=daysUntil(f.eventDate); if(du==null||du<0) return;
     const bname=BRAND_NAME[r.brand]||''; const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'אירוע';
-    const who=f.celebrant||f.contact||'';
+    const whoRaw=String(f.celebrant||f.contact||'').replace(/\s+/g,' ').trim();
+    const who=whoRaw.length>32?(whoRaw.slice(0,32).trim()+'…'):whoRaw;
     const name=et+(who?(' · '+who):'')+' · '+bname; // זיהוי האירוע: סוג · שם · מותג
     const dt=remDateTime(f);
     const whenTxt=du===0?'היום':(du===1?'מחר':('בעוד '+du+' ימים'));
@@ -1911,9 +1916,10 @@ function updateRemNotif(){
   const list=computeReminders();
   if(!list.length){ bar.style.display='none'; bar.innerHTML=''; return; }
   const top=list[0];
+  const n=list.length;
   bar.innerHTML='<span class="rn-ic">🔔</span>'
-    +'<span class="rn-tx"><span class="rn-1">תזכורת לסיים — '+list.length+' '+(list.length===1?'משימה פתוחה':'משימות פתוחות')+'</span>'
-    +'<span class="rn-2">'+esc(top.problem)+' · '+esc(top.name)+' · '+esc(top.when)+'</span></span>'
+    +'<span class="rn-tx"><span class="rn-1">'+n+' '+(n===1?'משימה פתוחה לטיפול':'משימות פתוחות לטיפול')+'</span>'
+    +'<span class="rn-2">לחצי לצפייה ברשימה ולטיפול</span></span>'
     +'<span class="rn-cta">לפרטים ‹</span>';
   bar.onclick=openReminders;
   bar.style.display='flex';
@@ -2393,9 +2399,12 @@ function renderChef(){
   if(!reps.length){ cards=`<div class="wempty">— אין עדיין ${isKids?'תפריטי ילדים':'תפריטי מבוגרים'} —</div>`; }
   else {
     const builder=isKids?kidsCardHTML:adultsCardHTML;
+    const curYM=new Date().toISOString().slice(0,7);
     const groups=[]; let cur=null;
     reps.forEach(r=>{ const mon=(r.fields.eventDate||'').slice(0,7)||'none'; if(!cur||cur.mon!==mon){ cur={mon,label:monLabel(r.fields.eventDate),rows:[]}; groups.push(cur);} cur.rows.push(r); });
-    cards=groups.map(g=>{ const key=CHEF_TAB+'|'+g.mon; const collapsed=!!CHEF_COLLAPSED[key];
+    cards=groups.map(g=>{ const key=CHEF_TAB+'|'+g.mon;
+      const isPast=(g.mon!=='none' && g.mon<curYM);
+      const collapsed=(key in CHEF_COLLAPSED)?CHEF_COLLAPSED[key]:isPast;
       return `<div class="chef-mgroup${collapsed?' collapsed':''}">`
         +`<div class="chef-mhead" data-mon="${esc(key)}">${esc(g.label)} <span class="chef-mcount">${g.rows.length}</span><span class="chef-marrow">▾</span></div>`
         +`<div class="chef-mbody">${g.rows.map(builder).join('')}</div></div>`;
@@ -2403,7 +2412,7 @@ function renderChef(){
   }
   app.innerHTML=`<div class="chef-wrap">
     <div class="chef-head"><div class="chef-title">👨‍🍳 תפריטים למטבח</div>${CHEF_MODE?'<button type="button" class="btn ghost sm" id="chefLogout">יציאה</button>':''}</div>
-    <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · לפי תאריך. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
+    <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · לפי תאריך. חודשים שעברו מכווצים — גללו למעלה לפתיחה. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
     <div class="rubric-tabs chef-tabs">
       <button data-ctab="kids" class="${isKids?'on':''}">🧒 תפריטי ילדים (${kidsReps.length})</button>
       <button data-ctab="adults" class="${!isKids?'on':''}">🍽️ תפריטי מבוגרים (${adultsReps.length})</button>
@@ -2411,10 +2420,11 @@ function renderChef(){
     ${cards}
   </div>`;
   app.querySelectorAll('.chef-tabs button').forEach(b=>b.onclick=()=>{ CHEF_TAB=b.dataset.ctab; renderChef(); });
-  app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; CHEF_COLLAPSED[k]=!CHEF_COLLAPSED[k]; h.parentElement.classList.toggle('collapsed',!!CHEF_COLLAPSED[k]); });
+  app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; const grp=h.parentElement; const nowCol=grp.classList.contains('collapsed'); CHEF_COLLAPSED[k]=!nowCol; grp.classList.toggle('collapsed',!nowCol); });
   app.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>chefToggleDone(b.dataset.done,b.dataset.tab));
   app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>chefEditReport(b.dataset.edit));
   const lo=$('#chefLogout'); if(lo) lo.onclick=chefLogout;
+  setTimeout(()=>{ const t=app.querySelector('.chef-mgroup:not(.collapsed)'); if(t){ try{ t.scrollIntoView({behavior:'auto',block:'start'}); }catch(e){} } },70);
 }
 async function chefToggleDone(id,tab){
   const r=MEM.reports.find(x=>x.id===id); if(!r) return; r.fields=r.fields||{};
