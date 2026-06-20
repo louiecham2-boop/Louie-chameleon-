@@ -459,12 +459,46 @@
   .cf-doneat{text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
   .file101-row{display:flex;align-items:center;gap:10px;margin:2px 0 4px;flex-wrap:wrap}
   .file101-name{font-size:13px;color:var(--muted);font-weight:700;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* ===== תזכורות מנהלת המשרד ===== */
+  .rem-bell{position:fixed;inset-inline-end:16px;bottom:18px;z-index:75;width:56px;height:56px;border-radius:50%;background:#b3261e;color:#fff;border:none;box-shadow:0 8px 24px rgba(179,38,30,.4);font-size:24px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:.15s}
+  .rem-bell:hover{filter:brightness(1.08)}
+  .rem-bell.show{display:flex}
+  .rem-bell .rem-count{position:absolute;top:-4px;inset-inline-start:-4px;background:#fff;color:#b3261e;font-size:13px;font-weight:900;min-width:22px;height:22px;border-radius:11px;display:flex;align-items:center;justify-content:center;border:2px solid #b3261e;padding:0 5px}
+  .rem-banner{background:#fff4f2;border:1.5px solid #f0b8b0;border-radius:13px;padding:13px 15px;margin-bottom:16px}
+  .rem-banner.allclear{background:var(--green-bg);border-color:#b8ddc7}
+  .rem-banner-h{display:flex;align-items:center;gap:8px;font-weight:900;font-size:15px;color:#9c2c20}
+  .rem-banner.allclear .rem-banner-h{color:var(--green)}
+  .rem-banner-h .bnum{background:#b3261e;color:#fff;font-size:13px;font-weight:900;min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+  .rem-list{margin-top:11px;display:flex;flex-direction:column;gap:9px}
+  .rem-item{display:flex;align-items:flex-start;gap:11px;background:#fff;border:1px solid var(--line2);border-inline-start:5px solid var(--gray);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;text-align:start}
+  .rem-item:hover{border-color:var(--brand);box-shadow:var(--shadow)}
+  .rem-item.red{border-inline-start-color:#b3261e}
+  .rem-item.amber{border-inline-start-color:#d68a17}
+  .rem-ic{font-size:20px;line-height:1.2;flex-shrink:0}
+  .rem-tx{flex:1;min-width:0}
+  .rem-tx .rt-1{font-weight:800;font-size:14.5px;color:var(--ink);line-height:1.4}
+  .rem-tx .rt-2{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .rem-tx .rt-dt{display:block;font-size:13px;font-weight:800;color:var(--ink);margin-top:4px}
+  .rem-tx .rt-dt .ic{opacity:.7;font-weight:400}
+  .rem-tx .rt-when{display:inline-block;font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 9px;margin-top:6px}
+  .rem-tx .rt-when.red{background:#fde7e4;color:#9c2c20}
+  .rem-tx .rt-when.amber{background:#fbf0db;color:#8a5a10}
+  .rem-go{align-self:center;color:var(--muted);font-size:20px;flex-shrink:0}
+  .rem-empty{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 2px}
+  .rem-notif{display:flex;align-items:center;gap:11px;max-width:980px;margin:10px auto 0;width:calc(100% - 32px);background:#b3261e;color:#fff;border-radius:13px;padding:12px 15px;cursor:pointer;box-shadow:0 6px 18px rgba(179,38,30,.28);animation:remPop .35s ease}
+  @keyframes remPop{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .rem-notif:hover{filter:brightness(1.05)}
+  .rem-notif .rn-ic{font-size:22px;flex-shrink:0}
+  .rem-notif .rn-tx{flex:1;min-width:0}
+  .rem-notif .rn-1{font-weight:900;font-size:15px;line-height:1.3}
+  .rem-notif .rn-2{font-size:12.5px;opacity:.92;margin-top:2px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rem-notif .rn-cta{background:rgba(255,255,255,.22);border-radius:999px;padding:6px 13px;font-weight:800;font-size:13px;flex-shrink:0;white-space:nowrap}
 </style>
 </head>
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v109</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v111</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -481,10 +515,22 @@
   </div>
 </header>
 <div class="brand-banner" id="brandBanner"></div>
+<div id="remNotif" class="rem-notif" style="display:none"></div>
 
 <div class="app" id="app"></div>
 <div id="pdfArea"></div>
 <div class="toast" id="toast"></div>
+<button type="button" class="rem-bell" id="remBell" title="תזכורות"><span class="rem-count" id="remCount">0</span>🔔</button>
+<div id="remindersModal" class="modal-bg" style="display:none;z-index:97">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h" id="remModalTitle">🔔 תזכורות חשובות</div>
+    <p class="sub" style="margin:2px 0 12px">דברים שדורשים טיפול לפני / ביום האירוע. לחצי על תזכורת כדי לקפוץ ישר למקום הרלוונטי.</p>
+    <div id="remModalBody"></div>
+    <div class="modal-foot">
+      <button id="remClose" class="btn primary">הבנתי</button>
+    </div>
+  </div>
+</div>
 <div id="confirmModal" class="modal-bg" style="display:none;z-index:90">
   <div class="modal" style="max-width:340px">
     <div class="modal-h" id="confirmMsg" style="font-weight:700;font-size:15.5px;line-height:1.5"></div>
@@ -625,7 +671,7 @@ function histCutoff(){ const d=new Date(); d.setMonth(d.getMonth()-6); d.setDate
 function repInWin(r){ const c=histCutoff(); const d=r&&r.fields&&r.fields.eventDate; return !!(d&&d>=c); }
 function rowInWin(r){ const c=histCutoff(); const d=r&&r.date; return !!(d&&d>=c); }
 function mergeWin(key,recent,inWin){ const older=MEM[key].filter(x=>!inWin(x)); MEM[key]=older.concat(recent); }
-function afterCloudSync(){ if(CHEF_MODE||VIEW==='chef'){ renderChef(); return; } if(VIEW==='archive'){ const q=$('#searchBox'); buildTree(q?q.value.trim():''); } else if(VIEW==='endreport' && document.querySelector('.end-wrap')) renderEndHome(); else if(VIEW==='sched' && modalsClosed()) renderSched(); }
+function afterCloudSync(){ if(typeof refreshBell==='function') refreshBell(); if(typeof maybeAutoPopReminders==='function') setTimeout(maybeAutoPopReminders,200); if(CHEF_MODE||VIEW==='chef'){ renderChef(); return; } if(VIEW==='archive'){ const q=$('#searchBox'); buildTree(q?q.value.trim():''); } else if(VIEW==='endreport' && document.querySelector('.end-wrap')) renderEndHome(); else if(VIEW==='sched' && modalsClosed()) renderSched(); }
 async function loadHistory(){
   if(HIST_LOADED) return true;
   if(CLOUD && fb.db){
@@ -714,6 +760,7 @@ function modalsClosed(){ return ['#schedModal','#workerModal','#cateringModal'].
 let BRAND='louie', VIEW='new', current=null, EDITING=true;
 let SCHEDVIEW='list', schedY=null, schedM=null, editingAssign=null;
 let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null;
+let REM_AUTO_SHOWN=false;
 const WROLES=[['manager','מנהלים'],['operator','מפעילים'],['dj','די-ג׳יים'],['photographer','צלמים'],['other','אחר']];
 const BRAND_NAME={louie:'לואי', kamilion:'קמיליון'};
 const WELCOME_MSG={"louie": "היי מזל טוב, כיף שסגרתם אצלנו בלואי  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בלואי רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת לואיס אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533973786.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)", "kamilion": "היי מזל טוב, כיף שסגרתם אצלנו בקמיליון  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בקמיליון רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת קמיליון אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533750860.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)"};
@@ -1078,14 +1125,6 @@ function supPhoneHTML(name){
   const w=findWorkerByName(name); if(!w||!w.phone) return '';
   const tel=String(w.phone).replace(/[^0-9+]/g,'');
   return '📞 טלפון ספק: <a href="tel:'+tel+'" onclick="event.stopPropagation()">'+esc(w.phone)+'</a>';
-}
-function updateEndAdultsVisibility(){
-  if(!current || current.type!=='endreport') return;
-  const kidsOnly = current.fields.ee_etype==='בר/בת מצווה ילדים';
-  ['ee_adultsContract','ee_adultsActual'].forEach(k=>{
-    const el=document.querySelector('[data-key="'+k+'"]'); if(!el) return;
-    const fc=el.closest('.field'); if(fc) fc.style.display = kidsOnly ? 'none' : '';
-  });
 }
 function autofillEndStaff(){
   if(!current || current.type!=='endreport') return;
@@ -1473,7 +1512,7 @@ function bindInputs(app){
     sel.onchange=()=>{ if(sel.value==='__other__'){ other.style.display=''; current.fields[key]=other.value||''; other.focus(); } else { other.style.display='none'; current.fields[key]=sel.value; clr(); } markDirty(); };
     other.oninput=()=>{ current.fields[key]=other.value; if(other.value) clr(); markDirty(); };
   });
-  app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); if(s.dataset.key==='ee_etype') updateEndAdultsVisibility(); }; });
+  app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); }; });
   app.querySelectorAll('.hebdate-btn:not([disabled])').forEach(b=>b.onclick=()=>openHebCal(b.dataset.key));
   app.querySelectorAll('.chefmenu').forEach(c=>bindChefmenu(c));
   app.querySelectorAll('.checks').forEach(g=>{
@@ -1501,7 +1540,6 @@ function bindInputs(app){
     });
     note.oninput=()=>{ let v=current.fields[key]; if(!v||typeof v!=='object') v={v:'',note:''}; v.note=note.value; current.fields[key]=v; markDirty(); };
   });
-  if(current && current.type==='endreport') updateEndAdultsVisibility();
 }
 let dirty=false;
 function computeStatus(){
@@ -1543,6 +1581,7 @@ async function saveReport(showToast){
   await persist(current);
   dirty=false;
   const n=$('#saveNote'); if(n) n.textContent='נשמר '+new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})+(CLOUD?' · בענן':'');
+  if(typeof refreshBell==='function') refreshBell();
   if(showToast){
     const folder=current.fields.eventDate?((new Date(current.fields.eventDate+'T00:00')).getFullYear()+' / '+MONTHS[(new Date(current.fields.eventDate+'T00:00')).getMonth()]):'ללא תאריך';
     const isEnd=(current.type==='endreport');
@@ -1756,21 +1795,171 @@ async function sharePDF(){
   }
 }
 
+/* ===================== תזכורות מנהלת המשרד ===================== */
+function todayIsoStr(){ return new Date().toISOString().slice(0,10); }
+function daysUntil(iso){
+  if(!iso) return null;
+  const t=new Date(todayIsoStr()+'T00:00'); const d=new Date(iso+'T00:00');
+  if(isNaN(d.getTime())) return null;
+  return Math.round((d-t)/86400000);
+}
+// "נלקח צ׳ק ביטחון" — נחשב שטופל אם כתוב כן / לא רלוונטי / יש / נלקח / הופקד / התקבל / קיבל
+function securityTaken(v){
+  const s=String(v==null?'':v).trim().toLowerCase();
+  if(!s) return false;
+  if(s==='yes'||s==='na'||s==='כן'||s==='לא רלוונטי') return true;
+  if(/יש|נלקח|הופקד|התקבל|קיבל|נמסר|שולם/.test(s)) return true;
+  return false; // כולל 'no','עד שבוע לפני','לעדכן' וכל ערך לא ודאי אחר
+}
+// בדיקת שלמות שיבוץ הצוות (מפעיל / DJ / צלם) לאירוע
+function crewMissingFor(r){
+  const a=(MEM.assignments||[]).find(x=>x.reportId===r.id) || (MEM.assignments||[]).find(x=>x.date===r.fields.eventDate&&x.brand===r.brand) || null;
+  const op=(a&&a.op)||r.fields.operator||'';
+  const dj=(a&&a.dj)||r.fields.dj||'';
+  const ph=(a&&a.photog)||r.fields.photographer||'';
+  return [op,dj,ph].some(v=>roleState(v)==='need');
+}
+// בדיקת שלמות הספקים (בדיקת קייטרינג — מול הלקוח ומול הקייטרינג)
+function cateringMissingFor(r){
+  const c=(MEM.catering||[]).find(x=>x.reportId===r.id) || (MEM.catering||[]).find(x=>x.date===r.fields.eventDate&&x.brand===r.brand) || null;
+  return !(c && String(c.client||'').trim() && String(c.catering||'').trim());
+}
+// מרכז כל התזכורות הפעילות (משני המותגים) לפי כללי הזמן
+function remDateTime(f){
+  // תאריך מלא + יום בשבוע + שעה מדויקת
+  let s=hebDateText(f.eventDate);
+  if(f.eventTime && /^[0-9]/.test(String(f.eventTime).trim())) s+=' · בשעה '+String(f.eventTime).trim();
+  return s;
+}
+function computeReminders(){
+  const out=[]; if(!MEM||!MEM.reports) return out;
+  MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&r.type!=='endreport').forEach(r=>{
+    const f=r.fields; const du=daysUntil(f.eventDate); if(du==null||du<0) return;
+    const bname=BRAND_NAME[r.brand]||''; const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'אירוע';
+    const who=f.celebrant||f.contact||'';
+    const name=et+(who?(' · '+who):'')+' · '+bname; // זיהוי האירוע: סוג · שם · מותג
+    const dt=remDateTime(f);
+    const whenTxt=du===0?'היום':(du===1?'מחר':('בעוד '+du+' ימים'));
+    // 1) ביום האירוע — לא נלקח צ׳ק ביטחון
+    if(du===0 && !securityTaken(f.securityCheck)){
+      out.push({kind:'security',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🧾',
+        problem:'לא נלקח צ׳ק ביטחון'+(f.securityCheck?(' (רשום: "'+String(f.securityCheck).trim()+'")'):''),
+        name:name, datetime:dt, when:whenTxt, wlevel:'red'});
+    }
+    // 2) שבוע לפני — לא נבחר תפריט אוכל
+    if(du>=0 && du<=7 && !chefHasMenu(r)){
+      out.push({kind:'menu',level:'amber',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍽️',
+        problem:'לא נבחר תפריט אוכל',
+        name:name, datetime:dt, when:whenTxt, wlevel:(du<=1?'red':'amber')});
+    }
+    // 3) יום לפני — שיבוצים לא מלאים (עובדים ו/או ספקים)
+    if(du>=0 && du<=1){
+      const crewMiss=crewMissingFor(r); const catMiss=cateringMissingFor(r);
+      if(crewMiss||catMiss){
+        const parts=[]; if(crewMiss) parts.push('צוות (מפעיל/DJ/צלם)'); if(catMiss) parts.push('ספקים (בדיקת קייטרינג)');
+        out.push({kind:'assign',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'👥',
+          problem:'שיבוצים חסרים — '+parts.join(' + '),
+          name:name, datetime:dt, tab:(crewMiss?'assign':'catering'), when:whenTxt, wlevel:'red'});
+      }
+    }
+  });
+  const rank={red:0,amber:1};
+  out.sort((a,b)=>(rank[a.level]-rank[b.level]) || (a.sort||'').localeCompare(b.sort||''));
+  return out;
+}
+function remItemHTML(rm,i){
+  const wcls=rm.wlevel==='red'?'red':'amber';
+  return '<button type="button" class="rem-item '+rm.level+'" data-ri="'+i+'">'
+    +'<span class="rem-ic">'+rm.ic+'</span>'
+    +'<span class="rem-tx">'
+      +'<span class="rt-1">'+esc(rm.problem)+'</span>'
+      +'<span class="rt-2">'+esc(rm.name)+'</span>'
+      +'<span class="rt-dt"><span class="ic">📅</span> '+esc(rm.datetime)+'</span>'
+      +'<span class="rt-when '+wcls+'">'+esc(rm.when)+'</span>'
+    +'</span>'
+    +'<span class="rem-go">‹</span></button>';
+}
+let REM_CACHE=[];
+function goToReminder(rm){
+  closeReminders();
+  if(rm.brand && rm.brand!==BRAND){ BRAND=rm.brand; applyBrand(); syncBrandUI(); }
+  if(rm.kind==='assign'){
+    VIEW='sched'; SCHEDTAB=rm.tab||'assign';
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view==='sched'));
+    renderSched(); window.scrollTo({top:0,behavior:'smooth'});
+  } else {
+    // ביטחון / תפריט — נפתח את הדוח עצמו לעריכה בדיוק במקום שצריך לטפל
+    VIEW='archive';
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));
+    openById(rm.rid);
+  }
+  refreshBell();
+}
+function openReminders(){
+  const list=computeReminders(); REM_CACHE=list;
+  const body=$('#remModalBody'); if(!body) return;
+  if(!list.length){ body.innerHTML='<div class="rem-empty">🎉 אין תזכורות פתוחות — הכל מסודר!</div>'; }
+  else body.innerHTML='<div class="rem-list">'+list.map(remItemHTML).join('')+'</div>';
+  body.querySelectorAll('.rem-item').forEach(b=>b.onclick=()=>{ const rm=REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
+  const close=$('#remClose'); if(close) close.onclick=closeReminders; // אבטחה — סגירה ב"הבנתי"
+  const m=$('#remindersModal'); if(m) m.style.display='flex';
+}
+function closeReminders(){ const m=$('#remindersModal'); if(m) m.style.display='none'; }
+function updateRemNotif(){
+  const bar=$('#remNotif'); if(!bar) return;
+  if(CHEF_MODE){ bar.style.display='none'; return; }
+  const list=computeReminders();
+  if(!list.length){ bar.style.display='none'; bar.innerHTML=''; return; }
+  const top=list[0];
+  bar.innerHTML='<span class="rn-ic">🔔</span>'
+    +'<span class="rn-tx"><span class="rn-1">תזכורת לסיים — '+list.length+' '+(list.length===1?'משימה פתוחה':'משימות פתוחות')+'</span>'
+    +'<span class="rn-2">'+esc(top.problem)+' · '+esc(top.name)+' · '+esc(top.when)+'</span></span>'
+    +'<span class="rn-cta">לפרטים ‹</span>';
+  bar.onclick=openReminders;
+  bar.style.display='flex';
+}
+function refreshBell(){
+  updateRemNotif();
+  const bell=$('#remBell'); if(!bell) return;
+  if(CHEF_MODE){ bell.classList.remove('show'); return; }
+  const n=computeReminders().length;
+  $('#remCount').textContent=n;
+  bell.classList.toggle('show',n>0);
+}
+function maybeAutoPopReminders(){
+  if(CHEF_MODE||REM_AUTO_SHOWN) return;
+  if(computeReminders().length){ REM_AUTO_SHOWN=true; openReminders(); }
+}
+function remBannerHTML(){
+  const list=computeReminders();
+  if(!list.length) return '<div class="rem-banner allclear"><div class="rem-banner-h">✓ אין תזכורות פתוחות — הכל מסודר</div></div>';
+  REM_CACHE=list;
+  return '<div class="rem-banner"><div class="rem-banner-h">🔔 תזכורות חשובות <span class="bnum">'+list.length+'</span></div>'
+    +'<div class="rem-list">'+list.map(remItemHTML).join('')+'</div></div>';
+}
+{ const rb=$('#remBell'); if(rb) rb.onclick=openReminders; }
+{ const rc=$('#remClose'); if(rc) rc.onclick=closeReminders; }
+{ const rm=$('#remindersModal'); if(rm) rm.onclick=e=>{ if(e.target===rm) closeReminders(); }; }
+{ const rn=$('#remNotif'); if(rn) rn.onclick=openReminders; }
+/* =============================================================== */
 function renderSched(){
   const app=$('#app');
   if(schedY==null){ const d=new Date(); schedY=d.getFullYear(); schedM=d.getMonth(); }
   app.innerHTML=`
     <h1 class="page">מנהלת המשרד — ${BRAND_NAME[BRAND]}</h1>
+    ${remBannerHTML()}
     <div class="rubric-tabs">
       <button data-tab="assign" class="${SCHEDTAB==='assign'?'on':''}">🗓️ שיבוצים</button>
       <button data-tab="workers" class="${SCHEDTAB==='workers'?'on':''}">👥 ספקים ועובדים</button>
       <button data-tab="catering" class="${SCHEDTAB==='catering'?'on':''}">🍽️ בדיקת קייטרינג</button>
     </div>
     <div id="rubricBody"></div>`;
+  app.querySelectorAll('.rem-banner .rem-item').forEach(b=>b.onclick=()=>{ const rm=REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
   app.querySelectorAll('.rubric-tabs button').forEach(b=>b.onclick=()=>{ SCHEDTAB=b.dataset.tab; renderSched(); });
   if(SCHEDTAB==='workers') renderWorkers();
   else if(SCHEDTAB==='catering') renderCatering();
   else renderAssign();
+  refreshBell();
 }
 function renderAssign(){
   const rb=$('#rubricBody'); if(!rb) return;
@@ -2064,6 +2253,7 @@ function setView(v){
   VIEW=v;
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   if(v==='new') renderPicker(); else if(v==='sched') renderSched(); else if(v==='chef') renderChef(); else if(v==='endreport') renderEndHome(); else renderArchive();
+  refreshBell();
 }
 function syncBrandUI(){ document.querySelectorAll('#brandSwitch button').forEach(b=>b.classList.toggle('on',b.dataset.brand===BRAND)); }
 
@@ -2115,7 +2305,7 @@ async function startApp(){
   await seedJuly();
   applyBrand();
   if(CHEF_MODE){ document.body.classList.add('chefmode'); renderChef(); }
-  else { document.body.classList.remove('chefmode'); syncBrandUI(); renderPicker(); }
+  else { document.body.classList.remove('chefmode'); syncBrandUI(); renderPicker(); refreshBell(); setTimeout(maybeAutoPopReminders,600); }
 }
 function chefHasMenu(r){ const f=r.fields||{}; return !!(f.kidsMenu||(f.adultsMenuPick&&f.adultsMenuPick.menu)||f.sides||f.adultsNotes||f.menu); }
 function chefMissing(cv){
