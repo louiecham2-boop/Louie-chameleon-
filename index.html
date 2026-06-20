@@ -194,6 +194,7 @@
   .sched-card:hover{border-color:var(--brand);transform:translateY(-1px)}
   .sched-card.need{border-inline-start:5px solid #e23b2e;background:#fdf5f4}
   .sched-card.done{border-inline-start:5px solid #1f9d57;background:#f3faf5}
+  @media(max-width:680px){ .sched-card.need{border-inline-start:3px solid #e0837a} }
   .sched-card.done .sc-date{background:#e7f6ec;border-color:#1f9d57;color:#137a40}
   .sched-card.done .sc-date .scd-dow{color:#1f9d57}
   .sched-card.done .sc-date .scd-mon{color:#4ea676}
@@ -491,6 +492,9 @@
   .rem-empty{text-align:center;color:var(--muted);font-size:14px;padding:8px 0 2px}
   .load-old{width:100%;justify-content:center;margin:4px 0 14px;background:var(--brand-soft);border-color:var(--line2);color:var(--brand-ink);font-weight:800}
   .load-old.ghost{background:transparent}
+  .load-old-wrap{margin:4px 0 14px}
+  .load-old-note{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:7px}
+  .load-old-wrap .load-old{margin:0}
   .rem-notif{display:flex;align-items:center;gap:11px;max-width:980px;margin:10px auto 0;width:calc(100% - 32px);background:#b3261e;color:#fff;border-radius:13px;padding:12px 15px;cursor:pointer;box-shadow:0 6px 18px rgba(179,38,30,.28);animation:remPop .35s ease}
   @keyframes remPop{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
   .rem-notif:hover{filter:brightness(1.05)}
@@ -504,7 +508,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v123</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v126</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -642,6 +646,24 @@
 </div>
 
 <script>
+/* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
+const APP_VERSION = 'v126';
+(function(){
+  try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
+  var base = location.origin + location.pathname;
+  fetch(base + '?_v=' + Date.now(), {cache:'no-store'})
+    .then(function(r){ return r.ok ? r.text() : null; })
+    .then(function(html){
+      try{ sessionStorage.setItem('__verChecked','1'); }catch(e){}
+      if(!html) return;
+      var m = html.match(/>v(\d+)<\/small>/);
+      if(!m) return;
+      var remote = parseInt(m[1],10);
+      var local  = parseInt((APP_VERSION.match(/(\d+)/)||[0,0])[1],10);
+      if(remote > local){ location.replace(base + '?v=' + remote); }
+    })
+    .catch(function(){});
+})();
 /* ============================================================== */
 /*  הגדרות — מלא/י כאן את פרטי ה-Firebase שלך (ראה המדריך המצורף)   */
 /*  כל עוד נשאר "PASTE" — המערכת עובדת במצב מקומי לבדיקה.            */
@@ -687,7 +709,9 @@ let SHOW_OLD={archive:false,chef:false,sched:false,cater:false};
 function loadOlderBarHTML(area,olderCount){
   if(SHOW_OLD[area]) return '<button type="button" class="btn ghost load-old" data-area="'+area+'">⬆️ הצג רק אירועים עדכניים</button>';
   if(!olderCount) return '';
-  return '<button type="button" class="btn load-old" data-area="'+area+'">📂 טען אירועים קודמים ('+olderCount+')</button>';
+  return '<div class="load-old-wrap">'
+    +'<div class="load-old-note">מוצגים אירועים מהיומיים האחרונים והלאה. יש '+olderCount+' אירועים ישנים יותר שמוסתרים.</div>'
+    +'<button type="button" class="btn load-old" data-area="'+area+'">📂 טען אירועים קודמים ('+olderCount+')</button></div>';
 }
 function repInWin(r){ const c=histCutoff(); const d=r&&r.fields&&r.fields.eventDate; return !!(d&&d>=c); }
 function rowInWin(r){ const c=histCutoff(); const d=r&&r.date; return !!(d&&d>=c); }
@@ -1727,11 +1751,8 @@ function buildTree(q,autoScroll){
   tree.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); openById(b.dataset.pdf,true); });
   tree.querySelectorAll('.row').forEach(row=>row.onclick=(e)=>{ if(e.target.closest('[data-del],[data-pdf]')) return; openById(row.dataset.id,false); });
   if(autoScroll && !q){
-    const todayIso=new Date().toISOString().slice(0,10);
-    const rows=[...tree.querySelectorAll('.row[data-date]')];
-    let target=rows.find(r=>r.dataset.date && r.dataset.date>=todayIso);
-    if(!target && rows.length) target=rows[rows.length-1];
-    if(target){ setTimeout(()=>{ try{ target.scrollIntoView({behavior:'auto',block:'start'}); }catch(e){} },60); }
+    // מתחילים מראש הדף — האירועים העדכניים ממילא בראש הרשימה
+    try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
   }
 }
 function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); }
