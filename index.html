@@ -502,7 +502,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v118</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v120</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -651,7 +651,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "469233100296",
   appId: "1:469233100296:web:ab46563de8b5cba252d3bd"
 };
-const APP_PASSCODE = "1234";   /* קוד כניסה אחד לכל הצוות. שנה/י למספר שתרצה, או השאר/י "" לביטול */
+const APP_PASSCODE = "3334";   /* קוד כניסה אחד לכל הצוות. שנה/י למספר שתרצה, או השאר/י "" לביטול */
 const CHEF_PASSCODE = "2580";  /* קוד נפרד לשף — רואה רק את התפריטים */
 let CHEF_MODE = false;
 let CHEF_TAB = 'kids';
@@ -1906,14 +1906,17 @@ function computeReminders(){
         problem:'לא נבחר תפריט אוכל',
         name:name, datetime:dt, when:whenTxt, wlevel:(du<=1?'red':'amber')});
     }
-    // 3) יום לפני — שיבוצים לא מלאים (עובדים ו/או ספקים)
+    // 3) יום לפני — שיבוצים לא מלאים (צוות / ספקים) — מופרד לכל לשונית
     if(du>=0 && du<=1){
-      const crewMiss=crewMissingFor(r); const catMiss=cateringMissingFor(r);
-      if(crewMiss||catMiss){
-        const parts=[]; if(crewMiss) parts.push('צוות (מפעיל/DJ/צלם)'); if(catMiss) parts.push('ספקים (בדיקת קייטרינג)');
-        out.push({kind:'assign',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'👥',
-          problem:'שיבוצים חסרים — '+parts.join(' + '),
-          name:name, datetime:dt, tab:(crewMiss?'assign':'catering'), when:whenTxt, wlevel:'red'});
+      if(crewMissingFor(r)){
+        out.push({kind:'crew',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'👥',
+          problem:'שיבוץ צוות חסר (מפעיל / DJ / צלם)',
+          name:name, datetime:dt, tab:'assign', when:whenTxt, wlevel:'red'});
+      }
+      if(cateringMissingFor(r)){
+        out.push({kind:'catering',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍴',
+          problem:'בדיקת קייטרינג חסרה (מול לקוח / קייטרינג)',
+          name:name, datetime:dt, tab:'catering', when:whenTxt, wlevel:'red'});
       }
     }
   });
@@ -1937,7 +1940,7 @@ let REM_CACHE=[];
 function goToReminder(rm){
   closeReminders();
   if(rm.brand && rm.brand!==BRAND){ BRAND=rm.brand; applyBrand(); syncBrandUI(); }
-  if(rm.kind==='assign'){
+  if(rm.kind==='crew'||rm.kind==='catering'||rm.kind==='assign'){
     VIEW='sched'; SCHEDTAB=rm.tab||'assign';
     document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view==='sched'));
     renderSched(); window.scrollTo({top:0,behavior:'smooth'});
@@ -1985,11 +1988,14 @@ function maybeAutoPopReminders(){
   if(CHEF_MODE||REM_AUTO_SHOWN) return;
   if(computeReminders().length){ REM_AUTO_SHOWN=true; openReminders(); }
 }
-function remBannerHTML(){
-  const list=computeReminders();
-  if(!list.length) return '<div class="rem-banner allclear"><div class="rem-banner-h">✓ אין תזכורות פתוחות — הכל מסודר</div></div>';
-  REM_CACHE=list;
-  return '<div class="rem-banner"><div class="rem-banner-h">🔔 תזכורות חשובות <span class="bnum">'+list.length+'</span></div>'
+let SCHED_REM_CACHE=[];
+function remBannerHTML(kinds,title){
+  let list=computeReminders();
+  if(kinds&&kinds.length) list=list.filter(r=>kinds.indexOf(r.kind)>=0);
+  SCHED_REM_CACHE=list;
+  const ttl=title||'תזכורות';
+  if(!list.length) return '<div class="rem-banner allclear"><div class="rem-banner-h">✓ '+esc(ttl)+' — אין חוסרים פתוחים</div></div>';
+  return '<div class="rem-banner"><div class="rem-banner-h">🔔 '+esc(ttl)+' <span class="bnum">'+list.length+'</span></div>'
     +'<div class="rem-list">'+list.map(remItemHTML).join('')+'</div></div>';
 }
 { const rb=$('#remBell'); if(rb) rb.onclick=openReminders; }
@@ -2000,16 +2006,20 @@ function remBannerHTML(){
 function renderSched(){
   const app=$('#app');
   if(schedY==null){ const d=new Date(); schedY=d.getFullYear(); schedM=d.getMonth(); }
+  let remHtml='';
+  if(SCHEDTAB==='assign') remHtml=remBannerHTML(['crew'],'תזכורות שיבוץ צוות');
+  else if(SCHEDTAB==='catering') remHtml=remBannerHTML(['catering'],'תזכורות בדיקת קייטרינג');
+  // לשונית "ספקים ועובדים" — ללא באנר תזכורות
   app.innerHTML=`
     <h1 class="page">מנהלת המשרד — ${BRAND_NAME[BRAND]}</h1>
-    ${remBannerHTML()}
     <div class="rubric-tabs">
       <button data-tab="assign" class="${SCHEDTAB==='assign'?'on':''}">🗓️ שיבוצים</button>
       <button data-tab="workers" class="${SCHEDTAB==='workers'?'on':''}">👥 ספקים ועובדים</button>
       <button data-tab="catering" class="${SCHEDTAB==='catering'?'on':''}">🍽️ בדיקת קייטרינג</button>
     </div>
+    ${remHtml}
     <div id="rubricBody"></div>`;
-  app.querySelectorAll('.rem-banner .rem-item').forEach(b=>b.onclick=()=>{ const rm=REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
+  app.querySelectorAll('.rem-banner .rem-item').forEach(b=>b.onclick=()=>{ const rm=SCHED_REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
   app.querySelectorAll('.rubric-tabs button').forEach(b=>b.onclick=()=>{ SCHEDTAB=b.dataset.tab; renderSched(); });
   if(SCHEDTAB==='workers') renderWorkers();
   else if(SCHEDTAB==='catering') renderCatering();
