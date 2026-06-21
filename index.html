@@ -74,6 +74,8 @@
   .gate{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .gate-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px;width:300px;text-align:center}
   .gate-card .g-dot{width:18px;height:18px;border-radius:6px;background:var(--brand);box-shadow:0 0 0 6px var(--brand-soft);margin:0 auto 14px}
+  .gate-card .g-dot.pulse{animation:gpulse 1s ease-in-out infinite}
+  @keyframes gpulse{0%,100%{transform:scale(1);box-shadow:0 0 0 6px var(--brand-soft)}50%{transform:scale(1.18);box-shadow:0 0 0 11px var(--brand-soft)}}
   .gate-card h2{margin:0 0 4px;font-size:19px}
   .gate-card p{margin:0 0 16px;color:var(--muted);font-size:13.5px}
   .gate-card input{width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px;text-align:center;font-size:16px;letter-spacing:3px;margin-bottom:12px;font-family:inherit}
@@ -316,6 +318,12 @@
   .calc-warn{background:#fff4d6;border:1px solid #ecd175;color:#7a5a10;border-radius:9px;padding:10px 12px;font-weight:800;font-size:13px;margin-bottom:11px;line-height:1.45}
   .calc-tip{font-size:13px;color:#37424f;background:#eef3f9;border:1px solid #d7e0ea;border-radius:9px;padding:11px 13px;margin-bottom:11px;line-height:1.85}
   .calc-tip b{color:var(--ink);font-weight:800}
+  .calc-manual{width:100%;box-sizing:border-box;border:1px solid var(--line2);border-radius:11px;padding:12px;font-size:16px;font-family:inherit;background:#fff;line-height:1.7;min-height:150px;resize:vertical;margin-bottom:11px}
+  .calc-mrow{display:flex;align-items:center;gap:9px;border:1px solid var(--line2);border-radius:11px;padding:11px 12px;margin-bottom:9px;background:#fff}
+  .calc-mrow .cr-lbl{width:auto;flex:none;font-size:13.5px;font-weight:800;color:var(--ink)}
+  .calc-mrow input{flex:1;min-width:0;border:1px solid var(--line2);border-radius:9px;padding:11px;font-size:18px;font-weight:800;background:#fcfdfe;font-family:inherit;text-align:left}
+  .calc-mrow.tot input{color:var(--brand-ink)}
+  .calc-mrow .cr-cur{flex:none;font-weight:800;color:var(--muted)}
   .calc-rows{margin-bottom:4px}
   .crow{border:1px solid var(--line2);border-radius:11px;padding:10px;margin-bottom:9px;background:#fff}
   .crow input{border:1px solid var(--line2);border-radius:9px;padding:10px;font-size:16px;background:#fff;font-family:inherit}
@@ -475,10 +483,16 @@
   .rem-banner.allclear .rem-banner-h{color:var(--green)}
   .rem-banner-h .bnum{background:#b3261e;color:#fff;font-size:13px;font-weight:900;min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
   .rem-list{margin-top:11px;display:flex;flex-direction:column;gap:9px}
+  .rem-grp{font-weight:900;font-size:13.5px;padding:7px 12px;border-radius:9px;margin-top:4px;display:flex;align-items:center;gap:6px}
+  .rem-grp:first-child{margin-top:0}
+  .rem-grp.red{background:#fde7e4;color:#9c2c20}
+  .rem-grp.blue{background:#e7eefc;color:#1d4fb8}
+  .rem-grp.amber{background:#fbf0db;color:#8a5a10}
   .rem-item{display:flex;align-items:flex-start;gap:11px;background:#fff;border:1px solid var(--line2);border-inline-start:5px solid var(--gray);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;text-align:start}
   .rem-item:hover{border-color:var(--brand);box-shadow:var(--shadow)}
   .rem-item.red{border-inline-start-color:#b3261e}
   .rem-item.amber{border-inline-start-color:#d68a17}
+  .rem-item.blue{border-inline-start-color:#2563eb}
   .rem-ic{font-size:20px;line-height:1.2;flex-shrink:0}
   .rem-tx{flex:1;min-width:0}
   .rem-tx .rt-1{font-weight:800;font-size:14.5px;color:var(--ink);line-height:1.4}
@@ -495,20 +509,20 @@
   .load-old-wrap{margin:4px 0 14px}
   .load-old-note{font-size:12.5px;color:var(--muted);text-align:center;margin-bottom:7px}
   .load-old-wrap .load-old{margin:0}
-  .rem-notif{display:flex;align-items:center;gap:11px;max-width:980px;margin:10px auto 0;width:calc(100% - 32px);background:#b3261e;color:#fff;border-radius:13px;padding:12px 15px;cursor:pointer;box-shadow:0 6px 18px rgba(179,38,30,.28);animation:remPop .35s ease}
+  .rem-notif{display:flex;align-items:center;gap:9px;max-width:980px;margin:10px auto 0;width:calc(100% - 32px);background:#c46258;color:#fff;border-radius:12px;padding:8px 14px;cursor:pointer;box-shadow:0 3px 10px rgba(150,55,45,.16);animation:remPop .35s ease}
   @keyframes remPop{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
   .rem-notif:hover{filter:brightness(1.05)}
-  .rem-notif .rn-ic{font-size:22px;flex-shrink:0}
+  .rem-notif .rn-ic{font-size:19px;flex-shrink:0}
   .rem-notif .rn-tx{flex:1;min-width:0}
-  .rem-notif .rn-1{font-weight:900;font-size:15px;line-height:1.3}
-  .rem-notif .rn-2{font-size:12.5px;opacity:.92;margin-top:2px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rem-notif .rn-cta{background:rgba(255,255,255,.22);border-radius:999px;padding:6px 13px;font-weight:800;font-size:13px;flex-shrink:0;white-space:nowrap}
+  .rem-notif .rn-1{font-weight:800;font-size:14px;line-height:1.3}
+  .rem-notif .rn-2{font-size:12px;opacity:.92;margin-top:1px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rem-notif .rn-cta{background:rgba(255,255,255,.22);border-radius:999px;padding:5px 11px;font-weight:800;font-size:12.5px;flex-shrink:0;white-space:nowrap}
 </style>
 </head>
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v126</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v131</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -647,7 +661,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v126';
+const APP_VERSION = 'v131';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1369,21 +1383,28 @@ function calcRowHTML(r,run){
     +'<button type="button" class="cr-del">מחק שורה</button>'
   +'</div>';
 }
+function calcVal(v){
+  if(v&&typeof v==='object'&&('text' in v||'total' in v||'check' in v)){
+    return {text:v.text||'',total:v.total||'',check:v.check||''};
+  }
+  // המרה מהמבנה הישן (שורות אוטומטיות) -> טקסט חופשי, בלי חישוב אוטומטי
+  if(v&&typeof v==='object'&&Array.isArray(v.rows)){
+    const sym={'+':'+','-':'−','*':'×','%':'%'};
+    const lines=v.rows.filter(function(r){const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); return !isNaN(n)||(r.d&&String(r.d).trim());}).map(function(r){ const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); const a=isNaN(n)?'':n.toLocaleString('he-IL'); const d=(r.d||'').trim(); return (sym[r.op||'+'])+' '+a+((r.op==='%')?'%':' ₪')+(d?(' — '+d):''); });
+    return {text:lines.join('\n'),total:'',check:''};
+  }
+  return {text:'',total:'',check:''};
+}
 function calcInner(v){
-  if(!v||!Array.isArray(v.rows)||!v.rows.length) v={rows:[{op:'+',amt:'',d:''},{op:'+',amt:'',d:''}]};
-  const cmp=calcCompute(v.rows); const total=cmp.total;
+  v=calcVal(v);
   const seated=(current&&current.type==='shulchan');
-  const rowsH=v.rows.map(function(r,i){return calcRowHTML(r,cmp.runs[i]);}).join('');
-  let result='<div class="calc-total">= סה״כ לתשלום: <span class="calc-sum">'+Math.round(total).toLocaleString('he-IL')+'</span> ₪</div>';
-  if(seated) result+='<div class="calc-check">צ׳ק ביטחון (כולל 10% רזרבה): <span class="calc-checkv">'+Math.round(total*1.1).toLocaleString('he-IL')+'</span> ₪</div>';
-  return '<div class="calc-warn">⚠️ לבדוק את החישוב פעמיים לפני סגירה.</div>'
-    +'<div class="calc-tip">בכל שורה: בחרו פעולה <b>+ − × %</b>, כתבו סכום ועל מה. החישוב רץ מלמעלה למטה.<br>לדוגמה: <b>+</b> 280 מנה · <b>×</b> 60 אנשים · <b>%</b> 10 שירות · <b>−</b> 2000 מקדמה.</div>'
-    +'<div class="calc-rows">'+rowsH+'</div>'
-    +'<button type="button" class="calc-add">➕ הוסף שורה</button>'
-    +'<button type="button" class="calc-go">🧮 חשב סכום</button>'
-    +result
-    +'<button type="button" class="calc-send">📤 שלח חישוב ללקוח (וואטסאפ)</button>'
-    +'<button type="button" class="calc-reset">🔄 התחל חישוב מחדש (מחק הכל)</button>';
+  let h='<div class="calc-tip">מלאי את החישוב <b>ידנית</b>: כתבי כאן את הפירוט וחשבי את הסכום בעצמך.</div>'
+    +'<textarea class="calc-manual" dir="rtl" placeholder="לדוגמה:&#10;280 ₪ למנה × 60 איש = 16,800&#10;+ 10% שירות = 1,680&#10;− מקדמה 2,000&#10;…">'+esc(v.text||'')+'</textarea>'
+    +'<div class="calc-mrow tot"><span class="cr-lbl">סה״כ לתשלום</span><input class="calc-mtotal" dir="ltr" type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="0" value="'+esc(v.total||'')+'"><span class="cr-cur">₪</span></div>';
+  if(seated) h+='<div class="calc-mrow"><span class="cr-lbl">צ׳ק ביטחון</span><input class="calc-mcheck" dir="ltr" type="text" inputmode="decimal" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="0" value="'+esc(v.check||'')+'"><span class="cr-cur">₪</span></div>';
+  h+='<button type="button" class="calc-send">📤 שלח חישוב ללקוח (וואטסאפ)</button>'
+    +'<button type="button" class="calc-reset">🔄 נקה חישוב</button>';
+  return h;
 }
 function fieldHTML(fld,val){
   val=val==null?'':val; const full=fld.full?' full':''; const hint=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
@@ -1396,7 +1417,7 @@ function fieldHTML(fld,val){
     return `<div class="field full"><label>${esc(fld.label)}${ok}${hh}</label><div class="chefmenu" data-key="${fld.key}">${chefmenuInner(fld.key,v)}</div></div>`;
   }
   if(fld.type==='calc'){
-    const v=(val&&typeof val==='object'&&Array.isArray(val.rows)&&val.rows.length)?val:{rows:[{op:'+',amt:'',d:''},{op:'+',amt:'',d:''}]};
+    const v=(val&&typeof val==='object')?val:{text:'',total:'',check:''};
     return `<div class="field full"><label>${esc(fld.label)}</label><div class="calc" data-key="${fld.key}">${calcInner(v)}</div></div>`;
   }
   if(fld.type==='datewin'){
@@ -1471,27 +1492,20 @@ function sendMenuToChef(key){
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
 function printCalc(key){
-  const v=current.fields[key], f=current.fields;
-  if(!v||!Array.isArray(v.rows)){ toast('אין חישוב'); return; }
+  const v=calcVal(current.fields[key]), f=current.fields;
   if(dirty) saveReport(false);
-  const cmp=calcCompute(v.rows); const total=Math.round(cmp.total);
-  const sym={'+':'+','-':'−','*':'×','%':'%'};
-  const rws=v.rows.filter(function(r){const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); return !isNaN(n)||(r.d&&String(r.d).trim());});
-  if(!rws.length){ toast('אין חישוב'); return; }
-  const rowsHtml=rws.map(function(r){ const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); const a=isNaN(n)?'':n.toLocaleString('he-IL'); const d=esc((r.d||'').trim()); return '<tr><td class="op">'+sym[r.op||'+']+'</td><td class="am">'+a+((r.op==='%')?'%':' ₪')+'</td><td class="ds">'+d+'</td></tr>'; }).join('');
-  const seated=(current.type==='shulchan'); const check=seated?Math.round(cmp.total*1.1):total;
+  const txt=(v.text||'').trim(); const total=(v.total||'').trim();
+  if(!txt&&!total){ toast('אין חישוב'); return; }
+  const seated=(current.type==='shulchan'); const check=(v.check||'').trim();
   const company=(current.brand==='kamilion')?'קמיליון אירועים בע״מ':'לואיס אירועים בע״מ';
   const accent=current.brand==='kamilion'?'#6b3fa0':'#1e5b9c';
   const contact=esc((f.contact||'').trim()), cel=esc((f.celebrant||'').trim()), dt=esc(f.eventDate||'');
+  const bodyTxt=esc(txt).replace(/\n/g,'<br>');
   const css='body{font-family:Arial,\'Arial Hebrew\',sans-serif;direction:rtl;margin:0;padding:26px;background:#fff;color:#1a2330}'
     +'.cdoc{max-width:620px;margin:0 auto}'
     +'.ch{font-size:24px;font-weight:800;border-bottom:3px solid '+accent+';padding-bottom:10px;margin-bottom:6px}'
     +'.cmeta{color:#5a6675;font-size:14px;margin-bottom:18px}'
-    +'table{width:100%;border-collapse:collapse;font-size:16px}'
-    +'td{padding:10px 6px;border-bottom:1px solid #eef1f5}'
-    +'.op{width:26px;font-weight:800;color:'+accent+';text-align:center}'
-    +'.am{width:135px;font-weight:700;white-space:nowrap;direction:ltr;text-align:right}'
-    +'.ds{color:#33404d}'
+    +'.cbody{font-size:16px;line-height:1.85;white-space:normal}'
     +'.ctot{margin-top:16px;background:#f4f7fb;border-radius:10px;padding:15px 17px;font-size:21px;font-weight:800;text-align:left}'
     +'.ccheck{margin-top:9px;background:#fff4d6;border:1px solid #ecd175;border-radius:10px;padding:12px 16px;font-weight:800;color:#7a5a10;text-align:left}'
     +'.cnote{margin-top:18px;font-size:15px;font-weight:700;line-height:1.6}'
@@ -1499,9 +1513,9 @@ function printCalc(key){
     +'@media print{.pbar{display:none}}@page{size:A4;margin:12mm}';
   const body='<div class="cdoc"><div class="ch">חישוב אירוע — '+esc(BRAND_NAME[current.brand])+'</div>'
     +'<div class="cmeta">'+(contact?('לכבוד: '+contact+'  ·  '):'')+(cel?('אירוע: '+cel+'  ·  '):'')+(dt?('תאריך: '+dt):'')+'</div>'
-    +'<table>'+rowsHtml+'</table>'
-    +'<div class="ctot">סה״כ לתשלום: '+total.toLocaleString('he-IL')+' ₪</div>'
-    +(seated?('<div class="ccheck">צ׳ק ביטחון (כולל 10% רזרבה): '+check.toLocaleString('he-IL')+' ₪</div>'):'')
+    +(bodyTxt?('<div class="cbody">'+bodyTxt+'</div>'):'')
+    +(total?('<div class="ctot">סה״כ לתשלום: '+esc(total)+' ₪</div>'):'')
+    +(seated&&check?('<div class="ccheck">צ׳ק ביטחון: '+esc(check)+' ₪</div>'):'')
     +'<div class="cnote">נא לרשום את צ׳ק הביטחון לפקודת '+company+'.</div></div>';
   const w=window.open('','_blank');
   if(!w){ toast('הדפדפן חסם חלון קופץ — נא לאפשר'); return; }
@@ -1511,17 +1525,15 @@ function printCalc(key){
   setTimeout(function(){ try{ w.focus(); w.print(); }catch(e){} },600);
 }
 function sendCalcToClient(key){
-  const v=current.fields[key], f=current.fields;
-  if(!v||!Array.isArray(v.rows)){ toast('אין חישוב לשליחה'); return; }
-  const total=calcCompute(v.rows).total;
-  const sym={'+':'+','-':'−','*':'×','%':'%'};
-  const lines=v.rows.filter(function(r){const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); return !isNaN(n)||(r.d&&String(r.d).trim());}).map(function(r){ const n=parseFloat(String(r.amt==null?'':r.amt).replace(/,/g,'')); const a=isNaN(n)?'':n.toLocaleString('he-IL'); const d=(r.d||'').trim(); return sym[r.op||'+']+' '+a+((r.op==='%')?'%':' ₪')+(d?(' '+d):''); });
-  if(!lines.length){ toast('אין חישוב לשליחה'); return; }
+  const v=calcVal(current.fields[key]), f=current.fields;
+  const txt=(v.text||'').trim(); const total=(v.total||'').trim(); const check=(v.check||'').trim();
+  if(!txt&&!total){ toast('אין חישוב לשליחה'); return; }
   const name=(f.contact||'').trim();
   const company=(current.brand==='kamilion')?'קמיליון אירועים בע״מ':'לואיס אירועים בע״מ';
-  const seated=(current.type==='shulchan'); const check=seated?Math.round(total*1.1):Math.round(total);
-  let msg='היי '+(name||'')+', להלן החישוב של האירוע:\n\n'+lines.join('\n')+'\n──────────\nסה״כ לתשלום: '+Math.round(total).toLocaleString('he-IL')+' ₪';
-  if(seated) msg+='\nצ׳ק ביטחון (כולל 10% רזרבה): '+check.toLocaleString('he-IL')+' ₪';
+  const seated=(current.type==='shulchan');
+  let msg='היי '+(name||'')+', להלן החישוב של האירוע:\n\n'+(txt||'');
+  if(total) msg+='\n──────────\nסה״כ לתשלום: '+total+' ₪';
+  if(seated&&check) msg+='\nצ׳ק ביטחון: '+check+' ₪';
   msg+='\n\nנא לרשום את צ׳ק הביטחון לפקודת '+company+'.';
   let num=String(f.phone||'').replace(/\D/g,'');
   if(num){ if(num.indexOf('972')===0){} else if(num.charAt(0)==='0'){ num='972'+num.slice(1); } else if(num.length===9&&num.charAt(0)==='5'){ num='972'+num; } }
@@ -1563,23 +1575,16 @@ function bindChefmenu(c){
 }
 function bindCalc(c){
   const key=c.dataset.key;
-  const getV=()=>{ let v=current.fields[key]; if(!v||!Array.isArray(v.rows)||!v.rows.length) v={rows:[{op:'+',amt:'',d:''},{op:'+',amt:'',d:''}]}; current.fields[key]=v; return v; };
-  const rowsEl=c.querySelector('.calc-rows');
-  const recalc=()=>{ const v=getV(); const cmp=calcCompute(v.rows); Array.prototype.forEach.call(rowsEl.children,(row,i)=>{ const rn=row.querySelector('.cr-run'); if(rn) rn.textContent='= '+Math.round(cmp.runs[i]||0).toLocaleString('he-IL')+' ₪'; }); const sp=c.querySelector('.calc-sum'); if(sp) sp.textContent=Math.round(cmp.total).toLocaleString('he-IL'); const cv=c.querySelector('.calc-checkv'); if(cv) cv.textContent=Math.round(cmp.total*1.1).toLocaleString('he-IL'); };
-  function bindRow(row){
-    const amt=row.querySelector('.cr-amt'), d=row.querySelector('.cr-d'), del=row.querySelector('.cr-del');
-    const idx=()=>Array.prototype.indexOf.call(rowsEl.children,row);
-    row.querySelectorAll('.cr-op').forEach(b=>b.onclick=()=>{ const v=getV(); v.rows[idx()].op=b.dataset.op; row.querySelectorAll('.cr-op').forEach(x=>x.classList.toggle('on',x===b)); recalc(); markDirty(); });
-    amt.oninput=()=>{ const v=getV(); v.rows[idx()].amt=amt.value; recalc(); markDirty(); };
-    d.oninput=()=>{ const v=getV(); v.rows[idx()].d=d.value; markDirty(); };
-    del.onclick=()=>{ const v=getV(); v.rows.splice(idx(),1); row.remove(); if(!rowsEl.children.length){ v.rows=[{op:'+',amt:'',d:''}]; rowsEl.insertAdjacentHTML('beforeend',calcRowHTML(v.rows[0],0)); bindRow(rowsEl.lastElementChild); } recalc(); markDirty(); };
-  }
-  function addRow(focus){ const v=getV(); const nr={op:'+',amt:'',d:''}; v.rows.push(nr); rowsEl.insertAdjacentHTML('beforeend',calcRowHTML(nr,0)); const el=rowsEl.lastElementChild; bindRow(el); if(focus){ const ai=el.querySelector('.cr-amt'); if(ai) ai.focus(); } markDirty(); }
-  Array.prototype.forEach.call(rowsEl.children,bindRow);
-  const add=c.querySelector('.calc-add'); if(add) add.onclick=()=>addRow(true);
-  const go=c.querySelector('.calc-go'); if(go) go.onclick=()=>{ recalc(); const t=c.querySelector('.calc-total'); if(t){ t.classList.remove('flash'); void t.offsetWidth; t.classList.add('flash'); } };
+  const getV=()=>{ let v=current.fields[key]; v=calcVal(v); current.fields[key]=v; return v; };
+  getV();
+  const ta=c.querySelector('.calc-manual');
+  const tot=c.querySelector('.calc-mtotal');
+  const chk=c.querySelector('.calc-mcheck');
+  if(ta) ta.oninput=()=>{ getV().text=ta.value; markDirty(); };
+  if(tot) tot.oninput=()=>{ getV().total=tot.value; markDirty(); };
+  if(chk) chk.oninput=()=>{ getV().check=chk.value; markDirty(); };
   const snd=c.querySelector('.calc-send'); if(snd) snd.onclick=()=>sendCalcToClient(key);
-  const rs=c.querySelector('.calc-reset'); if(rs) rs.onclick=async()=>{ if(!(await askConfirm('למחוק את כל החישוב ולהתחיל מחדש?'))) return; const v={rows:[{op:'+',amt:'',d:''},{op:'+',amt:'',d:''}]}; current.fields[key]=v; c.innerHTML=calcInner(v); bindCalc(c); markDirty(); };
+  const rs=c.querySelector('.calc-reset'); if(rs) rs.onclick=async()=>{ if(!(await askConfirm('לנקות את כל החישוב?'))) return; const v={text:'',total:'',check:''}; current.fields[key]=v; c.innerHTML=calcInner(v); bindCalc(c); markDirty(); };
 }
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
@@ -1789,11 +1794,13 @@ function buildDocHTML(r){
         return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
       if(fld.type==='calc'){
-        const cv=f[fld.key]; let inner='—';
-        if(cv&&Array.isArray(cv.rows)){
-          const cmp=calcCompute(cv.rows); const sym={'+':'+','-':'−','*':'×','%':'%'};
-          const lines=cv.rows.filter(function(rr){const n=parseFloat(String(rr.amt==null?'':rr.amt).replace(/,/g,'')); return !isNaN(n)||(rr.d&&String(rr.d).trim());}).map(function(rr){ const n=parseFloat(String(rr.amt==null?'':rr.amt).replace(/,/g,'')); const a=isNaN(n)?'':n.toLocaleString('he-IL'); const d=esc((rr.d||'').trim()); return '<div>'+sym[rr.op||'+']+' '+a+((rr.op==='%')?'%':' ₪')+(d?(' '+d):'')+'</div>'; }).join('');
-          if(lines){ inner=lines+'<div style="margin-top:5px;font-weight:800;border-top:1px solid #ccc;padding-top:5px">= סה״כ לתשלום: '+Math.round(cmp.total).toLocaleString('he-IL')+' ₪</div>'; if(r.type==='shulchan') inner+='<div style="margin-top:3px;font-weight:700;color:#7a5a10">צ׳ק ביטחון (כולל 10% רזרבה): '+Math.round(cmp.total*1.1).toLocaleString('he-IL')+' ₪</div>'; }
+        const cv=calcVal(f[fld.key]); let inner='—';
+        const txt=(cv.text||'').trim(), total=(cv.total||'').trim(), check=(cv.check||'').trim();
+        if(txt||total){
+          let body=txt?esc(txt).replace(/\n/g,'<br>'):'';
+          if(total) body+=(body?'<div style="margin-top:5px;font-weight:800;border-top:1px solid #ccc;padding-top:5px">':'<div style="font-weight:800">')+'= סה״כ לתשלום: '+esc(total)+' ₪</div>';
+          if(r.type==='shulchan'&&check) body+='<div style="margin-top:3px;font-weight:700;color:#7a5a10">צ׳ק ביטחון: '+esc(check)+' ₪</div>';
+          inner=body;
         }
         return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
@@ -1933,39 +1940,39 @@ function computeReminders(){
     const name=et+(who?(' · '+who):'')+' · '+bname; // זיהוי האירוע: סוג · שם · מותג
     const dt=remDateTime(f);
     const whenTxt=du===0?'היום':(du===1?'מחר':('בעוד '+du+' ימים'));
-    // 1) ביום האירוע — לא נלקח צ׳ק ביטחון
+    // 1) ביום האירוע — לא נלקח צ׳ק ביטחון  (צ׳קים)
     if(du===0 && !securityTaken(f.securityCheck)){
-      out.push({kind:'security',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🧾',
+      out.push({kind:'security',level:'red',clr:'red',grp:0,rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🧾',
         problem:'לא נלקח צ׳ק ביטחון'+(f.securityCheck?(' (רשום: "'+String(f.securityCheck).trim()+'")'):''),
         name:name, datetime:dt, when:whenTxt, wlevel:'red'});
     }
-    // 2) שבוע לפני — לא נבחר תפריט אוכל
+    // 2) שבוע לפני — לא נבחר תפריט אוכל  (קייטרינג)
     if(du>=0 && du<=7 && !chefHasMenu(r)){
-      out.push({kind:'menu',level:'amber',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍽️',
+      out.push({kind:'menu',level:'amber',clr:'amber',grp:2,rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍽️',
         problem:'לא נבחר תפריט אוכל',
         name:name, datetime:dt, when:whenTxt, wlevel:(du<=1?'red':'amber')});
     }
     // 3) יום לפני — שיבוצים לא מלאים (צוות / ספקים) — מופרד לכל לשונית
     if(du>=0 && du<=1){
       if(crewMissingFor(r)){
-        out.push({kind:'crew',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'👥',
+        out.push({kind:'crew',level:'red',clr:'blue',grp:1,rid:r.id,brand:r.brand,sort:f.eventDate,ic:'👥',
           problem:'שיבוץ צוות חסר (מפעיל / DJ / צלם)',
           name:name, datetime:dt, tab:'assign', when:whenTxt, wlevel:'red'});
       }
       if(cateringMissingFor(r)){
-        out.push({kind:'catering',level:'red',rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍴',
+        out.push({kind:'catering',level:'red',clr:'amber',grp:2,rid:r.id,brand:r.brand,sort:f.eventDate,ic:'🍴',
           problem:'בדיקת קייטרינג חסרה (מול לקוח / קייטרינג)',
           name:name, datetime:dt, tab:'catering', when:whenTxt, wlevel:'red'});
       }
     }
   });
   const rank={red:0,amber:1};
-  out.sort((a,b)=>(rank[a.level]-rank[b.level]) || (a.sort||'').localeCompare(b.sort||''));
+  out.sort((a,b)=>((a.grp||0)-(b.grp||0)) || (rank[a.level]-rank[b.level]) || (a.sort||'').localeCompare(b.sort||''));
   return out;
 }
 function remItemHTML(rm,i){
   const wcls=rm.wlevel==='red'?'red':'amber';
-  return '<button type="button" class="rem-item '+rm.level+'" data-ri="'+i+'">'
+  return '<button type="button" class="rem-item '+(rm.clr||rm.level)+'" data-ri="'+i+'">'
     +'<span class="rem-ic">'+rm.ic+'</span>'
     +'<span class="rem-tx">'
       +'<span class="rt-1">'+esc(rm.problem)+'</span>'
@@ -2007,11 +2014,42 @@ function goToReminder(rm){
   }
   refreshBell();
 }
-function openReminders(){
-  const list=computeReminders(); REM_CACHE=list;
+function remGrpInfo(grp){
+  if(grp===0) return {t:'🧾 צ׳קים',c:'red'};
+  if(grp===1) return {t:'👥 שיבוצים',c:'blue'};
+  return {t:'🍴 קייטרינג ואוכל',c:'amber'};
+}
+function currentRemFilter(){
+  if(VIEW==='sched'){
+    if(SCHEDTAB==='assign') return ['crew'];
+    if(SCHEDTAB==='catering') return ['catering'];
+  }
+  return null; // בכל מקום אחר (התחלה / דוח) — הכל
+}
+function remFilterTitle(f){
+  if(!f) return '🔔 תזכורות חשובות';
+  if(f.indexOf('crew')>=0) return '👥 תזכורות שיבוץ צוות';
+  if(f.indexOf('catering')>=0) return '🍴 תזכורות בדיקת קייטרינג';
+  return '🔔 תזכורות';
+}
+function openReminders(filter){
+  const f=Array.isArray(filter)&&filter.length?filter:null;
+  let list=computeReminders();
+  if(f) list=list.filter(rm=>f.indexOf(rm.kind)>=0);
+  REM_CACHE=list;
+  const ttl=$('#remModalTitle'); if(ttl) ttl.textContent=remFilterTitle(f);
   const body=$('#remModalBody'); if(!body) return;
   if(!list.length){ body.innerHTML='<div class="rem-empty">🎉 אין תזכורות פתוחות — הכל מסודר!</div>'; }
-  else body.innerHTML='<div class="rem-list">'+list.map(remItemHTML).join('')+'</div>';
+  else {
+    let html='<div class="rem-list">'; let lastGrp=null;
+    list.forEach((rm,i)=>{
+      const g=(rm.grp==null?2:rm.grp);
+      if(!f&&g!==lastGrp){ const gi=remGrpInfo(g); html+='<div class="rem-grp '+gi.c+'">'+esc(gi.t)+'</div>'; lastGrp=g; }
+      html+=remItemHTML(rm,i);
+    });
+    html+='</div>';
+    body.innerHTML=html;
+  }
   body.querySelectorAll('.rem-item').forEach(b=>b.onclick=()=>{ const rm=REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
   const close=$('#remClose'); if(close) close.onclick=closeReminders; // אבטחה — סגירה ב"הבנתי"
   const m=$('#remindersModal'); if(m) m.style.display='flex';
@@ -2028,7 +2066,7 @@ function updateRemNotif(){
     +'<span class="rn-tx"><span class="rn-1">'+n+' '+(n===1?'משימה פתוחה לטיפול':'משימות פתוחות לטיפול')+'</span>'
     +'<span class="rn-2">לחצי לצפייה ברשימה ולטיפול</span></span>'
     +'<span class="rn-cta">לפרטים ‹</span>';
-  bar.onclick=openReminders;
+  bar.onclick=()=>openReminders(currentRemFilter());
   bar.style.display='flex';
 }
 function refreshBell(){
@@ -2053,10 +2091,10 @@ function remBannerHTML(kinds,title){
   return '<div class="rem-banner"><div class="rem-banner-h">🔔 '+esc(ttl)+' <span class="bnum">'+list.length+'</span></div>'
     +'<div class="rem-list">'+list.map(remItemHTML).join('')+'</div></div>';
 }
-{ const rb=$('#remBell'); if(rb) rb.onclick=openReminders; }
+{ const rb=$("#remBell"); if(rb) rb.onclick=()=>openReminders(currentRemFilter()); }
 { const rc=$('#remClose'); if(rc) rc.onclick=closeReminders; }
 { const rm=$('#remindersModal'); if(rm) rm.onclick=e=>{ if(e.target===rm) closeReminders(); }; }
-{ const rn=$('#remNotif'); if(rn) rn.onclick=openReminders; }
+{ const rn=$("#remNotif"); if(rn) rn.onclick=()=>openReminders(currentRemFilter()); }
 /* =============================================================== */
 function renderSched(){
   const app=$('#app');
@@ -2397,7 +2435,16 @@ function syncBrandUI(){ document.querySelectorAll('#brandSwitch button').forEach
   }catch(e){}
 })();
 
-document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=()=>{ BRAND=b.dataset.brand; applyBrand(); syncBrandUI(); if(VIEW==='new') renderPicker(); else if(VIEW==='sched') renderSched(); else if(VIEW==='chef') renderChef(); else if(VIEW==='endreport') renderEndHome(); else renderArchive(); refreshBell(); });
+document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=async()=>{
+  const target=b.dataset.brand;
+  if(target===BRAND) return;                 // כבר על המותג הזה — אין מה לעשות
+  const ok=await askConfirm('לעבור לעבוד על מועדון '+BRAND_NAME[target]+'? דוחות ושיבוצים חדשים יישמרו תחת מותג זה.');
+  if(!ok){ syncBrandUI(); return; }           // המשתמש ביטל — נשארים על המותג הנוכחי
+  BRAND=target; applyBrand(); syncBrandUI();
+  if(VIEW==='new') renderPicker(); else if(VIEW==='sched') renderSched(); else if(VIEW==='chef') renderChef(); else if(VIEW==='endreport') renderEndHome(); else renderArchive();
+  refreshBell();
+  toast('עברת למותג '+BRAND_NAME[target]+' ✓');
+});
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 { const m=$('#hebCalModal'); if(m){ const p=$('#hcPrev'),n=$('#hcNext'),cc=$('#hcCancel'),cl=$('#hcClear'); if(p)p.onclick=()=>hebCalNav(-1); if(n)n.onclick=()=>hebCalNav(1); if(cc)cc.onclick=closeHebCal; if(cl)cl.onclick=hebCalClear; m.onclick=e=>{ if(e.target===m) closeHebCal(); }; } }
 { const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; m.onclick=(e)=>{ if(e.target===m) closeAssign(); };
@@ -2442,6 +2489,7 @@ async function seedJune(){
 }
 async function startApp(){
   document.body.classList.remove('locked');
+  const _app=$('#app'); if(_app) _app.innerHTML='<div class="gate"><div class="gate-card"><div class="g-dot pulse"></div><h2>טוען…</h2><p>מתחבר למערכת</p></div></div>';
   await initCloud();
   const c=$('#conn'); c.textContent=CLOUD?'☁︎ ענן מחובר':'● מצב מקומי'; c.className='conn '+(CLOUD?'on':'');
   await dbLoad(); subscribeCloud();
