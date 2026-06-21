@@ -225,6 +225,13 @@
   .yesno button.on.yes{background:var(--green-bg);border-color:#bfe0cc;color:var(--green)}
   .yesno button.on.no{background:#fdeceb;border-color:#f1c9c4;color:#b3331f}
   .yesno button.on.na{background:var(--gray-bg);border-color:var(--line2);color:#566}
+  .imgfield{display:flex;flex-direction:column;gap:9px}
+  .img-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;align-self:flex-start;border:1px dashed var(--line2);background:#f7fafd;border-radius:10px;padding:11px 16px;cursor:pointer;font-weight:700;font-size:14px;color:#2b6cb0}
+  .img-btn:active{background:#eef4fb}
+  .imgwrap{position:relative;display:inline-block;max-width:280px}
+  .img-prev{max-width:100%;border-radius:10px;border:1px solid var(--line2);display:block}
+  .img-del{position:absolute;top:6px;inset-inline-start:6px;background:rgba(20,20,20,.72);color:#fff;border:0;border-radius:8px;padding:5px 9px;font-weight:700;font-size:12px;cursor:pointer}
+  .viewmode .img-btn,.viewmode .img-del{display:none}
 
   .form-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px}
   .save-note{color:var(--muted);font-size:13px}
@@ -471,6 +478,13 @@
   .tst-del{margin-top:8px;color:var(--muted)}
   .cf-seen{margin-top:8px;background:#eaf7ee;border:1px solid #b6e0c2;color:#1f7a43;font-weight:800;font-size:14px;border-radius:10px;padding:9px 12px;text-align:center}
   .cf-await{margin-top:8px;background:#fff4e0;border:1px solid #f0cf8c;color:#9a6a00;font-weight:800;font-size:14px;border-radius:10px;padding:9px 12px;text-align:center}
+  .tst-warn{background:#fff3e0;border:2px solid #f08a24;border-radius:13px;padding:13px 15px;margin-bottom:14px;box-shadow:0 0 0 3px rgba(240,138,36,.14);animation:tstPulse 1.7s ease-in-out infinite}
+  .tst-warn-h{display:flex;align-items:center;gap:8px;font-weight:900;font-size:15.5px;color:#a35a00}
+  .tst-warn-h .bnum{background:#ef6c00;color:#fff;font-size:13px;font-weight:900;min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+  .tw-list{margin-top:9px;display:flex;flex-direction:column;gap:7px}
+  .tw-row{background:#fff;border:1px solid #f3c98c;border-radius:10px;padding:9px 11px;font-weight:800;color:#8a4b00;font-size:14px}
+  .tw-hint{margin-top:9px;font-size:13px;font-weight:700;color:#a35a00}
+  @keyframes tstPulse{0%,100%{box-shadow:0 0 0 3px rgba(240,138,36,.12)}50%{box-shadow:0 0 0 7px rgba(240,138,36,.22)}}
   .cf-sub{font-weight:800;font-size:16px;color:var(--ink);margin:2px 0 4px}
   .cf-line{font-size:15.5px;color:var(--ink);margin-top:5px;line-height:1.65}
   .cf-empty{color:#9aa6b3;font-size:13px}
@@ -529,7 +543,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v134</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v141</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -681,7 +695,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v136';
+const APP_VERSION = 'v141';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -878,6 +892,7 @@ let BRAND='louie', VIEW='new', current=null, EDITING=true;
 let SCHEDVIEW='list', schedY=null, schedM=null, editingAssign=null;
 let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null, editingTasting=null;
 let REM_AUTO_SHOWN=false;
+let TST_WARN_SHOWN=false;
 const WROLES=[['manager','מנהלים'],['operator','מפעילים'],['dj','די-ג׳יים'],['photographer','צלמים'],['other','אחר']];
 const BRAND_NAME={louie:'לואי', kamilion:'קמיליון'};
 const WELCOME_MSG={"louie": "היי מזל טוב, כיף שסגרתם אצלנו בלואי  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בלואי רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת לואיס אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533973786.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)", "kamilion": "היי מזל טוב, כיף שסגרתם אצלנו בקמיליון  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בקמיליון רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת קמיליון אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533750860.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)"};
@@ -985,6 +1000,13 @@ const OPS_FIELDS=[
 const SEC_ADULTSMENU={title:'תפריט מבוגרים (אם יש)',kind:'info',fields:[
   F('adultsMenuPick','בחירת תפריט שף למבוגרים','chefmenu',{full:true}),
 ]};
+const SEC_BAT_ADULTS={title:'מבוגרים באירוע (אם מגיעים)',kind:'info',fields:[
+  F('batAdultsCount','כמות מבוגרים','number',{hint:'כמה מבוגרים מגיעים? (2–3 / יותר)'}),
+  F('batAdultsFood','מה המבוגרים אוכלים?','select',{full:true,opts:['מביאים אוכל קליל בעצמם','תפריט אוכל מהילדים – 80 ₪ לאדם','תפריט בופה – 160 ₪ לאדם (5–25 איש)']}),
+  F('batAdultsChefQty','כמות מנות לשף','number',{hint:'מספר מנות מבוגרים להעברה למטבח'}),
+  F('batCloseFamily','כמות משפחה קרובה (עד 5 ללא עלות)','number',{hint:'עד 5 בני משפחה קרובה ללא עלות'}),
+  F('batAdultsNotes','הערות לגבי המבוגרים','textarea',{full:true}),
+]};
 const SEC_APPROVAL={title:'אישור וסיכום',kind:'ok',fields:[
   F('clientApproved','הלקוח/ה אישר/ה את הסיכום?','yesno'),
   F('inspector','חתימת מבקר','text'),
@@ -1002,8 +1024,8 @@ const CHEF_MENUS={
   ]},
 };
 const EVENT_TYPES={
-  bat:{name:'בת/בר מצווה',icon:'🎉',sections:[SEC_DETAILS,{title:'חבילה ואטרקציות',kind:'info',fields:KIDS_FIELDS},SEC_ADULTSMENU,SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
-  bar:{hidden:true,name:'בר מצווה',icon:'🎉',sections:[SEC_DETAILS,{title:'חבילה ואטרקציות',kind:'info',fields:KIDS_FIELDS},SEC_ADULTSMENU,SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
+  bat:{name:'בת/בר מצווה',icon:'🎉',sections:[SEC_DETAILS,{title:'חבילה ואטרקציות',kind:'info',fields:KIDS_FIELDS},SEC_BAT_ADULTS,SEC_ADULTSMENU,SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
+  bar:{hidden:true,name:'בר מצווה',icon:'🎉',sections:[SEC_DETAILS,{title:'חבילה ואטרקציות',kind:'info',fields:KIDS_FIELDS},SEC_BAT_ADULTS,SEC_ADULTSMENU,SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
   brit:{hidden:true,name:'ברית',icon:'👶',sections:[SEC_DETAILS,{title:'חבילה',kind:'info',fields:[
     F('attractions','אטרקציות / שירותים','textarea',{full:true}),
     F('guestsCount','כמות מוזמנים','number'),
@@ -1019,6 +1041,7 @@ const EVENT_TYPES={
       F('kidsCommit','כמות מנות ילדים (לפי התחייבות)','number'),
       F('kidsEat','מה הילדים אוכלים?','text',{full:true,hint:'המבורגר וצ׳יפס / שניצל וצ׳יפס'}),
       F('adultsMenuPick','תפריט מבוגרים','chefmenu',{full:true}),
+      F('adultsChefQty','כמות מנות לשף','number',{hint:'מספר מנות מבוגרים להעברה למטבח'}),
       F('sides','בחירת תוספות','textarea',{full:true}),
       F('vegPersonal','מנות צמחוניות (אישיות)','text'),
       F('veganPersonal','מנות טבעוניות (אישיות)','text'),
@@ -1048,6 +1071,7 @@ const EVENT_TYPES={
     ]},
     {title:'תפריט מבוגרים',kind:'info',fields:[
       F('adultsMenuPick','תפריט מבוגרים','chefmenu',{full:true}),
+      F('adultsChefQty','כמות מנות לשף','number',{hint:'מספר מנות מבוגרים להעברה למטבח'}),
       F('sides','בחירת תוספות','textarea',{full:true}),
       F('glatt','מנות גלאט (מיוחדות בתוספת תשלום 15 ₪)','text',{full:true}),
       F('seating','סידור הושבה (כולל שליחת סקיצה במידת הצורך)','textarea',{full:true}),
@@ -1125,15 +1149,16 @@ const EVENT_TYPES={
     ]},
     {title:'שבירות וציוד',kind:'info',fields:[
       F('ee_broke','האם משהו נשבר?','yesnonote',{notePh:'מה נשבר?'}),
-      F('ee_crates','האם כל הארגזים נאספו? (לסמן כן רק בסוף שבוע)','yesno'),
     ]},
     {title:'תשלום',kind:'ops',fields:[
       F('ee_totalContract','סכום כללי לפי חוזה (כולל מקדמה)','number',{req:true}),
       F('ee_remaining','סכום שנותר לתשלום (אחרי קיזוז מקדמה)','number',{req:true}),
       F('ee_payMethod','איך הכסף עובר לחשבון?','select',{req:true,opts:['צק','העברה','אחר']}),
       F('ee_payNote','הערות לאופן התשלום','textarea',{full:true}),
-      F('ee_depositCheck','האם להפקיד את צ׳ק הביטחון?','yesno',{req:true}),
-      F('ee_checkPhotographed','האם הצ׳ק צולם לליאת (אם צריך להפקיד)?','yesno'),
+      F('ee_depositCheck','האם להפקיד את צ׳ק הביטחון?','yesno',{req:true,dep:{key:'ee_payMethod',val:'צק'}}),
+      F('ee_checkPhotographed','האם הצ׳ק צולם לליאת (אם צריך להפקיד)?','yesno',{dep:{key:'ee_payMethod',val:'צק'}}),
+      F('ee_transferDate','מתי בוצעה ההעברה?','date',{req:true,dep:{key:'ee_payMethod',val:'העברה'}}),
+      F('ee_transferShot','צילום מסך של ההעברה','image',{full:true,dep:{key:'ee_payMethod',val:'העברה'}}),
     ]},
     {title:'טיפים והערות',kind:'info',fields:[
       F('ee_googleReview','האם הצלחת להוציא ברכה בגוגל במקום? (לא צריך לחכות ליום אחרי)','yesnonote',{noteOn:'no',notePh:'אם לא — מדוע?'}),
@@ -1381,6 +1406,7 @@ function renderForm(){
   app.querySelectorAll('.sec-head').forEach(h=>h.onclick=()=>h.parentElement.classList.toggle('collapsed'));
   updateStatus();
   bindInputs(app);
+  applyFieldDeps(app);
   bindWelcome();
   { const phEl=app.querySelector('[data-key="phone"]'); if(phEl) phEl.addEventListener('input',()=>{ const n=app.querySelector('#welcomeCard .wc-note'); if(n){ const f=current.fields; n.innerHTML=f.phone?('יישלח אל המספר שבדוח: '+esc(f.phone)):'⚠ אין מספר בשדה הטלפון — מלא/י אותו תחילה'; } }); }
   const cm=$('#toMeshulav'); if(cm) cm.onclick=()=>{ if(current.fields.eventKind===EVENT_TYPES.bat.name) current.fields.eventKind=EVENT_TYPES.meshulav.name; current.type='meshulav'; markDirty(); renderForm(); toast('האירוע הפך למשולב — נוספו שדות מבוגרים'); };
@@ -1478,7 +1504,14 @@ function calcInner(v){
 }
 function fieldHTML(fld,val){
   val=val==null?'':val; const full=fld.full?' full':''; const hint=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
+  const depA=fld.dep?` data-dep-key="${esc(fld.dep.key)}" data-dep-val="${esc(Array.isArray(fld.dep.val)?fld.dep.val.join('|'):fld.dep.val)}"`:'';
   let control='';
+  if(fld.type==='image'){
+    const v=val||'';
+    const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
+    const prev=v?`<div class="imgwrap"><img src="${esc(v)}" alt="צילום מסך" class="img-prev"><button type="button" class="img-del" data-imgdel="${fld.key}">✕ הסר</button></div>`:'';
+    return `<div class="field full"${depA}><label>${esc(fld.label)}${hh}</label><div class="imgfield" data-key="${fld.key}"><label class="img-btn">📷 ${v?'החלפת צילום':'העלאת צילום מסך'}<input type="file" accept="image/*" hidden></label>${prev}</div></div>`;
+  }
   if(fld.type==='chefmenu'){
     const v=(val&&typeof val==='object')?val:{menu:'',sel:{}};
     const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
@@ -1556,7 +1589,7 @@ function fieldHTML(fld,val){
   const al=fld.alert?' alert':'';
   const rq=fld.req?'<span class="reqm"> *</span>':'';
   if(SUPPLIER_KEYS.indexOf(fld.key)>=0){ control += `<div class="sup-phone" data-sup="${fld.key}">${supPhoneHTML(val)}</div>`; }
-  return `<div class="field${full}${al}"><label>${esc(fld.label)}${rq}${hint}</label>${control}</div>`;
+  return `<div class="field${full}${al}"${depA}><label>${esc(fld.label)}${rq}${hint}</label>${control}</div>`;
 }
 function sendMenuToChef(key){
   const v=current.fields[key];
@@ -1662,6 +1695,30 @@ function bindCalc(c){
   const snd=c.querySelector('.calc-send'); if(snd) snd.onclick=()=>sendCalcToClient(key);
   const rs=c.querySelector('.calc-reset'); if(rs) rs.onclick=async()=>{ if(!(await askConfirm('לנקות את כל החישוב?'))) return; const v={text:'',total:'',check:''}; current.fields[key]=v; c.innerHTML=calcInner(v); bindCalc(c); markDirty(); };
 }
+function compressImage(file, cb){
+  const r=new FileReader();
+  r.onload=()=>{ const img=new Image(); img.onload=()=>{
+    const max=1280; let w=img.width,h=img.height;
+    if(w>h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    let q=0.6, out=c.toDataURL('image/jpeg',q);
+    while(out.length>900000 && q>0.3){ q-=0.1; out=c.toDataURL('image/jpeg',q); }
+    if(out.length>1100000){ toast('הצילום גדול מדי — נסה/י צילום קטן יותר'); return; }
+    cb(out);
+  }; img.onerror=()=>toast('שגיאה בטעינת התמונה'); img.src=r.result; };
+  r.onerror=()=>toast('שגיאה בקריאת הקובץ');
+  r.readAsDataURL(file);
+}
+function depActive(fld){ if(!fld||!fld.dep) return true; const cur=(current&&current.fields)?current.fields[fld.dep.key]:''; const vals=Array.isArray(fld.dep.val)?fld.dep.val:[fld.dep.val]; return vals.indexOf(String(cur==null?'':cur))>=0; }
+function applyFieldDeps(root){
+  (root||document).querySelectorAll('.field[data-dep-key]').forEach(fc=>{
+    const k=fc.getAttribute('data-dep-key');
+    const vals=(fc.getAttribute('data-dep-val')||'').split('|');
+    const cur=(current&&current.fields)?String(current.fields[k]==null?'':current.fields[k]):'';
+    fc.style.display=(vals.indexOf(cur)>=0)?'':'none';
+  });
+}
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
@@ -1674,10 +1731,15 @@ function bindInputs(app){
     sel.onchange=()=>{ if(sel.value==='__other__'){ other.style.display=''; current.fields[key]=other.value||''; other.focus(); } else { other.style.display='none'; current.fields[key]=sel.value; clr(); } markDirty(); };
     other.oninput=()=>{ current.fields[key]=other.value; if(other.value) clr(); markDirty(); };
   });
-  app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); }; });
+  app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); applyFieldDeps(); markDirty(); }; });
   app.querySelectorAll('select.crew-sel[data-key]').forEach(s=>{ s.dataset.prev=s.value;
     s.onchange=()=>{ if(!guardCrewSelect(s)) return; current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); };
   });
+  app.querySelectorAll('.imgfield').forEach(g=>{
+    const key=g.dataset.key, inp=g.querySelector('input[type=file]');
+    if(inp) inp.onchange=()=>{ const file=inp.files&&inp.files[0]; if(!file) return; toast('מעבד צילום…'); compressImage(file, durl=>{ current.fields[key]=durl; const y=window.scrollY; renderForm(); window.scrollTo(0,y); markDirty(); }); };
+  });
+  app.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{ current.fields[b.dataset.imgdel]=''; const y=window.scrollY; renderForm(); window.scrollTo(0,y); markDirty(); });
   app.querySelectorAll('.hebdate-btn:not([disabled])').forEach(b=>b.onclick=()=>openHebCal(b.dataset.key));
   app.querySelectorAll('.chefmenu').forEach(c=>bindChefmenu(c));
   app.querySelectorAll('.checks').forEach(g=>{
@@ -1721,7 +1783,7 @@ function computeStatus(){
   const f=current.fields||{};
   if(f.clientApproved==='yes') return 'confirmed';
   const def=EVENT_TYPES[current.type]; let allReq=true;
-  if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{ if(fld.req){ const v=f[fld.key]; if(v==null||String(v).trim()==='') allReq=false; } }));
+  if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{ if(fld.req && depActive(fld)){ const v=f[fld.key]; if(v==null||String(v).trim()==='') allReq=false; } }));
   return allReq?'filled':'draft';
 }
 function updateStatus(){
@@ -1735,6 +1797,7 @@ function validateRequired(){
   const def=EVENT_TYPES[current.type]; const missing=[];
   document.querySelectorAll('.field.missing').forEach(e=>e.classList.remove('missing'));
   def.sections.forEach(sec=>sec.fields.forEach(fld=>{
+    if(!depActive(fld)) return;
     if(fld.type==='checks'){
       const sel=Array.isArray(current.fields[fld.key])?current.fields[fld.key]:[];
       const ok=sel.indexOf('__none__')>=0 || sel.length>=(fld.min||3);
@@ -1742,6 +1805,7 @@ function validateRequired(){
       return;
     }
     if(!fld.req) return;
+    if(!depActive(fld)) return;
     const val=current.fields[fld.key];
     if(val==null||String(val).trim()===''){ missing.push(fld.label); const el=document.querySelector('[data-key="'+fld.key+'"]'); if(el){ const fc=el.closest('.field'); if(fc) fc.classList.add('missing'); } }
   }));
@@ -2600,8 +2664,8 @@ function chefAdultsHTML(cv){
     return '<div class="cf-line"><b>'+esc(cat.title)+':</b> '+list+'</div>'; }).filter(Boolean).join('');
   return '<div class="cf-sub">'+esc(m.name)+'</div>'+(parts||'<div class="cf-empty">לא סומנו מנות</div>');
 }
-function chefHasKids(r){ const f=r.fields||{}; return !!(f.kidsMenu); }
-function chefHasAdults(r){ const f=r.fields||{}; return !!((f.adultsMenuPick&&f.adultsMenuPick.menu)||f.sides||f.adultsNotes||f.menu); }
+function chefHasKids(r){ const f=r.fields||{}; return !!(f.kidsMenu||(f.batAdultsFood&&f.batAdultsFood.indexOf('מביאים')<0)); }
+function chefHasAdults(r){ const f=r.fields||{}; return !!((f.adultsMenuPick&&f.adultsMenuPick.menu)||f.sides||f.adultsNotes||f.menu||f.adultsChefQty); }
 function chefCardHead(r){
   const f=r.fields, d=fmtDateShort(f.eventDate);
   const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'';
@@ -2633,9 +2697,13 @@ function kidsCardHTML(r){
   const diet=[];
   { const _a=allergText(f.glutenLactose)||allergText(f.sensitivities); if(_a) diet.push('רגישויות: '+esc(_a)); }
   if(f.vegMeals) diet.push('צמחוני: '+esc(f.vegMeals));
+  const adultBuf=(f.batAdultsFood&&f.batAdultsFood.indexOf('מביאים')<0);
+  const aQty=f.batAdultsChefQty||f.batAdultsCount;
+  const aLine=adultBuf?(esc(f.batAdultsFood)+(aQty?(' · '+esc(aQty)+' מנות'):'')):'';
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
     <div class="cf-sec"><div class="cf-h">תפריט ילדים</div><div class="cf-big">${esc(f.kidsMenu)}</div></div>
+    ${aLine?`<div class="cf-sec"><div class="cf-h">מבוגרים באירוע (לא נכלל בכמות הילדים)</div><div class="cf-big">${aLine}</div></div>`:''}
     ${diet.length?`<div class="cf-diet">${diet.join(' · ')}</div>`:''}
     <button type="button" class="btn cf-done ${done?'on':''}" data-done="${r.id}" data-tab="kids">${done?'✓ הוכן / אושר':'סמן כהוכן / אושר'}</button>
     ${done&&f.chefDoneKidsAt?`<div class="cf-doneat">סומן: ${esc(f.chefDoneKidsAt)}</div>`:''}
@@ -2649,12 +2717,16 @@ function adultsCardHTML(r){
   { const _a=allergText(f.glutenLactose)||allergText(f.sensitivities); if(_a) diet.push('רגישויות: '+esc(_a)); }
   if(f.vegPersonal) diet.push('צמחוני: '+esc(f.vegPersonal));
   if(f.veganPersonal) diet.push('טבעוני: '+esc(f.veganPersonal));
+  const foodLine=[];
+  if(f.adultsChefQty) foodLine.push('כמות לשף: '+esc(f.adultsChefQty)+' מנות');
+  if(f.adultsCount) foodLine.push('כמות מבוגרים: '+esc(f.adultsCount));
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
     ${missing.length?`<div class="cf-missing">⛔ חסרה בחירה בתפריט — ${missing.join(' · ')}</div>`:''}
     ${adults?`<div class="cf-sec"><div class="cf-h">תפריט מבוגרים</div><div class="cf-big">${adults}</div></div>`:''}
+    ${foodLine.length?`<div class="cf-sec"><div class="cf-h">מבוגרים — כמויות</div><div class="cf-big">${foodLine.join(' · ')}</div></div>`:''}
     ${f.sides?`<div class="cf-sec"><div class="cf-h">תוספות</div><div class="cf-big">${esc(f.sides)}</div></div>`:''}
-    ${f.adultsNotes?`<div class="cf-sec"><div class="cf-h">הערות מבוגרים</div><div class="cf-body">${esc(f.adultsNotes)}</div></div>`:''}
+    ${(f.adultsNotes||f.batAdultsNotes)?`<div class="cf-sec"><div class="cf-h">הערות מבוגרים</div><div class="cf-body">${esc(f.adultsNotes||f.batAdultsNotes)}</div></div>`:''}
     ${diet.length?`<div class="cf-diet">${diet.join(' · ')}</div>`:''}
     <button type="button" class="btn cf-done ${done?'on':''}" data-done="${r.id}" data-tab="adults">${done?'✓ הוכן / אושר':'סמן כהוכן / אושר'}</button>
     ${done&&f.chefDoneAdultsAt?`<div class="cf-doneat">סומן: ${esc(f.chefDoneAdultsAt)}</div>`:''}
@@ -2764,6 +2836,37 @@ async function tastingMarkSeen(id){
   renderChef(); toast('סומן כראיתי ✓');
   await persistDoc('tastings',t);
 }
+/* ===== אזהרת טעימות ביום הטעימות — כשאורן עדיין לא אישר ===== */
+function tastingWarnings(){
+  const today=tstTodayIso();
+  let list=(MEM.tastings||[]).filter(t=>t.date && t.date<=today && !t.seen);
+  if(!CHEF_MODE) list=list.filter(t=>!t.brand||t.brand===BRAND);
+  return list.sort((a,b)=>((a.date||'')+(a.time||'')).localeCompare((b.date||'')+(b.time||'')));
+}
+function tastingWarnBannerHTML(){
+  const list=tastingWarnings(); if(!list.length) return '';
+  const today=tstTodayIso();
+  const rows=list.map(t=>{
+    const d=fmtDateShort(t.date);
+    const when=(t.date===today)?'היום':(d.d+' '+d.m);
+    const od=(t.date<today)?' · באיחור':'';
+    return `<div class="tw-row">📅 ${esc(when)}${t.time?' · '+esc(t.time):''}${t.title?' · '+esc(t.title):''}${CHEF_MODE&&t.brand?' · '+(BRAND_NAME[t.brand]||''):''}${od}</div>`;
+  }).join('');
+  const head=CHEF_MODE?'⚠️ טעימות שעדיין לא אישרת שראית!':'⚠️ אורן עדיין לא אישר טעימות של היום';
+  const hint=CHEF_MODE?'פתח/י את לשונית 📅 טעימות וסמן/י "ראיתי".':'כדאי לוודא מול אורן שראה.';
+  return `<div class="tst-warn"><div class="tst-warn-h">${head} <span class="bnum">${list.length}</span></div><div class="tw-list">${rows}</div><div class="tw-hint">${hint}</div></div>`;
+}
+function tastingWarnMsg(){
+  return CHEF_MODE
+    ? '⚠️ יש טעימות שעדיין לא אישרת שראית.\nאנא פתח/י את לשונית "📅 טעימות" וסמן/י "ראיתי".'
+    : '⚠️ אורן עדיין לא אישר את הטעימות של היום.\nכדאי לוודא מולו.';
+}
+function maybePopTastingWarn(){
+  if(TST_WARN_SHOWN) return;
+  if(!tastingWarnings().length) return;
+  TST_WARN_SHOWN=true;
+  setTimeout(()=>{ try{ notify(tastingWarnMsg()); }catch(e){} }, 350);
+}
 function renderChef(){
   const app=$('#app'); if(!app) return;
   const byDate=(a,b)=>(a.fields.eventDate||'').localeCompare(b.fields.eventDate||'');
@@ -2794,6 +2897,7 @@ function renderChef(){
   }
   app.innerHTML=`<div class="chef-wrap">
     <div class="chef-head"><div class="chef-title">👨‍🍳 תפריטים למטבח</div>${CHEF_MODE?'<button type="button" class="btn ghost sm" id="chefLogout">יציאה</button>':''}</div>
+    ${tastingWarnBannerHTML()}
     ${chefRemBannerHTML()}
     <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · מציג אירועים עדכניים. ל"טען אירועים קודמים" לחצו על הכפתור. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
     <div class="rubric-tabs chef-tabs">
@@ -2818,6 +2922,7 @@ function renderChef(){
   app.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteTasting(b.dataset.tdel); });
   app.querySelectorAll('[data-tseen]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); tastingMarkSeen(b.dataset.tseen); });
   const lo=$('#chefLogout'); if(lo) lo.onclick=chefLogout;
+  maybePopTastingWarn();
   try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
 }
 async function chefToggleDone(id,tab){
