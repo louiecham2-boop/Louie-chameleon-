@@ -113,7 +113,7 @@
   .section{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px}
   .sec-head{display:flex;align-items:center;gap:10px;padding:13px 18px;cursor:pointer;user-select:none;font-weight:800;font-size:15.5px;border-inline-start:5px solid var(--line2);border-top-left-radius:var(--radius);border-top-right-radius:var(--radius)}
   .sec-head .count{margin-inline-start:auto;font-size:12px;font-weight:700;color:var(--muted);background:#f1f4f8;padding:3px 9px;border-radius:999px}
-  .sec-head .arr{transition:.2s;color:var(--muted);font-size:13px}
+  .sec-head .arr{margin-inline-start:auto;transition:.2s;color:var(--muted);font-size:13px}
   .section.collapsed .arr{transform:rotate(-90deg)}
   .section.collapsed .sec-body{display:none}
   .sec-head.info{background:var(--info);color:var(--info-tx);border-inline-start-color:var(--info-bd)}
@@ -384,6 +384,8 @@
   .status-auto.confirmed{background:var(--green-bg);color:var(--green);border-color:var(--green)}
   .field input.locked{background:#eef2f7;color:#3a4654;cursor:not-allowed}
   .checks{display:flex;flex-wrap:wrap;gap:8px}
+  .allerg{display:flex;flex-direction:column;gap:9px}
+  .allerg .allerg-note{width:100%;box-sizing:border-box;border:1px solid var(--line2);border-radius:10px;padding:10px;font-size:15px;font-family:inherit;background:#fff;min-height:70px;resize:vertical}
   .chk-opt{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line2);background:#fcfdfe;border-radius:10px;padding:9px 13px;font-weight:700;font-size:13.5px;color:#3a4654;cursor:pointer;user-select:none}
   .chk-opt input{width:18px;height:18px;accent-color:var(--brand);flex:none}
   .chk-opt.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-ink)}
@@ -464,6 +466,11 @@
   .cf-big b{font-weight:800}
   .chef-tabs{margin:10px 0 14px}
   .chef-tabs button{flex:1}
+  .tst-badge{display:inline-block;background:#e8413c;color:#fff;font-size:11px;font-weight:800;min-width:18px;padding:0 5px;border-radius:999px;line-height:18px;vertical-align:middle}
+  .tst-card.tst-past{opacity:.6}
+  .tst-del{margin-top:8px;color:var(--muted)}
+  .cf-seen{margin-top:8px;background:#eaf7ee;border:1px solid #b6e0c2;color:#1f7a43;font-weight:800;font-size:14px;border-radius:10px;padding:9px 12px;text-align:center}
+  .cf-await{margin-top:8px;background:#fff4e0;border:1px solid #f0cf8c;color:#9a6a00;font-weight:800;font-size:14px;border-radius:10px;padding:9px 12px;text-align:center}
   .cf-sub{font-weight:800;font-size:16px;color:var(--ink);margin:2px 0 4px}
   .cf-line{font-size:15.5px;color:var(--ink);margin-top:5px;line-height:1.65}
   .cf-empty{color:#9aa6b3;font-size:13px}
@@ -522,7 +529,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v131</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v134</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -544,7 +551,6 @@
 <div class="app" id="app"></div>
 <div id="pdfArea"></div>
 <div class="toast" id="toast"></div>
-<button type="button" class="rem-bell" id="remBell" title="תזכורות"><span class="rem-count" id="remCount">0</span>🔔</button>
 <div id="remindersModal" class="modal-bg" style="display:none;z-index:97">
   <div class="modal" style="max-width:480px">
     <div class="modal-h" id="remModalTitle">🔔 תזכורות חשובות</div>
@@ -658,10 +664,24 @@
     </div>
   </div>
 </div>
+<div id="tastingModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-h" id="tModalTitle">טעימות חדשות</div>
+    <label>תאריך הטעימות</label><input id="tDate" type="date" dir="ltr">
+    <label>שעה</label><input id="tTime" type="time" dir="ltr">
+    <label>עבור מי / כותרת (לא חובה)</label><input id="tTitle" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="למשל: משפחת כהן">
+    <label>הערה לשף (לא חובה)</label><textarea id="tNote" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    <div class="modal-foot">
+      <button id="tSave" class="btn primary">שמירה</button>
+      <button id="tDel" class="btn del">מחק</button>
+      <button id="tCancel" class="btn ghost">ביטול</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v131';
+const APP_VERSION = 'v136';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -743,7 +763,7 @@ async function loadHistory(){
   HIST_LOADED=true; return true;
 }
 async function dbLoad(){
-  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[]};
+  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[],tastings:[]};
   if(CLOUD && fb.db){
     const cutoff=histCutoff();
     try{ const s=await fb.db.collection('reports').where('fields.eventDate','>=',cutoff).get(); MEM.reports=s.docs.map(d=>d.data()); }
@@ -751,6 +771,8 @@ async function dbLoad(){
     try{ const sa=await fb.db.collection('assignments').where('date','>=',cutoff).get(); MEM.assignments=sa.docs.map(d=>d.data()); }
     catch(e){ try{ const sa=await fb.db.collection('assignments').get(); MEM.assignments=sa.docs.map(d=>d.data()); }catch(_){} }
     try{ const sw=await fb.db.collection('workers').get(); MEM.workers=sw.docs.map(d=>d.data()); }
+    catch(e){ console.warn(e); }
+    try{ const st=await fb.db.collection('tastings').get(); MEM.tastings=st.docs.map(d=>d.data()); }
     catch(e){ console.warn(e); }
     try{ const sc=await fb.db.collection('catering').where('date','>=',cutoff).get(); MEM.catering=sc.docs.map(d=>d.data()); }
     catch(e){ try{ const sc=await fb.db.collection('catering').get(); MEM.catering=sc.docs.map(d=>d.data()); }catch(_){} }
@@ -764,6 +786,7 @@ async function dbLoad(){
   if(!MEM.assignments) MEM.assignments=[];
   if(!MEM.workers) MEM.workers=[];
   if(!MEM.catering) MEM.catering=[];
+  if(!MEM.tastings) MEM.tastings=[];
   return MEM;
 }
 async function persist(report){
@@ -798,6 +821,38 @@ async function persistAssignment(a){
     catch(e){ usingMemoryOnly=true; }
   }
 }
+/* ===== ייבוא חד-פעמי של ספקים מרשימת הטלפונים (שם + טלפון בלבד) ===== */
+let _seedTried=false;
+async function seedSuppliersOnce(){
+  if(_seedTried) return; if(!CLOUD || !fb.db || !MEM) return;
+  _seedTried=true;
+  try{
+    let done=false;
+    try{ const meta=await fb.db.collection('meta').doc('seedSuppliers_v1').get(); done=!!(meta&&meta.exists); }catch(e){}
+    if(!done){ try{ if(window.storage){ const f=await window.storage.get('seedSuppliers_v1'); done=!!(f&&f.value); } }catch(e){} }
+    if(done) return;
+    const SEED=[
+      {n:'רותם', role:'manager',      p:'054-4450469'},
+      {n:'אורי', role:'dj',           p:'052-3907187'},
+      {n:'מוש',  role:'dj',           p:'052-8977933'},
+      {n:'ניב',  role:'dj',           p:'054-9182131'},
+      {n:'ליאל', role:'dj',           p:'050-4488384'},
+      {n:'אולג', role:'photographer', p:'054-8968085'}
+    ];
+    const have=(MEM.workers||[]).map(w=>String(w.phone||'').replace(/\D/g,''));
+    let added=0;
+    for(const s of SEED){
+      const digits=String(s.p).replace(/\D/g,'');
+      if(have.indexOf(digits)>=0) continue;
+      const w={id:'seed_'+digits,name:s.n,role:s.role,phone:s.p,contract:false,form101:false,form101url:'',notes:'יובא מרשימת ספקים',createdAt:Date.now(),updatedAt:Date.now()};
+      MEM.workers.push(w); added++;
+      try{ await fb.db.collection('workers').doc(w.id).set(JSON.parse(JSON.stringify(w))); }catch(e){ console.warn('seed worker',e); }
+    }
+    try{ await fb.db.collection('meta').doc('seedSuppliers_v1').set({done:true,at:Date.now(),added}); }catch(e){}
+    try{ if(window.storage) await window.storage.set('seedSuppliers_v1','1'); }catch(e){}
+    if(added){ if(typeof toast==='function') toast('נוספו '+added+' ספקים מהרשימה ✓'); if(typeof afterCloudSync==='function') afterCloudSync(); }
+  }catch(e){ console.warn('seedSuppliers',e); _seedTried=false; }
+}
 function subscribeCloud(){
   if(!CLOUD || !fb.db) return;
   const cutoff=histCutoff();
@@ -808,8 +863,11 @@ function subscribeCloud(){
     mergeWin('assignments', snap.docs.map(d=>d.data()), rowInWin); afterCloudSync();
   }, err=>{ console.warn('snapshot a',err); fb.db.collection('assignments').onSnapshot(s=>{ MEM.assignments=s.docs.map(d=>d.data()); afterCloudSync(); }, e2=>console.warn(e2)); });
   fb.db.collection('workers').onSnapshot(snap=>{
-    MEM.workers=snap.docs.map(d=>d.data()); afterCloudSync();
+    MEM.workers=snap.docs.map(d=>d.data()); afterCloudSync(); seedSuppliersOnce();
   }, err=>console.warn('snapshot w',err));
+  fb.db.collection('tastings').onSnapshot(snap=>{
+    MEM.tastings=snap.docs.map(d=>d.data()); afterCloudSync();
+  }, err=>console.warn('snapshot t',err));
   fb.db.collection('catering').where('date','>=',cutoff).onSnapshot(snap=>{
     mergeWin('catering', snap.docs.map(d=>d.data()), rowInWin); afterCloudSync();
   }, err=>{ console.warn('snapshot c',err); fb.db.collection('catering').onSnapshot(s=>{ MEM.catering=s.docs.map(d=>d.data()); afterCloudSync(); }, e2=>console.warn(e2)); });
@@ -818,7 +876,7 @@ function modalsClosed(){ return ['#schedModal','#workerModal','#cateringModal'].
 
 let BRAND='louie', VIEW='new', current=null, EDITING=true;
 let SCHEDVIEW='list', schedY=null, schedM=null, editingAssign=null;
-let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null;
+let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null, editingTasting=null;
 let REM_AUTO_SHOWN=false;
 const WROLES=[['manager','מנהלים'],['operator','מפעילים'],['dj','די-ג׳יים'],['photographer','צלמים'],['other','אחר']];
 const BRAND_NAME={louie:'לואי', kamilion:'קמיליון'};
@@ -898,7 +956,7 @@ const KIDS_FIELDS=[
   F('balloons','בלונים — צבעים לבחירה (2)','text'),
   F('kidsCount','כמות ילדים','number'),
   F('vegMeals','מנות צמחוניות','text'),
-  F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','textarea',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+  F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
   F('kidsMenu','תפריט ילדים','textarea',{full:true}),
   F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
   F('bus','הילדים מגיעים באוטובוס?','yesno'),
@@ -951,7 +1009,7 @@ const EVENT_TYPES={
     F('guestsCount','כמות מוזמנים','number'),
     F('menu','תפריט','textarea',{full:true}),
     F('vegMeals','מנות צמחוניות','text'),
-    F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','textarea',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+    F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
     F('externalSupplier','ספק חיצוני?','textarea',{full:true}),
   ]},SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
   meshulav:{name:'משולב (ילדים + מבוגרים)',icon:'✨',sections:[SEC_DETAILS,
@@ -985,7 +1043,7 @@ const EVENT_TYPES={
       F('kidsEat','מה הילדים אוכלים?','text',{full:true,hint:'המבורגר וצ׳יפס / שניצל וצ׳יפס'}),
       F('vegPersonal','מנות צמחוניות (אישיות)','text'),
       F('veganPersonal','מנות טבעוניות (אישיות)','text'),
-      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','textarea',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
       F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
     ]},
     {title:'תפריט מבוגרים',kind:'info',fields:[
@@ -1022,7 +1080,7 @@ const EVENT_TYPES={
       F('bar','חבילת בר / שתייה','textarea',{full:true}),
       F('vegPersonal','מנות צמחוניות','text'),
       F('veganPersonal','מנות טבעוניות','text'),
-      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','textarea',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
       F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
     ]},
     {title:'לוגיסטיקה ותשלומים',kind:'info',fields:[
@@ -1307,7 +1365,7 @@ function renderForm(){
     <div id="sections">
       ${def.sections.map((sec,si)=>`
         <div class="section" data-si="${si}">
-          <div class="sec-head ${sec.kind}"><span>${esc(sec.title)}</span><span class="count">${sec.fields.length} שדות</span><span class="arr">▾</span></div>
+          <div class="sec-head ${sec.kind}"><span>${esc(sec.title)}</span><span class="arr">▾</span></div>
           <div class="sec-body">${sec.fields.map(fld=>fieldHTML(fld,f[fld.key])).join('')}</div>
         </div>`).join('')}
     </div>
@@ -1383,6 +1441,18 @@ function calcRowHTML(r,run){
     +'<button type="button" class="cr-del">מחק שורה</button>'
   +'</div>';
 }
+const ALLERG_OPTS=['גלוטן','לקטוז','אגוזים','אחר'];
+function allergVal(v){
+  if(v&&typeof v==='object'&&Array.isArray(v.sel)) return {sel:v.sel.slice(),note:v.note||''};
+  if(typeof v==='string'&&v.trim()) return {sel:[],note:v}; // המרה מערך טקסט ישן
+  return {sel:[],note:''};
+}
+function allergText(v){
+  v=allergVal(v); const parts=[];
+  if(v.sel.length) parts.push(v.sel.join(', '));
+  if(v.note&&v.note.trim()) parts.push(v.note.trim());
+  return parts.join(' · ');
+}
 function calcVal(v){
   if(v&&typeof v==='object'&&('text' in v||'total' in v||'check' in v)){
     return {text:v.text||'',total:v.total||'',check:v.check||''};
@@ -1419,6 +1489,12 @@ function fieldHTML(fld,val){
   if(fld.type==='calc'){
     const v=(val&&typeof val==='object')?val:{text:'',total:'',check:''};
     return `<div class="field full"><label>${esc(fld.label)}</label><div class="calc" data-key="${fld.key}">${calcInner(v)}</div></div>`;
+  }
+  if(fld.type==='allergens'){
+    const v=allergVal(val);
+    const opts=ALLERG_OPTS.map(o=>{ const on=v.sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}><span>${esc(o)}</span></label>`; }).join('');
+    const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
+    return `<div class="field full${fld.alert?' alert':''}"><label>${esc(fld.label)}${hh}</label><div class="allerg" data-key="${fld.key}"><div class="checks">${opts}</div><textarea class="allerg-note" dir="rtl" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="הערות / פירוט (כמות, מנה חלופית, פרטי 'אחר'…)">${esc(v.note||'')}</textarea></div></div>`;
   }
   if(fld.type==='datewin'){
     const ed=current&&current.fields&&current.fields.eventDate;
@@ -1618,6 +1694,15 @@ function bindInputs(app){
     });
   });
   app.querySelectorAll('.calc').forEach(c=>bindCalc(c));
+  app.querySelectorAll('.allerg').forEach(g=>{
+    const key=g.dataset.key, note=g.querySelector('.allerg-note');
+    g.querySelectorAll('input[type=checkbox]').forEach(chk=>chk.onchange=()=>{
+      let v=allergVal(current.fields[key]); const opt=chk.dataset.opt;
+      if(chk.checked){ if(v.sel.indexOf(opt)<0) v.sel.push(opt); } else v.sel=v.sel.filter(x=>x!==opt);
+      current.fields[key]=v; chk.closest('.chk-opt').classList.toggle('on',chk.checked); markDirty();
+    });
+    note.oninput=()=>{ let v=allergVal(current.fields[key]); v.note=note.value; current.fields[key]=v; markDirty(); };
+  });
   app.querySelectorAll('.yesno:not(.ynn-btns)').forEach(g=>{ g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ current.fields[g.dataset.key]=b.dataset.v; g.querySelectorAll('button').forEach(x=>{x.className=''; if(x.dataset.v===b.dataset.v)x.classList.add('on',b.dataset.v);}); markDirty(); }); });
   app.querySelectorAll('.ynn').forEach(g=>{
     const key=g.dataset.key, note=g.querySelector('.ynn-note');
@@ -1806,6 +1891,7 @@ function buildDocHTML(r){
       }
             if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+esc(t)+'</td></tr>'; }
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const t=sel.indexOf('__none__')>=0?'ללא': sel.join(' · '); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?esc(t):'—')+'</td></tr>'; }
+      if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?esc(t):'—')+'</td></tr>'; }
       let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':esc(v)}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${esc(sec.title)}</h2><table>${rows}</table>`;
@@ -2454,6 +2540,7 @@ function setCrewSel(el,roleKey,val){ if(!el) return; el.innerHTML=crewOptionsHTM
 { const b=$('#notifyOk'); if(b) b.onclick=()=>{ const m=$('#notifyModal'); if(m) m.style.display='none'; }; const m=$('#notifyModal'); if(m) m.onclick=e=>{ if(e.target===m) m.style.display='none'; }; }
 { const m=$('#workerModal'); if(m){ $('#wSave').onclick=saveWorker; $('#wCancel').onclick=closeWorker; $('#wDel').onclick=()=>{ if(editingWorker) deleteWorker(editingWorker); }; m.onclick=e=>{ if(e.target===m) closeWorker(); }; } }
 { const m=$('#cateringModal'); if(m){ $('#cSave').onclick=saveCater; $('#cCancel').onclick=closeCater; $('#cDel').onclick=()=>{ if(editingCater) deleteCater(editingCater); }; m.onclick=e=>{ if(e.target===m) closeCater(); }; } }
+{ const m=$('#tastingModal'); if(m){ $('#tSave').onclick=saveTasting; $('#tCancel').onclick=closeTasting; $('#tDel').onclick=()=>{ if(editingTasting) deleteTasting(editingTasting); }; m.onclick=e=>{ if(e.target===m) closeTasting(); }; } }
 
 const JUNE26=[{"type":"bat","fields":{"contact":"נועה","phone":"0523710344","eventTime":"19:30","celebrant":"שחר","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"תפריט שף ב400","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"פנקייקים וזיקוקים מתנה\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nלשים לב ללג\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 25\nתפריט מבוגרים: אסאדו פרגיות סלמון ובמסתובבים: צוריסוס עלי גפן סלטים : סלט עלים עשיר קרפצו סלק פטה כבד ירקות שורש ונבטים קרפצו חציל קרפצו בקר סלט פנצלנלה","managerNotes":"לשדרג אותם לתפריט שף במתנה לא רצתה בתוספת\nדיסק און קי: הביאו","eventDate":"2026-06-01"}},{"type":"bat","fields":{"contact":"אורטל","phone":"0549403072","eventTime":"19:30","celebrant":"דניאל וגאיה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"המבורגר וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"תמונות מתחלפות","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה זיקוק קר ב300 שח","eventDate":"2026-06-03","managerNotes":"דיסק און קי: יש"}},{"type":"bat","fields":{"contact":"דוד","phone":"0528754063","eventTime":"19:30","celebrant":"נועה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"50","kidsMenu":"תפריט שף ב800","vegMeals":"תפריט שף","glutenLactose":"6 שיהיה לחמניות","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"יש מצגת","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nזיקוק ב350 שח בלי נשיקה סטירה","eventDate":"2026-06-04","managerNotes":"דיסק און קי: יש מצגת"}},{"type":"bat","fields":{"contact":"דורית","phone":"0547777166","eventTime":"11:00","celebrant":"אביגיל","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"60+8 מבוגרים","kidsMenu":"תפריט שף ב500 שח","vegMeals":"3","glutenLactose":"3","wheelchair":"yes","externalSupplier":"לא","bus":"yes","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n10:30 – הגעה לתמונות\n11:00 – אטרקציות חטיפים והפעלה קלה\n11:30 – כניסה וריקודים\n12:00 – הפסקת אוכל\n12:30 – מצגת והפעלה\n13:15 – טקס עוגה וקינוחים\n13:30 – גאסט דנס\n13:45 – ריקודים עד הסוף","eventDate":"2026-06-05","managerNotes":"דיסק און קי: הביאה דיסק און קי עם מצגת וסירטונים ביום האירוע תביא דיסק און קי עם תמונות ."}},{"type":"meshulav","fields":{"contact":"שרה","phone":"0539630329","eventTime":"20:00","celebrant":"רומי","balloons":"לבן ורוד","attractions":["עמדת צילום"],"cakeCeremony":"yes","kidsCount":"40","kidsMenu":"תפריט שף ב800","vegMeals":"3","glutenLactose":"1","wheelchair":"yes","externalSupplier":"קייטרינג","bus":"no","galiBook":"no","presentation":"yes","packageNotes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – ריקודים\n22:45 – ריקודים עד הסוף עושים שולחן מתוקים לשים בוטרינה בכניסה לא רוצים גאסט דנס","adultsCount":"30","sides":"לעדכן","vegPersonal":"לעדכן","veganPersonal":"לעדכן","adultsNotes":"מבוגרים למעלה\n\nתפריט מבוגרים שנבחר:\nמסתובבים: לעדכן\nסלטים: לעדכן\nעיקריות: לעדכן","seating":"שולחן 1 - 12 מקומות שולחן 2 - 12 מקומות שולחן 3 -12-14 מקומות שולחן 4 - 12-14 מקומות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","eventManager":"ֿ","eventDate":"2026-06-07","managerNotes":"דיסק און קי: יש מצגת התקייה של רומי"}},{"type":"bat","fields":{"contact":"עדי","phone":"0545592575","eventTime":"19:30","celebrant":"מיקה ואלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"35","kidsMenu":"תפריט שף כלול","vegMeals":"0","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"1 מהבנות","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","eventDate":"2026-06-08","managerNotes":"דיסק און קי: רק תמונות תקייה תמונות של מיקה"}},{"type":"bat","fields":{"contact":"אפרת","phone":"0505297980","eventTime":"19:30","celebrant":"היללי","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"תפריט שף ב800","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"yes","galiBook":"yes","presentation":"תמונות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 40\nתפריט מבוגרים: 7 סלטים: *קרפצ'ו חציל *חומוס ביתי *טריו שרי *אנטיפסטי ירקות *סלט טאבולה ים תיכוני *סלט כרוב אסייתי *סלט עלים עשיר בירקות בייבי (לבקש אקסטרה לשולחנות פלפל ירוק חריף מטוגן). 2 תוספות: *אורז לבן עם פירות יבשים ושקדים *תפוח אדמה זעיר בשמן זית (לבקש אקסטרה תוספת של שעועית ירוקה). עיקריות: *פילה מושט ברוטב מרוקאי *פרגית טעם מזרחי *אסאדו ברוטב טקסס","eventDate":"2026-06-09","adultsMenuPick":{"menu":"ashir","sel":{"salads":["חומוס ביתי עם מסבחה","טריו שרי עם פסטו ושקדים","אנטיפסטי ירקות קלויים","סלט עלים עשיר ואנדיב","פלפל חריף מטוגן בלימון","סלט טאבולה ים-תיכוני","כרוב אסייתי"],"mains":["פרגית במגוון טעמים","פילה מושט במגוון טעמים","אסאדו עגל ברוטב טקסס"]},"opt":{}},"managerNotes":"אטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת סוני פלייסטיישן מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן\nדיסק און קי: עד שבוע לפני"}},{"type":"meshulav","fields":{"contact":"שירה","phone":"0532505469","eventTime":"19:30","celebrant":"אדל","balloons":"לבן ורוד","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","kidsCount":"40","kidsMenu":"תפריט שף ב1000 גלאט ! בריוש אסאדו מיני המבורגר פסטה עגבניות","vegMeals":"פסטה עגבניות","glutenLactose":"3","wheelchair":"yes","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","packageNotes":"הילדים אוכלים למעלה במידה וכולם מגיעים אם לא כולם מגיעים והילדים בכמות קטנה להושיב למטה בועות ערפל מתנה זיקוק ב300 שח\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","adultsCount":"30 מבוגרים +3 רזרבה","sides":"אורז לבן עם פירות יבשים שעועית ירוקה","vegPersonal":"0","veganPersonal":"0","adultsNotes":"מבוגרים למטה","seating":"שולחן 1- 10-12 מקומות שולחן 2 - 10-11 מקומות שולחן 7- 10 -12 מקומות","usbDate":"","acum":"yes","securityCheck":"yes","eventDate":"2026-06-10","adultsMenuPick":{"menu":"ashir","sel":{"rotating":["קרוסטון פטה כבד וריבת בצל","קבב על מקל קינמון וטחינה"],"salads":["קרפצ׳יו חציל ים-תיכוני","חומוס ביתי עם מסבחה","אנטיפסטי ירקות קלויים","סלט עלים עשיר ואנדיב","פלפל חריף מטוגן בלימון","סלט טאבולה ים-תיכוני","כרוב אסייתי"],"mains":["פרגית במגוון טעמים","פילה מושט במגוון טעמים","דונר טורקי (עגל וטלה)"]},"opt":{}},"managerNotes":"אטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת PlayStation 5 מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן סדנת איפור אמא ובת אצל מאפרת מקצועית בשווי 1000 ש''ח במתנה\nדיסק און קי: יש מצגת ותמונות"}},{"type":"bat","fields":{"contact":"מורן","phone":"0547606200","eventTime":"19:30","celebrant":"גפן","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"60","kidsMenu":"תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"אבידן מול האבא","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה להוסיף כיסאות ושולחנות בחוץ הרוב מעשנים!!!\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 31 \"עראיס מיני בריוש אסאדו","eventDate":"2026-06-11","managerNotes":"דיסק און קי: יש מצגת ותמונות 2 תקיות של תמונות"}},{"type":"bat","fields":{"contact":"ג'ודי","phone":"0542669344","eventTime":"19:30","glutenLactose":"0","wheelchair":"no","acum":"yes","externalSupplier":"צלם דיגי","presentation":"no","usbDate":"","securityCheck":"yes","notes":"לוז אירוע:\n19:30 – קבלת פנים\n20:15 – כניסה ראשונה וריקודים\n20:45 – מנה עיקרית\n21:15 – טקס חינה וריקודים\n21:40 – קינוחים ושתייה וחמה צריכים שולחן ליד הורטינה בכניסה למתנות יביאו שתייה אלכוהולית שולחן גדול לקינוחים לדאוג לשולחן לדבר עם אבידן על השעות\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: חינה\nכמות מנות מבוגרים (לפי התחייבות): 46 מבוגרים\nכמות מנות ילדים (לפי התחייבות): 8 ילדים\nמה הילדים אוכלים? המבורגר וציפס/שניצל וציפס: שניצל וציפס\nמנות צמחוניות (אישיות): 1 צמחוני שווארמה צימחונית\nמנות טבעוניות (אישיות): 0\nבחירת מנות מסתובבים: שיפודי עוף בטמפטרה עראיס\nבחירת סלטים: סלט עלים חסות וכו .. טריו עגבניות שרי קרפציו חציל חומוס מטבוחה קוסקוס עם ירקות צמחוני\nבחירת עיקריות: פרגית על האש על מצע אורז אושפלו אסאדו ניוקי ערמונים סלמון עשבי תיבול על רביולי ארטישוק קינוח- פירות...אבטיח מלון ענבים( במקום ביסקוטי)\nמנות גלאט (מיוחדות בתוספת תשלום) 15 שח: לא\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): איך שבא לנו","eventDate":"2026-06-14","managerNotes":"דיסק און קי: לא"}},{"type":"meshulav","fields":{"contact":"חן","phone":"0542211329","eventTime":"20:00","celebrant":"אדל","kidsCount":"30","kidsMenu":"המבורגר וציפס","vegMeals":"0","glutenLactose":"0","wheelchair":"no","externalSupplier":"זמר","bus":"no","galiBook":"no","presentation":"כן פורמט mp4","packageNotes":"אין חבילה ילדים למעלה ארוחת ילדים","adultsCount":"82","vegPersonal":"3","adultsNotes":"מבוגרים למטה ילדים למעלה\n\nלוז אירוע:\n19:00 – קבלת פנים\n19:45 – סלטים ברכות\n20:00 – ריקודים זמר\n20:30 – מנה עיקרית\n21:15 – מצגת\n21:30 – ריקודים וזמר\n21:45 – קינוחים\n\nתפריט מבוגרים שנבחר:\nמסתובבים: בריוש אסאדו קבב על מקל קינמון\nסלטים: עלים חומוס טאבולה מטבוחה קרפציו חציל פטה כבד קרפציו בקר סלט פלפלים חריף\nעיקריות: פרגית אושפלו אסאדו 6 פירה כמהין סלמון עם רביולי ארטישוק","seating":"יעשו וישלחו 5 שולחנות של 12","usbDate":"","acum":"yes","securityCheck":"yes","eventDate":"2026-06-15","notes":"— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מבוגרים","managerNotes":"דיסק און קי: תקייה מצגת אדל חדש אין סאוונד אין תמונות"}},{"type":"bat","fields":{"contact":"ליאור","phone":"0586424321","eventTime":"19:00","celebrant":"אריאל יעל","glutenLactose":"0","wheelchair":"no","acum":"yes","externalSupplier":"דיגי וצלם","presentation":"yes","usbDate":"","securityCheck":"yes","notes":"שולחן בווטרינה בכניסה עבור מתוקים שיביאו 19:00 קבלת פנים 19:30 כניסה וריקודים 20:00 הושבה וסלטים 20:20 ריקודים נוספים 21:00 מנה עיקרית 21:30 מצגת וברכה של יעל 21:40 ג'סטדאנס 22:20 קינוחים וריקודים נוספים לסיום מנהל אירוע שישים לב לאירוע ושהלוז יהיה דינמי תלוי בזמנים לדבר עם הלקוח לפני\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה\nכמות מנות מבוגרים (לפי התחייבות): 43\nכמות מנות ילדים (לפי התחייבות): 3\nמה הילדים אוכלים?: שניצלונים וציפס\nמנות צמחוניות (אישיות): 6 צמחוני\nמנות טבעוניות (אישיות): 0\nבחירת מנות מסתובבים: קבב על מקל קינמון אדרול סיני\nבחירת סלטים: חומוס טריו שרי אנטיפסטי סלט עלים בטטה מטבוחה סלט טאבולה\nבחירת תוספות: \"אורז לבן עם פירות יבשים תפוח אדמה בדואט של בטטה \"\nבחירת עיקריות: \"פרגית אסאדו עגל רך ונימוח שווארמה הודו \"\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): שולחן 5: 5 מוזמנים מש' אריאל שולחן 4: 5מוזמנים מש' אור שולחן 3: 8 מוזמנים מש' פרידמן שולחן 2: 8 מוזמנים מש' הגאין+זאבי אסולין שולחן 6+7: 20 בנות שולחן חברות. לחבר את השולחנות בבקשה. להדפיס את השמות של המשפחה","eventDate":"2026-06-16","managerNotes":"דיסק און קי: 2 סירטונים לא הביא דיסק און קי"}},{"type":"bat","fields":{"contact":"טליה","phone":"0523223405","eventTime":"19:30","celebrant":"איה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב ורוד","kidsCount":"60","kidsMenu":"שניצלונים ציפס והמבורגר תוספת 600","vegMeals":"3","glutenLactose":"1 להביא לחמניה ללא גלוטן","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה להוסיף קערת גומי בבר חטיפים !! בלי אייל גולן","operator":"מפעילה שלא תצעק זה לא היה להם נעים בקמיליון","eventDate":"2026-06-17","managerNotes":"דיסק און קי: יש תמונות"}},{"type":"bat","fields":{"contact":"דנה","phone":"0547107378","eventTime":"19:00","celebrant":"עלמה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"60","kidsMenu":"תפריט שף ב1000 חלק!!","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"אירוע כל הספקים בנות צלמת - נועה דיגייית - ורד נועה מפעילה\n\nלוז אירוע:\n18:30 – הגעה לתמונות\n19:00 – אטרקציות חטיפים והפעלה קלה\n19:30 – טקס כניסה וריקודים\n20:00 – הפסקת אוכל\n20:30 – מצגת והפעלה\n21:15 – טקס עוגה וקינוחים\n21:30 – גאסט דנס\n21:45 – ריקודים עד הסוף","eventDate":"2026-06-18","managerNotes":"דיסק און קי: להקרין את התמונות מהתקייה- עלמה בוק ואת המצגת מהתקייה- סירטון תמונות עלמה"}},{"type":"bat","fields":{"contact":"רונית","phone":"0544946764","eventTime":"13:00","celebrant":"מעיין","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"30","kidsMenu":"תפריט שף בריוש אסאדו מיני המבורגר פסטה עגבניות","vegMeals":"3","glutenLactose":"3 שיהיה להם כיבוד","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"יש + רזרבה","notes":"החוגגת עם סכרת ויש בני משפחה עם צליאק\n\nלוז אירוע:\n12:30 – הגעה לתמונות\n13:00 – אטרקציות חטיפים והפעלה קלה\n13:30 – כניסה וריקודים\n14:00 – הפסקת אוכל\n14:30 – מצגת והפעלה\n15:15 – טקס עוגה וקינוחים\n15:30 – גאסט דנס\n15:45 – ריקודים לשים שולחן קטן למתנות בלי נשיקה סטירה כמסדרים את הגומי שיהיה סטרילי שהעובדים יהיו עם כפפות","eventDate":"2026-06-19","managerNotes":"דיסק און קי: מצגת ותמונות"}},{"type":"bat","fields":{"contact":"צאלה","phone":"0548004956","eventTime":"21:00","celebrant":"15 חוגגות- אלה יהודה ענבר רצון עטרה גוטליב ירדן אברהם אמילי אייזנברג גונר סיאנה שיר עובד שיר רפאל נאל לוין ליאל לייזר רומי צרפתי נויה קליימן זיו זייגנר הלנה ורמוס געש בר","attractions":["עמדת צילום"],"cakeCeremony":"2 עוגות עוגות שוקולד עם קצפת עוגה ללא גלוטן (לנסות שיהיה וניל עם קצפת)","balloons":"ורוד לבן","kidsCount":"50","kidsMenu":"ב100שח לחוגגת תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"כן תמונות מתחלפות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n20:30 – הגעה לתמונות\n21:00 – אטרקציות חטיפים והפעלה קלה\n21:30 – כניסה וריקודים\n22:00 – הפסקת אוכל\n22:30 – מצגת והפעלה\n23:15 – טקס עוגה וקינוחים\n23:30 – גאסט דנס\n23:45 – ריקודים עד\n00:00","managerNotes":"להגיד לה ב120 שח למבוגר בופה עשיר כמו של הילדים במקום הבופה שלא מופיע אם רוצה בופה ב190\nדיסק און קי: עד שבוע לפני","eventDate":"2026-06-20"}},{"type":"bat","fields":{"contact":"יואל","phone":"0535964634","eventTime":"19:30","celebrant":"מאיה","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"50","kidsMenu":"שניצלונים וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"","securityCheck":"yes","notes":"לוודא שיש שפע באירוע בעיקר בבר מתוקים\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nשיהיה הכל בשפע!!!!! בכניסה שלה יתנגן המצגת עם התמונות שלה ולא התמונות שבתקייה\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: משולב\nכמות מבוגרים: 30\nתפריט מבוגרים: 🔹 מסתובבים (2): - קרוסטון פטה כבד וריבת בצל - אגרול סיני, רוטב חמוץ מתוק 🥗 סלטים (7): - קרפציו חציל עם נגיעות ים תיכוניות, לימון כבוש, טחינה, צימיצורי וטחינה לבנה ושמן זית - חומוס ביתי בלווי מסבחה גרגירים ופטרוזיליה קצוצה - בטטה מדורה מקורמלת עם טחינה גולמית, סילאן תמרים ושערות חלבה - עדשים ירוקות וקוביות בטטה קריספית, כוסברה, חסה, בתיבול ויניגרט סויה ג'ינג'ר וצ'ילי אדום - סלט טאבולה ים תיכוני עם המון ירק, חמוציות וזילוף טחינה גולמית - כרוב אסייתי, כרוב סגול ולבן, גזר, פלפל אדום ובצל ירוק ברוטב ויניגרט סויה ושקדים קלויים - קינואה, בזיליקום, נענע, פטרוזיליה, סלרי, פלפל חריף וקוביות זוקיני טריות 🍟 תוספות (2): - אורז לבן עם פירות יבשים ושקדים קלויים - תפוח אדמה בדואט של בטטה רוזמרין שום ושמן זית 🥩 מנות עיקריות (3): - פרגית במגוון טעמים (מזרחי, אסייאתי, מלח פלפל) - אסאדו עגל בצלייה איטית בניחוח מעושן - קדירת בקר בירקות שורש ופטריות","managerNotes":"החוגגת הייתה פה באירוע ואמרה לאבא שלא היה מספיק מתוקים !!!!\nאטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת סוני פלייסטיישן מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן\nדיסק און קי: יש 2 סירטונים וסירטון אחד של תמונות ותמונות","eventDate":"2026-06-21"}},{"type":"bat","fields":{"contact":"דבורה","phone":"0525353343","eventTime":"19:30","celebrant":"אריאלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב לבן","kidsCount":"40 +22 מבוגרים שאוכלים גם עם הילדים","kidsMenu":"תפריט שף ב1000 שח בריוש אסאדו מיני המבורגר פסטה פנה עגבניות שלל ירקות ורטבים","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות זיקוקים מתנה לעדכן לגבי פנקייקים ב200 שח לעדכן לגבי וופל בלגי ב250 שח","eventDate":"2026-06-22","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"אנה","phone":"0507717627","eventTime":"19:00","celebrant":"הילה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"40","kidsMenu":"שניצלונים וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nמבוגרים למעלה רק אחרי הטקס הכניסה בועות ערפל מתנה זיקוק קר ב300 שח לעדכן לעדכן לגבי סידור הושבה 14 14 12 3 שולחנות\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 40\nתפריט מבוגרים: לעדכן","eventDate":"2026-06-23","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"סמדר","phone":"0523645041","eventTime":"19:30","celebrant":"אגם נעמה ובר","cakeCeremony":"yes","balloons":"לעדכן","kidsCount":"לעדכן","kidsMenu":"לעדכן לגבי תפריט שף 1000","vegMeals":"0","glutenLactose":"0","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה 3 חוגגות","eventDate":"2026-06-24"}},{"type":"bat","fields":{"contact":"שונטל","phone":"0503550019","eventTime":"20:00","attractions":["עמדת צילום"],"balloons":"לעדכן","kidsMenu":"לעדכן תפריט ב800 שח","vegMeals":"3","glutenLactose":"3","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – גאסט דנס\n22:45 – ריקודים עד הסוף\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מסיבת שכבה כיתות ו","eventDate":"2026-06-25","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"אור","phone":"0547129971","eventTime":"12:00","celebrant":"אריאל","balloons":"קשת בלונים. מתנה כסוף כחול","glutenLactose":"לעדכן","wheelchair":"yes","acum":"","externalSupplier":"לא","presentation":"yes","usbDate":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n12:00 – קבלת פנים\n12:40 – סלטים ברכות ריקודים\n13:15 – מנה עיקרית\n13:50 – מצגת\n14:00 – קינוחים וריקודים\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מבוגרים בר מצווה\nכמות מנות מבוגרים (לפי התחייבות): 40\nכמות מנות ילדים (לפי התחייבות): לעדכן\nמה הילדים אוכלים? המבורגר וציפס/שניצל וציפס: שניצלונים וציפס\nמנות צמחוניות (אישיות): לעדכן\nמנות טבעוניות (אישיות): לעדכן\nבחירת מנות מסתובבים: לעדכן\nבחירת סלטים: מסתובבים : שיפודי עוף בטמפורה ירקות בטמפורה מיני בריוש במילוי אסאדו ראשונות : קרפצ'יו חציל שרוף קרפצ'ו בקר סלט פנצ'נלה ים תיכוני חומוס אבו פיראס בטטה מדורה מקורמלת קרפצ'ו סלק מרענן עיקריות : אסאדו דרום אמריקאי נתחי פרגית בגריל נתח סלמון בגריל\nבחירת תוספות: לעדכן\nבחירת עיקריות: לעדכן\nמנות גלאט (מיוחדות בתוספת תשלום) 15 שח: לא\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): לעדכן","eventManager":"דגש למנהל אירוע ! הילד עם צרכים מיוחדים שיא הרגישות לתדרך את הספקים ביום האירוע !!","dj":"לשבץ","photographer":"לשבץ","eventDate":"2026-06-26","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"טלי","phone":"0547849009","eventTime":"20:30","celebrant":"נועם ונויה","cakeCeremony":"yes","balloons":"לעדכן","kidsCount":"50","kidsMenu":"הבורגר וציפס","vegMeals":"0","glutenLactose":"3 מבקשת גם קינוחים ללא גלוטן","wheelchair":"no","externalSupplier":"לא","bus":"no","usbDate":"","acum":"","securityCheck":"","eventDate":"2026-06-27","notes":"— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה 2 חוגגות","managerNotes":"דיסק און קי: כן"}},{"type":"bat","fields":{"contact":"תומר","phone":"0526013125","eventTime":"19:30","celebrant":"מתן","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב ורוד","kidsCount":"60","kidsMenu":"תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: חבילה","eventDate":"2026-06-29","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"עדי","phone":"0545592575","eventTime":"19:30","celebrant":"מיקה ואלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"35","kidsMenu":"תפריט שף כלול","vegMeals":"0","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"1 מהבנות","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","eventDate":"2026-06-28","managerNotes":"דיסק און קי: רק תמונות תקייה תמונות של מיקה"}},{"type":"bat","fields":{"contact":"אנה","phone":"0542618577","eventTime":"20:00","celebrant":"מיכל","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"40","kidsMenu":"תפריט שף","vegMeals":"אל רגיל בוטנים","glutenLactose":"לא","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – גאסט דנס\n22:45 – ריקודים עד הסוף לשים הרבה פרחים !! גם בחוץ חשוב מאוד העיצוב של האולם גם למעלה ולמטה\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 30 לעדכן\nתפריט מבוגרים: לעדכן","eventDate":"2026-06-30","managerNotes":"דיסק און קי: עד שבוע לפני"}}];
 const TYPE_NAME_SEED={bat:'בת מצווה',meshulav:'משולב',shulchan:'אירוע סביב שולחן',cocktail:'אירוע קוקטייל פרטי'};
@@ -2544,7 +2631,7 @@ function chefEditReport(id){
 function kidsCardHTML(r){
   const f=r.fields, done=!!f.chefDoneKids;
   const diet=[];
-  if(f.glutenLactose) diet.push('רגישויות: '+esc(f.glutenLactose));
+  { const _a=allergText(f.glutenLactose)||allergText(f.sensitivities); if(_a) diet.push('רגישויות: '+esc(_a)); }
   if(f.vegMeals) diet.push('צמחוני: '+esc(f.vegMeals));
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
@@ -2559,7 +2646,7 @@ function adultsCardHTML(r){
   const adults=chefAdultsHTML(f.adultsMenuPick);
   const missing=chefMissing(f.adultsMenuPick);
   const diet=[];
-  if(f.glutenLactose) diet.push('רגישויות: '+esc(f.glutenLactose));
+  { const _a=allergText(f.glutenLactose)||allergText(f.sensitivities); if(_a) diet.push('רגישויות: '+esc(_a)); }
   if(f.vegPersonal) diet.push('צמחוני: '+esc(f.vegPersonal));
   if(f.veganPersonal) diet.push('טבעוני: '+esc(f.veganPersonal));
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
@@ -2599,19 +2686,99 @@ function chefRemBannerHTML(){
   return '<div class="chef-rem rem-banner"><div class="rem-banner-h">🍽️ אירועים קרובים שעדיין ללא תפריט <span class="bnum">'+list.length+'</span></div>'
     +'<div class="rem-list">'+list.map(remItemHTML).join('')+'</div></div>';
 }
+/* ===== טעימות — הודעות מהמשרד לשף (אורן) + אישור "ראיתי" ===== */
+function tstTodayIso(){ const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function tastingsVisible(){
+  let list=(MEM.tastings||[]).slice();
+  if(!CHEF_MODE) list=list.filter(t=>!t.brand||t.brand===BRAND);
+  const today=tstTodayIso();
+  const up=list.filter(t=>(t.date||'')>=today).sort((a,b)=>((a.date||'')+(a.time||'')).localeCompare((b.date||'')+(b.time||'')));
+  const past=list.filter(t=>(t.date||'')<today).sort((a,b)=>((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||'')));
+  return up.concat(past);
+}
+function tastingUnseenCount(){ const today=tstTodayIso(); return tastingsVisible().filter(t=>(t.date||'')>=today && !t.seen).length; }
+function tastingCardHTML(t,today){
+  const past=(t.date||'')<today, d=fmtDateShort(t.date), seen=!!t.seen;
+  return `<div class="chef-card tst-card${seen?' done':''}${past?' tst-past':''}" data-tid="${t.id}">
+    <div class="cf-hdr">
+      <div class="cf-tile"><div class="cf-dow">${esc(d.w)}</div><div class="cf-day">${esc(String(d.d))}</div><div class="cf-mon">${esc(d.m)}</div></div>
+      <div class="cf-htext">
+        <div class="cf-name">טעימות${t.time?' · '+esc(t.time):''}</div>
+        <div class="cf-meta">${esc(t.title||'')}${CHEF_MODE&&t.brand?(t.title?' · ':'')+(BRAND_NAME[t.brand]||''):''}</div>
+      </div>
+      ${!CHEF_MODE?`<button type="button" class="cf-edit" data-tedit="${t.id}">✎ עריכה</button>`:''}
+    </div>
+    ${t.note?`<div class="cf-sec"><div class="cf-h">הערה</div><div class="cf-body">${esc(t.note)}</div></div>`:''}
+    ${seen
+      ? `<div class="cf-seen">✓ אורן אישר שראה${t.seenAt?' · '+esc(t.seenAt):''}</div>`
+      : (CHEF_MODE
+          ? `<button type="button" class="btn cf-done" data-tseen="${t.id}">👁 סמן שראיתי</button>`
+          : `<div class="cf-await">⏳ ממתין לאישור השף</div>`)}
+    ${!CHEF_MODE?`<button type="button" class="btn sm rdel tst-del" data-tdel="${t.id}">🗑 מחק</button>`:''}
+  </div>`;
+}
+function tastingsListHTML(){
+  const list=tastingsVisible(), today=tstTodayIso();
+  let h='';
+  if(!CHEF_MODE) h+=`<div class="arch-tools"><button class="btn" id="addTasting">+ הוסף טעימות</button></div>`;
+  h+=`<p class="sub">${CHEF_MODE?'תאריכי טעימות שהמשרד עדכן עבורך. סמן/י "ראיתי" לאישור.':'עדכון תאריך ושעת טעימות לשף ('+(BRAND_NAME[BRAND]||'')+'). אורן יאשר שראה.'}</p>`;
+  if(!list.length){ h+=`<div class="wempty">— אין טעימות מתוזמנות —</div>`; return h; }
+  h+=list.map(t=>tastingCardHTML(t,today)).join('');
+  return h;
+}
+function openTasting(id){
+  editingTasting=id||null;
+  const t=id?(MEM.tastings||[]).find(x=>x.id===id):null;
+  $('#tDate').value=t?(t.date||''):'';
+  $('#tTime').value=t?(t.time||''):'';
+  $('#tTitle').value=t?(t.title||''):'';
+  $('#tNote').value=t?(t.note||''):'';
+  $('#tDel').style.display=id?'':'none';
+  $('#tModalTitle').textContent=id?'עריכת טעימות':'טעימות חדשות';
+  $('#tastingModal').style.display='flex';
+}
+function closeTasting(){ const m=$('#tastingModal'); if(m) m.style.display='none'; editingTasting=null; }
+async function saveTasting(){
+  const date=$('#tDate').value;
+  if(!date){ toast('יש לבחור תאריך'); return; }
+  let t=editingTasting?(MEM.tastings||[]).find(x=>x.id===editingTasting):null;
+  const wasEdit=!!t;
+  if(!t){ t={id:uid(),createdAt:Date.now(),brand:BRAND}; MEM.tastings.push(t); }
+  const nTime=$('#tTime').value, nTitle=$('#tTitle').value.trim(), nNote=$('#tNote').value.trim();
+  const changed=wasEdit && ((t.date||'')!==date || (t.time||'')!==nTime || (t.title||'')!==nTitle || (t.note||'')!==nNote);
+  t.date=date; t.time=nTime; t.title=nTitle; t.note=nNote; t.updatedAt=Date.now();
+  if(!wasEdit || changed){ t.seen=false; t.seenAt=''; }
+  closeTasting(); renderChef(); toast(changed?'עודכן — השף יתבקש לאשר מחדש ✓':'נשמר ✓');
+  await persistDoc('tastings',t);
+}
+async function deleteTasting(id){
+  const t=(MEM.tastings||[]).find(x=>x.id===id); if(!t) return;
+  if(!(await askConfirm('למחוק את הטעימות בתאריך '+(t.date||'')+'?'))) return;
+  if($('#tastingModal')&&$('#tastingModal').style.display!=='none') closeTasting();
+  await deleteDoc('tastings',id,'tastings');
+  renderChef(); toast('נמחק');
+}
+async function tastingMarkSeen(id){
+  const t=(MEM.tastings||[]).find(x=>x.id===id); if(!t) return;
+  t.seen=true; t.seenAt=new Date().toLocaleString('he-IL'); t.updatedAt=Date.now();
+  renderChef(); toast('סומן כראיתי ✓');
+  await persistDoc('tastings',t);
+}
 function renderChef(){
   const app=$('#app'); if(!app) return;
   const byDate=(a,b)=>(a.fields.eventDate||'').localeCompare(b.fields.eventDate||'');
   const all=MEM.reports.filter(r=>r.fields&&r.fields.eventDate&&(CHEF_MODE||r.brand===BRAND));
   const kidsReps=all.filter(chefHasKids).sort(byDate);
   const adultsReps=all.filter(chefHasAdults).sort(byDate);
-  const isKids=CHEF_TAB!=='adults';
-  let reps=isKids?kidsReps:adultsReps;
+  const isTasting=(CHEF_TAB==='tasting');
+  const isKids=(CHEF_TAB!=='adults' && !isTasting);
+  let reps=isTasting?[]:(isKids?kidsReps:adultsReps);
   let olderCount=0;
-  if(!SHOW_OLD.chef){ const cutoff=recentCutoffIso(); const before=reps.length; reps=reps.filter(r=>(r.fields.eventDate||'')>=cutoff); olderCount=before-reps.length; }
-  const olderBarChef=loadOlderBarHTML('chef',olderCount);
+  if(!isTasting && !SHOW_OLD.chef){ const cutoff=recentCutoffIso(); const before=reps.length; reps=reps.filter(r=>(r.fields.eventDate||'')>=cutoff); olderCount=before-reps.length; }
+  const olderBarChef=isTasting?'':loadOlderBarHTML('chef',olderCount);
   let cards;
-  if(!reps.length){ cards=`<div class="wempty">— אין ${isKids?'תפריטי ילדים':'תפריטי מבוגרים'} עדכניים ${olderCount?'(יש '+olderCount+' ישנים — לחצו "טען אירועים קודמים")':''} —</div>`; }
+  if(isTasting){ cards=tastingsListHTML(); }
+  else if(!reps.length){ cards=`<div class="wempty">— אין ${isKids?'תפריטי ילדים':'תפריטי מבוגרים'} עדכניים ${olderCount?'(יש '+olderCount+' ישנים — לחצו "טען אירועים קודמים")':''} —</div>`; }
   else {
     const builder=isKids?kidsCardHTML:adultsCardHTML;
     const curYM=new Date().toISOString().slice(0,7);
@@ -2631,7 +2798,8 @@ function renderChef(){
     <p class="sub">${CHEF_MODE?'כל האירועים (לואי + קמיליון)':'אירועי '+(BRAND_NAME[BRAND]||'')} · מציג אירועים עדכניים. ל"טען אירועים קודמים" לחצו על הכפתור. סמן/י "הוכן / אושר" לכל אירוע שטופל.${CHEF_MODE?'':' עריכת תפריט (✎) זמינה למנהלים בלבד.'}</p>
     <div class="rubric-tabs chef-tabs">
       <button data-ctab="kids" class="${isKids?'on':''}">🧒 תפריטי ילדים (${kidsReps.length})</button>
-      <button data-ctab="adults" class="${!isKids?'on':''}">🍽️ תפריטי מבוגרים (${adultsReps.length})</button>
+      <button data-ctab="adults" class="${!isKids&&!isTasting?'on':''}">🍽️ תפריטי מבוגרים (${adultsReps.length})</button>
+      <button data-ctab="tasting" class="${isTasting?'on':''}">📅 טעימות${tastingUnseenCount()?` <span class="tst-badge">${tastingUnseenCount()}</span>`:''}</button>
     </div>
     ${olderBarChef}
     ${cards}
@@ -2645,6 +2813,10 @@ function renderChef(){
   app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; const grp=h.parentElement; const nowCol=grp.classList.contains('collapsed'); CHEF_COLLAPSED[k]=!nowCol; grp.classList.toggle('collapsed',!nowCol); });
   app.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>chefToggleDone(b.dataset.done,b.dataset.tab));
   app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>chefEditReport(b.dataset.edit));
+  { const ab=$('#addTasting'); if(ab) ab.onclick=()=>openTasting(null); }
+  app.querySelectorAll('[data-tedit]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openTasting(b.dataset.tedit); });
+  app.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteTasting(b.dataset.tdel); });
+  app.querySelectorAll('[data-tseen]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); tastingMarkSeen(b.dataset.tseen); });
   const lo=$('#chefLogout'); if(lo) lo.onclick=chefLogout;
   try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
 }
