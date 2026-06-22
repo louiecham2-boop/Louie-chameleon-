@@ -306,7 +306,7 @@
   .doc table{width:100%;border-collapse:collapse;margin-bottom:4px}
   .doc td{padding:6px 10px;border-bottom:1px solid #e7ebf0;vertical-align:top}
   .doc td.k{font-weight:700;color:#3a4654;width:46%;background:#fafbfc}
-  .doc td.v{color:#1a2330;white-space:pre-wrap;direction:rtl;text-align:right}
+  .doc td.v{color:#1a2330;white-space:pre-wrap;direction:rtl;text-align:right;line-height:1.55}
   .doc bdi,.doc .m-v bdi{unicode-bidi:isolate}
   .doc td.v.empty{color:#9aa6b3}
   .doc .d-foot{margin-top:22px;display:flex;gap:30px;border-top:2px solid #e7ebf0;padding-top:16px}
@@ -562,7 +562,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v159</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v160</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -715,7 +715,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v159';
+const APP_VERSION = 'v160';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -2023,10 +2023,10 @@ function buildDocHTML(r){
         }
         return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
-            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidi(t)+'</td></tr>'; }
+            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const t=sel.indexOf('__none__')>=0?'ללא': sel.join(' · '); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
       if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
-      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidi(v)}</td></tr>`;
+      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${esc(sec.title)}</h2><table>${rows}</table>`;
   }).join('');
