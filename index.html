@@ -126,6 +126,11 @@
   .field{display:flex;flex-direction:column;gap:5px}
   .field.full{grid-column:1/-1}
   .field label{font-size:13px;font-weight:700;color:#3a4654}
+  .date-readout{display:flex;align-items:center;gap:8px;margin-top:7px;padding:8px 12px;background:var(--brand-soft);border:1.5px solid var(--brand);border-radius:10px;font-weight:800;font-size:16px;color:var(--brand);direction:rtl}
+  .date-readout .dr-num{font-weight:900;letter-spacing:.3px}
+  .date-readout.empty{background:#f3f5f8;border-color:var(--line2);color:var(--muted);font-weight:700}
+  .date-readout .dr-ico{font-size:15px}
+  .doc .d-meta .m-date{color:var(--brand);font-weight:900}
   .field .hint{font-size:11.5px;color:var(--muted);font-weight:600}
   .field input,.field textarea,.field select{width:100%;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;font-size:16px;background:#fcfdfe;color:var(--ink);font-family:inherit}
   .field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft);background:#fff}
@@ -258,6 +263,8 @@
   .row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer;transition:.1s}
   .row:last-child{border-bottom:0}
   .row:hover{background:#f6f9fc}
+  .row.today{background:var(--brand-soft);box-shadow:inset 0 0 0 2px var(--brand);border-radius:10px;border-bottom-color:transparent}
+  .row.today:hover{background:var(--brand-soft)}
   .row .date{font-weight:800;font-variant-numeric:tabular-nums;min-width:46px;text-align:center;background:var(--brand-soft);color:var(--brand-ink);border-radius:9px;padding:6px 4px;line-height:1.15}
   .row .date small{display:block;font-size:10px;font-weight:700;opacity:.8}
   .row .who{flex:1;min-width:0}
@@ -548,7 +555,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v145</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v150</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -700,7 +707,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v145';
+const APP_VERSION = 'v150';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1255,7 +1262,16 @@ function fmtDateShort(iso){ if(!iso) return {d:'—',m:'',w:''}; const dt=new Da
 function fmtDateLong(iso){ if(!iso) return 'ללא תאריך'; const dt=new Date(iso+'T00:00'); return dt.getDate()+' ב'+MONTHS[dt.getMonth()]+' '+dt.getFullYear(); }
 function monLabel(iso){ if(!iso) return 'ללא תאריך'; const dt=new Date(iso+'T00:00'); return MONTHS[dt.getMonth()]+' '+dt.getFullYear(); }
 function yesnoText(v){ return v==='yes'?'כן':v==='no'?'לא':v==='na'?'לא רלוונטי':''; }
-function hebDateText(iso){ if(!iso) return 'בחר/י תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; return d.getDate()+' ב'+MONTHS[d.getMonth()]+' '+d.getFullYear()+' · יום '+WEEKDAYS_SH[d.getDay()]; }
+function hebDateText(iso){ if(!iso) return 'בחר/י תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return 'יום '+WEEKDAYS_FULL[d.getDay()]+' · '+dd+'.'+mm+'.'+d.getFullYear(); }
+const WEEKDAYS_FULL=['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+function dateReadout(iso){
+  if(!iso) return '<div class="date-readout empty" data-for="eventDate">📅 טרם נבחר תאריך</div>';
+  const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return '<div class="date-readout empty" data-for="eventDate">📅 —</div>';
+  const dd=String(d.getDate()).padStart(2,'0'), mm=String(d.getMonth()+1).padStart(2,'0'), yy=d.getFullYear();
+  return `<div class="date-readout" data-for="eventDate"><span class="dr-ico">📅</span><span class="dr-day">יום ${WEEKDAYS_FULL[d.getDay()]}</span><bdi class="dr-num">${dd}.${mm}.${yy}</bdi></div>`;
+}
+function docDate(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return 'יום '+WEEKDAYS_FULL[d.getDay()]+' · <bdi>'+dd+'.'+mm+'.'+d.getFullYear()+'</bdi>'; }
+function dmy(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return dd+'.'+mm+'.'+d.getFullYear(); }
 function openHebCal(key){
   HEBCAL.key=key;
   const cur=current&&current.fields&&current.fields[key];
@@ -1594,6 +1610,7 @@ function fieldHTML(fld,val){
   }
   const al=fld.alert?' alert':'';
   const rq=fld.req?'<span class="reqm"> *</span>':'';
+  if(fld.type==='date' && fld.key==='eventDate'){ control += dateReadout(val); }
   if(SUPPLIER_KEYS.indexOf(fld.key)>=0){ control += `<div class="sup-phone" data-sup="${fld.key}">${supPhoneHTML(val)}</div>`; }
   return `<div class="field${full}${al}"${depA}><label>${esc(fld.label)}${rq}${hint}</label>${control}</div>`;
 }
@@ -1601,7 +1618,7 @@ function sendMenuToChef(key){
   const v=current.fields[key];
   if(!v||!v.menu||!CHEF_MENUS[v.menu]){ toast('בחר/י תפריט תחילה'); return; }
   const m=CHEF_MENUS[v.menu], f=current.fields;
-  const lines=['תפריט לשף — '+BRAND_NAME[current.brand],'אירוע: '+EVENT_TYPES[current.type].name+' · '+fmtDateLong(f.eventDate)+(f.celebrant?' · '+f.celebrant:''),'תפריט: '+m.name,''];
+  const lines=['תפריט לשף — '+BRAND_NAME[current.brand],'אירוע: '+EVENT_TYPES[current.type].name+' · '+dmy(f.eventDate)+(f.celebrant?' · '+f.celebrant:''),'תפריט: '+m.name,''];
   m.cats.forEach(cat=>{ const seld=(v.sel&&v.sel[cat.key])||[]; if(!seld.length) return; const list=seld.map(nm=>{const o=v.opt&&v.opt[cat.key+'::'+nm]; return nm+(o?(' ('+o+')'):'');}).join(', '); lines.push(cat.title+' (לבחירה '+cat.pick+'): '+list); });
   const text=lines.join('\n');
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
@@ -1728,7 +1745,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value); } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
+    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -1827,7 +1844,7 @@ async function saveReport(showToast){
   const n=$('#saveNote'); if(n) n.textContent='נשמר '+new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})+(CLOUD?' · בענן':'');
   if(typeof refreshBell==='function') refreshBell();
   if(showToast){
-    const folder=current.fields.eventDate?((new Date(current.fields.eventDate+'T00:00')).getFullYear()+' / '+MONTHS[(new Date(current.fields.eventDate+'T00:00')).getMonth()]):'ללא תאריך';
+    const folder=current.fields.eventDate?(MONTHS[(new Date(current.fields.eventDate+'T00:00')).getMonth()]+' '+(new Date(current.fields.eventDate+'T00:00')).getFullYear()):'ללא תאריך';
     const isEnd=(current.type==='endreport');
     toast((isEnd?'הדוח נשמר במערכת ✓ · תיקייה: ':'המסמך נשמר בהצלחה ✓ · תיקייה: ')+folder);
     const back=isEnd?'endreport':(['chef','archive','endreport'].includes(VIEW)?VIEW:'new');
@@ -1842,13 +1859,13 @@ function renderArchive(){
     <h1 class="page">ארכיון הדוחות — ${BRAND_NAME[BRAND]}</h1>
     <p class="sub">הדוחות מסודרים אוטומטית בתיקיות לפי שנה ← חודש ← תאריך האירוע. אירועים שכבר עברו מכווצים — גללו למעלה ולחצו על החודש כדי לפתוח.</p>
     <div class="arch-tools">
-      <div class="search"><span class="mag">⌕</span><input id="searchBox" dir="rtl" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="חיפוש לפי שם, תאריך (10/6), טלפון או סוג אירוע..."></div>
+      <div class="search"><span class="mag">⌕</span><input id="searchBox" dir="auto" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="חיפוש לפי שם, תאריך (10/6), טלפון או סוג אירוע..."></div>
       <button class="btn" id="newFromArch">+ דוח חדש</button>
       ${(CLOUD&&!HIST_LOADED)?'<button class="btn ghost" id="loadHistBtn">📂 טען היסטוריה (אירועים ישנים)</button>':''}
     </div>
     ${(!CLOUD&&usingMemoryOnly)?'<div class="note">⚠︎ מצב מקומי לבדיקה — הנתונים אינם משותפים בין מכשירים. לאחר חיבור ה-Firebase (ראה המדריך) כל הצוות יראה את אותם דוחות.</div>':''}
     <div id="tree"></div>`;
-  $('#searchBox').oninput=()=>buildTree($('#searchBox').value.trim());
+  { const sb=$('#searchBox'); let _st; sb.oninput=()=>{ clearTimeout(_st); _st=setTimeout(()=>buildTree(sb.value.trim()),180); }; }
   $('#newFromArch').onclick=()=>setView('new');
   { const lh=$('#loadHistBtn'); if(lh) lh.onclick=async()=>{ lh.disabled=true; lh.textContent='טוען…'; const ok=await loadHistory(); renderArchive(); if(ok) toast('כל ההיסטוריה נטענה ✓'); }; }
   buildTree('',true);
@@ -1891,8 +1908,8 @@ function buildTree(q,autoScroll){
         return `<div class="month ${mOpen?'':'collapsed'}" data-m="${mid}">
           <div class="month-head"><span class="folder">📁</span><span>${esc(m.name)} ${y!=='ללא תאריך'?y:''}</span><span class="mc">${m.items.length}</span><span class="arr">▾</span></div>
           <div class="rows">
-            ${items.map(r=>{ const sd=fmtDateShort(r.fields.eventDate); const nm=r.fields.celebrant||'ללא שם';
-              return `<div class="row" data-id="${r.id}" data-date="${esc(r.fields.eventDate||'')}">
+            ${items.map(r=>{ const sd=fmtDateShort(r.fields.eventDate); const nm=r.fields.celebrant||'ללא שם'; const isToday=(r.fields.eventDate===todayIsoStr());
+              return `<div class="row${isToday?' today':''}" data-id="${r.id}" data-date="${esc(r.fields.eventDate||'')}">
                 <div class="date">${sd.d}<small>${sd.m}</small></div>
                 <div class="who"><div class="nm">${r.type==='endreport'?'<span class="end-badge">📋 סוף אירוע</span> ':''}${esc(nm)}</div>
                   <div class="meta"><span>${esc(EVENT_TYPES[r.type]?.name||'')}</span>${r.fields.contact?'• '+esc(r.fields.contact):''}${r.fields.eventTime?'• '+esc(r.fields.eventTime):''}</div></div>
@@ -1973,7 +1990,7 @@ function buildDocHTML(r){
     </div>
     <div class="d-meta">
       <div class="m-cell"><span class="m-l">שם החוגג/ת</span><span class="m-v">${esc(f.celebrant||'—')}</span></div>
-      <div class="m-cell"><span class="m-l">תאריך האירוע</span><span class="m-v">${fmtDateLong(f.eventDate)}</span></div>
+      <div class="m-cell"><span class="m-l">תאריך האירוע</span><span class="m-v m-date">${docDate(f.eventDate)}</span></div>
       <div class="m-cell"><span class="m-l">שעת האירוע</span><span class="m-v">${esc(f.eventTime||'—')}</span></div>
       <div class="m-cell"><span class="m-l">איש קשר</span><span class="m-v">${esc(f.contact||'—')}${f.phone?' · '+esc(f.phone):''}</span></div>
       <div class="m-cell"><span class="m-l">סטטוס</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
