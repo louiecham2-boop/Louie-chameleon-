@@ -64,7 +64,7 @@
   .btn:hover{border-color:var(--brand);color:var(--brand-ink)}
   .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
   .btn.primary:hover{filter:brightness(1.06)}
-  .btn.pdf{background:#b3331f;border-color:#b3331f;color:#fff}
+  .btn.pdf{background:var(--brand);border-color:var(--brand);color:#fff}
   .btn.pdf:hover{filter:brightness(1.07)}
   .btn.sent{background:#1f8a4c;border-color:#1f8a4c;color:#fff}
   .btn.sent:hover{filter:brightness(1.07);border-color:#1f8a4c;color:#fff}
@@ -305,7 +305,8 @@
   .doc table{width:100%;border-collapse:collapse;margin-bottom:4px}
   .doc td{padding:6px 10px;border-bottom:1px solid #e7ebf0;vertical-align:top}
   .doc td.k{font-weight:700;color:#3a4654;width:46%;background:#fafbfc}
-  .doc td.v{color:#1a2330;white-space:pre-wrap}
+  .doc td.v{color:#1a2330;white-space:pre-wrap;direction:rtl;text-align:right}
+  .doc bdi,.doc .m-v bdi{unicode-bidi:isolate}
   .doc td.v.empty{color:#9aa6b3}
   .doc .d-foot{margin-top:22px;display:flex;gap:30px;border-top:2px solid #e7ebf0;padding-top:16px}
   .doc .sig{flex:1}
@@ -560,7 +561,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v153</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v156</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -713,7 +714,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v153';
+const APP_VERSION = 'v156';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1194,6 +1195,21 @@ const EVENT_TYPES={
 
 const $=(s,el=document)=>el.querySelector(s);
 const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* עוטף קטעי לטינית/מספרים ב-<bdi dir=ltr> כדי שלא יתערבבו/יתהפכו בייצוא PDF (html2canvas) */
+function bidi(s){
+  s=String(s==null?'':s);
+  let out='';
+  const re=/[\u0590-\u05FF]+|[^\u0590-\u05FF]+/g; let m;
+  while((m=re.exec(s))){
+    const run=m[0];
+    if(/[\u0590-\u05FF]/.test(run)){ out+=esc(run); }
+    else if(/[A-Za-z0-9]/.test(run)){ out+='<bdi dir="ltr">'+esc(run)+'</bdi>'; }
+    else { out+=esc(run); }
+  }
+  return out;
+}
+/* גרסת רב-שורות: כל שורה מטופלת בנפרד ומופרדת ב-<br> */
+function bidiLines(s){ return String(s==null?'':s).split('\n').map(bidi).join('<br>'); }
 function uid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200); }
 function askConfirm(msg){
@@ -1244,6 +1260,19 @@ function crewOptionsHTML(key,cur){
   return h;
 }
 function notify(msg){ const m=$('#notifyModal'); if(!m){ try{alert(msg);}catch(e){} return; } $('#notifyMsg').textContent=msg; m.style.display='flex'; }
+/* הצעות אוטומטיות לשדה צוות חופשי — שם כערך, סטטוס 101 כתווית */
+function crewDatalistHTML(key){
+  const ws=workersForCrew(key);
+  let h='<option value="לא צריך"></option>';
+  ws.forEach(w=>{ const nm=esc(w.name||''); if(!nm) return; const lbl=((w.role==='manager')?'(מנהל) ':'')+(hasForm101(w)?'':'חסר 101'); h+='<option value="'+nm+'"'+(lbl?' label="'+esc(lbl.trim())+'"':'')+'></option>'; });
+  return h;
+}
+/* תזכורת רכה (לא חוסמת) אם השם שהוקלד תואם עובד ללא טופס 101 */
+function crewWarn101(name){
+  const n=String(name||'').trim(); if(!n||n==='לא צריך') return;
+  const w=(MEM.workers||[]).find(x=>String(x.name||'').trim()===n);
+  if(w && !hasForm101(w)) toast('⚠ ל"'+n+'" אין טופס 101 מסומן בכרטיס העובד — מומלץ להשלים');
+}
 function guardCrewSelect(s){
   if(!s) return true;
   const opt=s.options[s.selectedIndex];
@@ -1584,7 +1613,10 @@ function fieldHTML(fld,val){
   }
   if(fld.type==='crew'){
     const rq=fld.req?'<span class="reqm"> *</span>':'';
-    return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hint}</label><select class="crew-sel" data-key="${fld.key}" dir="rtl">${crewOptionsHTML(fld.key,val)}</select></div>`;
+    const lid='dl_'+fld.key;
+    return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hint}</label>`
+      +`<input class="crew-input" data-key="${fld.key}" dir="rtl" list="${lid}" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="הקלד/י שם — או בחר/י מהרשימה" value="${esc(val)}">`
+      +`<datalist id="${lid}">${crewDatalistHTML(fld.key)}</datalist></div>`;
   }
   if(fld.type==='select'){
     const rq=fld.req?'<span class="reqm"> *</span>':'';
@@ -1766,8 +1798,9 @@ function bindInputs(app){
     other.oninput=()=>{ current.fields[key]=other.value; if(other.value) clr(); markDirty(); };
   });
   app.querySelectorAll('select.sel-one[data-key]').forEach(s=>{ s.onchange=()=>{ current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); applyFieldDeps(); markDirty(); }; });
-  app.querySelectorAll('select.crew-sel[data-key]').forEach(s=>{ s.dataset.prev=s.value;
-    s.onchange=()=>{ if(!guardCrewSelect(s)) return; current.fields[s.dataset.key]=s.value; const fc=s.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); };
+  app.querySelectorAll('input.crew-input[data-key]').forEach(inp=>{
+    inp.oninput=()=>{ current.fields[inp.dataset.key]=inp.value; const fc=inp.closest('.field'); if(fc) fc.classList.remove('missing'); markDirty(); };
+    inp.onchange=()=>{ current.fields[inp.dataset.key]=inp.value; crewWarn101(inp.value); };
   });
   app.querySelectorAll('.imgfield').forEach(g=>{
     const key=g.dataset.key, inp=g.querySelector('input[type=file]');
@@ -1971,8 +2004,8 @@ function buildDocHTML(r){
         const cv=f[fld.key]; let inner='—';
         if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){
           const m=CHEF_MENUS[cv.menu];
-          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return esc(nm)+(o?(' ('+esc(o)+')'):'');}).join(' · '); return '<div style="margin-top:4px"><b>'+esc(cat.title)+' (לבחירה '+cat.pick+'):</b> '+list+'</div>'; }).filter(Boolean).join('');
-          inner='<b>'+esc(m.name)+'</b>'+(parts||'<div style="color:#9aa6b3">לא סומנו מנות</div>');
+          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return bidi(nm)+(o?(' ('+bidi(o)+')'):'');}).join(' · '); return '<div style="margin-top:4px"><b>'+esc(cat.title)+' (לבחירה '+cat.pick+'):</b> '+list+'</div>'; }).filter(Boolean).join('');
+          inner='<b>'+bidi(m.name)+'</b>'+(parts||'<div style="color:#9aa6b3">לא סומנו מנות</div>');
         }
         return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
@@ -1980,17 +2013,17 @@ function buildDocHTML(r){
         const cv=calcVal(f[fld.key]); let inner='—';
         const txt=(cv.text||'').trim(), total=(cv.total||'').trim(), check=(cv.check||'').trim();
         if(txt||total){
-          let body=txt?esc(txt).replace(/\n/g,'<br>'):'';
-          if(total) body+=(body?'<div style="margin-top:5px;font-weight:800;border-top:1px solid #ccc;padding-top:5px">':'<div style="font-weight:800">')+'= סה״כ לתשלום: '+esc(total)+' ₪</div>';
-          if(r.type==='shulchan'&&check) body+='<div style="margin-top:3px;font-weight:700;color:#7a5a10">צ׳ק ביטחון: '+esc(check)+' ₪</div>';
+          let body=txt?('<div style="line-height:1.85">'+bidiLines(txt)+'</div>'):'';
+          if(total) body+='<div style="margin-top:7px;font-weight:900;font-size:15px;border-top:2px solid #1e5b9c;padding-top:6px;color:#16456f">סה״כ לתשלום: <bdi dir="ltr">'+esc(total)+' ₪</bdi></div>';
+          if(r.type==='shulchan'&&check) body+='<div style="margin-top:4px;font-weight:700;color:#7a5a10">צ׳ק ביטחון: <bdi dir="ltr">'+esc(check)+' ₪</bdi></div>';
           inner=body;
         }
         return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
-            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+esc(t)+'</td></tr>'; }
-      if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const t=sel.indexOf('__none__')>=0?'ללא': sel.join(' · '); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?esc(t):'—')+'</td></tr>'; }
-      if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?esc(t):'—')+'</td></tr>'; }
-      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':esc(v)}</td></tr>`;
+            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidi(t)+'</td></tr>'; }
+      if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const t=sel.indexOf('__none__')>=0?'ללא': sel.join(' · '); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
+      if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
+      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidi(v)}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${esc(sec.title)}</h2><table>${rows}</table>`;
   }).join('');
@@ -2000,13 +2033,13 @@ function buildDocHTML(r){
       <div class="d-sub">דוח טרום-אירוע · ${esc(def.name)}</div>
     </div>
     <div class="d-meta">
-      <div class="m-cell"><span class="m-l">שם החוגג/ת</span><span class="m-v">${esc(f.celebrant||'—')}</span></div>
+      <div class="m-cell"><span class="m-l">שם החוגג/ת</span><span class="m-v">${f.celebrant?bidi(f.celebrant):'—'}</span></div>
       <div class="m-cell"><span class="m-l">תאריך האירוע</span><span class="m-v m-date">${docDate(f.eventDate)}</span></div>
-      <div class="m-cell"><span class="m-l">שעת האירוע</span><span class="m-v">${esc(f.eventTime||'—')}</span></div>
-      <div class="m-cell"><span class="m-l">איש קשר</span><span class="m-v">${esc(f.contact||'—')}${f.phone?' · '+esc(f.phone):''}</span></div>
+      <div class="m-cell"><span class="m-l">שעת האירוע</span><span class="m-v">${f.eventTime?bidi(f.eventTime):'—'}</span></div>
+      <div class="m-cell"><span class="m-l">איש קשר</span><span class="m-v">${f.contact?bidi(f.contact):'—'}${f.phone?' · '+bidi(f.phone):''}</span></div>
       <div class="m-cell"><span class="m-l">סטטוס</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
-      <div class="m-cell"><span class="m-l">הופק בתאריך</span><span class="m-v">${today}</span></div>
-      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+esc(a.op)); if(a.dj)p.push('DJ: '+esc(a.dj)); if(a.photog)p.push('צלם: '+esc(a.photog)); if(a.other)p.push('אחר: '+esc(a.other)); return p.length?`<div class="m-cell m-wide"><span class="m-l">צוות משובץ</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
+      <div class="m-cell"><span class="m-l">הופק בתאריך</span><span class="m-v"><bdi dir="ltr">${esc(today)}</bdi></span></div>
+      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+bidi(a.op)); if(a.dj)p.push('DJ: '+bidi(a.dj)); if(a.photog)p.push('צלם: '+bidi(a.photog)); if(a.other)p.push('אחר: '+bidi(a.other)); return p.length?`<div class="m-cell m-wide"><span class="m-l">צוות משובץ</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
     </div>
     ${secs}
     <div class="d-foot"><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת המשרד</div></div><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת האירוע</div></div><div class="sig"><div class="line"></div><div class="lbl">אישור לקוח</div></div></div>
