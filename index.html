@@ -130,6 +130,11 @@
   .date-readout .dr-num{font-weight:900;letter-spacing:.3px}
   .date-readout.empty{background:#f3f5f8;border-color:var(--line2);color:var(--muted);font-weight:700}
   .date-readout .dr-ico{font-size:15px}
+  /* תאריך האירוע — מציגים רק את הקריאון היפה (יום + תאריך); תיבת התאריך המקורית מוסתרת כדי שלא יופיע תאריך כפול */
+  .field input.evdate{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
+  .field input.evdate + .date-readout{margin-top:0}
+  .date-readout{cursor:pointer}
+  .viewmode .date-readout{cursor:default}
   .doc .d-meta .m-date{color:var(--brand);font-weight:900}
   .field .hint{font-size:11.5px;color:var(--muted);font-weight:600}
   .field input,.field textarea,.field select{width:100%;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;font-size:16px;background:#fcfdfe;color:var(--ink);font-family:inherit}
@@ -555,7 +560,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v150</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v153</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -648,6 +653,7 @@
     <label>מפעיל / הגברה</label><select id="aOp" dir="rtl"></select>
     <label>די-ג׳יי</label><select id="aDj" dir="rtl"></select>
     <label>צלם / וידאו</label><select id="aPhotog" dir="rtl"></select>
+    <label>אחר (רישום ידני)</label><input id="aOther" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="תפקיד / שם נוסף — חופשי">
     <label>הערות (לא חובה)</label><textarea id="aNotes" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     <div class="modal-foot">
       <button id="aSave" class="btn primary">שמירה</button>
@@ -707,7 +713,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v150';
+const APP_VERSION = 'v153';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -992,7 +998,8 @@ const KIDS_FIELDS=[
   F('externalSupplier','ספק חיצוני (מעבר לחבילה)?','textarea',{full:true}),
 ];
 const SEC_LOGISTICS={title:'לוגיסטיקה ותשלומים',kind:'info',fields:[
-  F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום לפני'}),
+  F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום האירוע'}),
+      F('presentationNote','הערה לגבי המצגת (לא חובה)','text'),
   F('acum','שולם אקו״ם (רישיון מוזיקה)?','yesno',{hint:'לעדכן'}),
   F('securityCheck','הביאו צ׳ק ביטחון על סכום האירוע?','yesno',{hint:'עד שבוע לפני'}),
   F('accountClosing','חישוב סגירת חשבון','calc',{full:true}),
@@ -1092,7 +1099,8 @@ const EVENT_TYPES={
       F('acum','שולם אקו״ם (רישיון מוזיקה)?','yesno'),
       F('externalSupplier','האם יש ספק חיצוני?','textarea',{full:true}),
       F('presentation','מתכננים מצגת?','yesno'),
-      F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום לפני'}),
+      F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום האירוע'}),
+      F('presentationNote','הערה לגבי המצגת (לא חובה)','text'),
       F('securityCheck','הביאו צ׳ק ביטחון על סכום האירוע?','yesno'),
       F('accountClosing','חישוב סגירת חשבון','calc',{full:true}),
       F('notes','הערות ודגשים','textarea',{full:true}),
@@ -1123,7 +1131,8 @@ const EVENT_TYPES={
       F('acum','שולם אקו״ם (רישיון מוזיקה)?','yesno'),
       F('externalSupplier','האם יש ספק חיצוני?','textarea',{full:true}),
       F('presentation','מתכננים מצגת?','yesno'),
-      F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום לפני'}),
+      F('usbDate','דיסק און קי (MP4 — תמונות/מצגת) — מתי מביאים?','datewin',{hint:'בין שבוע לפני האירוע עד יום האירוע'}),
+      F('presentationNote','הערה לגבי המצגת (לא חובה)','text'),
       F('securityCheck','הביאו צ׳ק ביטחון על סכום האירוע?','yesno'),
       F('accountClosing','חישוב סגירת חשבון','calc',{full:true}),
       F('notes','הערות ודגשים','textarea',{full:true}),
@@ -1155,6 +1164,7 @@ const EVENT_TYPES={
       F('ee_operator','מפעיל','text'),
       F('ee_photographer','צלם','text'),
       F('ee_digi','דיגי / DJ','text'),
+      F('ee_other','אחר','text',{hint:'רישום ידני — תפקיד / ספק נוסף'}),
       F('ee_staffConfirm','האם אלו העובדים/הספקים שעבדו באירוע?','yesno',{hint:'מועתק אוטומטית מהשיבוצים — אפשר לשנות או להוסיף'}),
       F('ee_staff','עובדים נוספים — שם, תפקיד ושעות','textarea',{full:true,big:true,hint:'שורה לכל עובד'}),
       F('ee_washers','שם שוטף/ים','text',{req:true,hint:'0 אם אין'}),
@@ -1327,7 +1337,7 @@ function autofillEndStaff(){
   const a=(MEM.assignments||[]).find(x=>x.date===date && x.brand===current.brand);
   if(!a) return;
   let filled=0;
-  [['op','ee_operator'],['photog','ee_photographer'],['dj','ee_digi']].forEach(([rk,fk])=>{
+  [['op','ee_operator'],['photog','ee_photographer'],['dj','ee_digi'],['other','ee_other']].forEach(([rk,fk])=>{
     const val=a[rk];
     if(val && roleState(val)==='set'){
       const cur=String(current.fields[fk]||'').trim();
@@ -1406,7 +1416,7 @@ function renderForm(){
       ${def.endReport?'':`<button class="btn pdf" id="pdfBtnTop">📲 שלח בוואטסאפ / שמור PDF</button>`}
     </div>
     ${!EDITING?`<div class="view-banner">👁 מצב צפייה — השדות נעולים מפני שינוי בטעות.<button class="btn mini-edit" id="editTop">✏️ ערוך / עדכן</button></div>`:''}
-    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
+    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); if(a.other)p.push('➕ אחר: '+esc(a.other)); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
     ${current.type==='bat'?`<div class="convert-bar"><button class="btn convert" id="toMeshulav">➕ להוסיף אירוע מבוגרים — להפוך למשולב</button></div>`:''}
     <div id="sections">
       ${def.sections.map((sec,si)=>`
@@ -1554,7 +1564,7 @@ function fieldHTML(fld,val){
   if(fld.type==='datewin'){
     const ed=current&&current.fields&&current.fields.eventDate;
     let mn='',mx='';
-    if(ed){ const d=new Date(ed+'T00:00'); const a=new Date(d); a.setDate(a.getDate()-7); const b=new Date(d); b.setDate(b.getDate()-1); mn=a.toISOString().slice(0,10); mx=b.toISOString().slice(0,10); }
+    if(ed){ const d=new Date(ed+'T00:00'); const a=new Date(d); a.setDate(a.getDate()-7); mn=a.toISOString().slice(0,10); mx=d.toISOString().slice(0,10); }
     const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:''; const rq=fld.req?'<span class="reqm"> *</span>':'';
     const note=ed?'':'<span class="hint" style="color:#b3331f">יש לבחור קודם תאריך אירוע</span>';
     return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq} ${ed?hh:note}</label><input type="date" data-key="${fld.key}" dir="ltr" value="${esc(val)}"${mn?` min="${mn}"`:''}${mx?` max="${mx}"`:''}${ed?'':' disabled'}></div>`;
@@ -1606,7 +1616,8 @@ function fieldHTML(fld,val){
     let extra='';
     if(t==='date'&&fld.key==='eventDate'&&!(current&&current.type==='endreport')){ extra+=` min="${new Date().toISOString().slice(0,10)}"`; }
     if(fld.lock) extra+=' readonly';
-    control=`<input type="${t}" data-key="${fld.key}" dir="${dirA}"${fld.lock?' class="locked"':''} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="${esc(val)}"${extra}>`;
+    const xcls=[fld.lock?'locked':'',fld.key==='eventDate'?'evdate':''].filter(Boolean).join(' ');
+    control=`<input type="${t}" data-key="${fld.key}" dir="${dirA}"${xcls?` class="${xcls}"`:''} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="${esc(val)}"${extra}>`;
   }
   const al=fld.alert?' alert':'';
   const rq=fld.req?'<span class="reqm"> *</span>':'';
@@ -1995,7 +2006,7 @@ function buildDocHTML(r){
       <div class="m-cell"><span class="m-l">איש קשר</span><span class="m-v">${esc(f.contact||'—')}${f.phone?' · '+esc(f.phone):''}</span></div>
       <div class="m-cell"><span class="m-l">סטטוס</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
       <div class="m-cell"><span class="m-l">הופק בתאריך</span><span class="m-v">${today}</span></div>
-      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+esc(a.op)); if(a.dj)p.push('DJ: '+esc(a.dj)); if(a.photog)p.push('צלם: '+esc(a.photog)); return p.length?`<div class="m-cell m-wide"><span class="m-l">צוות משובץ</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
+      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+esc(a.op)); if(a.dj)p.push('DJ: '+esc(a.dj)); if(a.photog)p.push('צלם: '+esc(a.photog)); if(a.other)p.push('אחר: '+esc(a.other)); return p.length?`<div class="m-cell m-wide"><span class="m-l">צוות משובץ</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
     </div>
     ${secs}
     <div class="d-foot"><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת המשרד</div></div><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת האירוע</div></div><div class="sig"><div class="line"></div><div class="lbl">אישור לקוח</div></div></div>
@@ -2336,8 +2347,8 @@ function renderAssign(){
 }
 function eventRows(){
   const reps=MEM.reports.filter(r=>r.brand===BRAND&&r.fields&&r.fields.eventDate);
-  const rows=reps.map(r=>{ const a=MEM.assignments.find(x=>x.reportId===r.id)||null; return {date:r.fields.eventDate,reportId:r.id,type:(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'',name:r.fields.celebrant||'',a:a, op:(a&&a.op)||r.fields.operator||'', dj:(a&&a.dj)||r.fields.dj||'', photog:(a&&a.photog)||r.fields.photographer||''}; });
-  MEM.assignments.filter(a=>a.brand===BRAND&&(!a.reportId||!reps.some(r=>r.id===a.reportId))).forEach(a=>{ rows.push({date:a.date||'',reportId:null,type:a.label||'שיבוץ ידני',name:'',a:a, op:a.op||'',dj:a.dj||'',photog:a.photog||''}); });
+  const rows=reps.map(r=>{ const a=MEM.assignments.find(x=>x.reportId===r.id)||null; return {date:r.fields.eventDate,reportId:r.id,type:(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'',name:r.fields.celebrant||'',a:a, op:(a&&a.op)||r.fields.operator||'', dj:(a&&a.dj)||r.fields.dj||'', photog:(a&&a.photog)||r.fields.photographer||'', other:(a&&a.other)||r.fields.ee_other||''}; });
+  MEM.assignments.filter(a=>a.brand===BRAND&&(!a.reportId||!reps.some(r=>r.id===a.reportId))).forEach(a=>{ rows.push({date:a.date||'',reportId:null,type:a.label||'שיבוץ ידני',name:'',a:a, op:a.op||'',dj:a.dj||'',photog:a.photog||'',other:a.other||''}); });
   rows.sort((x,y)=>(x.date||'').localeCompare(y.date||''));
   return rows;
 }
@@ -2361,7 +2372,7 @@ function renderSchedList(){
       <div class="sc-date"><span class="scd-dow">${sd.w}</span><span class="scd-day">${sd.d}</span><span class="scd-mon">${sd.m}</span></div>
       <div class="sc-body">
         <div class="sc-title">${esc(row.type||'אירוע')}${manual?'<span class="sc-manual">ידני</span>':''}${row.name?' · '+esc(row.name):''}</div>
-        <div class="sc-roles">${role('🎛️ מפעיל:','op',row.op)}${role('🎧 DJ:','dj',row.dj)}${role('📷 צלם:','photog',row.photog)}</div>
+        <div class="sc-roles">${role('🎛️ מפעיל:','op',row.op)}${role('🎧 DJ:','dj',row.dj)}${role('📷 צלם:','photog',row.photog)}${roleState(row.other)==='set'?`<div class="sc-role"><b>➕ אחר:</b> <span class="val">${esc(row.other)}</span></div>`:''}</div>
       </div>
       <div class="sc-go">‹</div>
     </div>`; };
@@ -2390,7 +2401,7 @@ function openAssignForRow(rid,aid){
   $('#aTime').value=(r&&r.fields.eventTime&&/^[0-9]/.test(r.fields.eventTime))?r.fields.eventTime:'';
   $('#aBrand').value=r?r.brand:BRAND;
   $('#aLabel').value=r?(((EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'')+(r.fields.celebrant?' · '+r.fields.celebrant:'')):'';
-  setCrewSel($('#aOp'),'operator', r?r.fields.operator:''); setCrewSel($('#aDj'),'dj', r?r.fields.dj:''); setCrewSel($('#aPhotog'),'photographer', r?r.fields.photographer:''); $('#aNotes').value='';
+  setCrewSel($('#aOp'),'operator', r?r.fields.operator:''); setCrewSel($('#aDj'),'dj', r?r.fields.dj:''); setCrewSel($('#aPhotog'),'photographer', r?r.fields.photographer:''); $('#aOther').value=(r&&r.fields&&r.fields.ee_other)||''; $('#aNotes').value='';
   $('#aDel').style.display='none';
   $('#aModalTitle').textContent='שיבוץ צוות לאירוע';
   const sm=$('#schedModal'); sm.dataset.reportId=rid||''; sm.style.display='flex';
@@ -2434,6 +2445,7 @@ function openAssign(id,presetDate){
   setCrewSel($('#aOp'),'operator', a?a.op:'');
   setCrewSel($('#aDj'),'dj', a?a.dj:'');
   setCrewSel($('#aPhotog'),'photographer', a?a.photog:'');
+  $('#aOther').value=a?(a.other||''):'';
   $('#aNotes').value=a?(a.notes||''):'';
   $('#aDel').style.display=id?'':'none';
   $('#aModalTitle').textContent=id?'עריכת שיבוץ':'שיבוץ חדש';
@@ -2445,7 +2457,7 @@ async function saveAssign(){
   if(!date){ toast('יש לבחור תאריך'); return; }
   let a=editingAssign?MEM.assignments.find(x=>x.id===editingAssign):null;
   if(!a){ a={id:uid(),createdAt:Date.now(),reportId:(($('#schedModal').dataset.reportId)||'')}; MEM.assignments.push(a); }
-  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
+  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.other=$('#aOther').value.trim(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
   closeAssign(); renderSched(); toast('השיבוץ נשמר ✓');
   await persistAssignment(a);
 }
@@ -3001,6 +3013,16 @@ function renderGate(){
     else $('#gErr').textContent='קוד שגוי'; };
   $('#pcBtn').onclick=go; $('#pcode').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }); $('#pcode').focus();
 }
+/* לחיצה על קריאון התאריך פותחת את בורר התאריך (במצב עריכה בלבד) — התיבה המקורית מוסתרת */
+document.addEventListener('click', function(e){
+  const dr = e.target && e.target.closest && e.target.closest('.date-readout');
+  if(!dr) return;
+  if(typeof EDITING!=='undefined' && !EDITING) return;
+  const fc = dr.closest('.field'); if(!fc) return;
+  const inp = fc.querySelector('input[data-key="eventDate"]'); if(!inp || inp.readOnly) return;
+  try{ if(typeof inp.showPicker==='function'){ inp.showPicker(); } else { inp.focus(); inp.click(); } }
+  catch(_){ try{ inp.focus(); }catch(__){} }
+});
 if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
 </script>
 </body>
