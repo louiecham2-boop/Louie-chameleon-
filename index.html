@@ -130,9 +130,10 @@
   .date-readout .dr-num{font-weight:900;letter-spacing:.3px}
   .date-readout.empty{background:#f3f5f8;border-color:var(--line2);color:var(--muted);font-weight:700}
   .date-readout .dr-ico{font-size:15px}
-  /* תאריך האירוע — מציגים רק את הקריאון היפה (יום + תאריך); תיבת התאריך המקורית מוסתרת כדי שלא יופיע תאריך כפול */
-  .field input.evdate{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);border:0;white-space:nowrap}
-  .field input.evdate + .date-readout{margin-top:0}
+  /* תאריך האירוע — מציגים את הקריאון היפה (יום + תאריך), ומעליו שדה תאריך אמיתי שקוף שלוכד את הלחיצה ופותח את בורר התאריך הטבעי (אמין ב-iOS) */
+  .evdate-wrap{position:relative}
+  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+  .viewmode .evdate-wrap input.evdate{display:none}
   .date-readout{cursor:pointer}
   .viewmode .date-readout{cursor:default}
   .doc .d-meta .m-date{color:var(--brand);font-weight:900}
@@ -561,7 +562,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v156</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v159</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -714,7 +715,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v156';
+const APP_VERSION = 'v159';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1035,11 +1036,13 @@ const CHEF_MENUS={
   shef:{name:'תפריט מסעדה',cats:[
     {key:'rotating',title:'מסתובבים',pick:2,items:['שיפודי עוף בטמפורה','ברוסקטה בממרח פטה כבד','ירקות בטמפורה','עלי גפן ממולאים','עראיס פיתה תלויה','מיני בריוש במילוי אסאדו','צ׳וריסוס דרום אמריקאי','רול סביח עם טוויסט בטטה','כוסיות מרקי חורף']},
     {key:'salads',title:'סלטים / ראשונות',pick:7,items:['קרפצ׳יו חציל שרוף','סלט עלים עשיר','קרפצ׳ו בקר','סלט פנצ׳נלה ים-תיכוני','אנטיפסטי ירקות קלויים','חומוס אבו פיראס','טאבולה מסורתית','בטטה מדורה מקורמלת','קרפצ׳ו סלק מרענן','פטה כבד קלאסי','ירקות שורש ונבטים']},
+    {key:'sides',title:'תוספות',pick:2,items:['אורז לבן עם פירות יבשים ושקדים קלויים','אורז אושפלו, גרגרי חומוס וירקות שורש','תפוח אדמה זעיר בשמן זית ותימין','תפוח אדמה בדואט של בטטה','שעועית ירוקה','קרם תפוחי אדמה ובצל מטוגן קריספי','כוסמת, עדשים, בורגול ועשבי תיבול','סירות בטטה אפויות']},
     {key:'mains',title:'עיקריות',pick:3,items:[{n:'אסאדו דרום אמריקאי',opts:['על פולנטת תירס','על פירה כמהין']},{n:'נתחי פרגית בגריל',opts:['מצע אורז ופירות יבשים','אושפלו מתובל','ג׳אלה ועשבי תיבול']},'ביף בורגיניון קלאסי','נתח סלמון בגריל','חריימה של סבתא מרים','רביולי עגבניות','שווארמה טבעונית']},
   ]},
   ashir:{name:'תפריט שף',cats:[
     {key:'rotating',title:'מסתובבים',pick:2,items:['קרוסטון פטה כבד וריבת בצל','פטריות בטמפורה חריפה','קבב על מקל קינמון וטחינה','אגרול סיני ברוטב חמוץ-מתוק','עראיס לצד סלסת עגבניות','צ׳וריסוס דרום אמריקאי','רול סביח עם טוויסט בטטה','ברוסקטה עם חציל מקורמל']},
     {key:'salads',title:'סלטים',pick:7,items:['קרפצ׳יו חציל ים-תיכוני','חומוס ביתי עם מסבחה','טריו שרי עם פסטו ושקדים','אנטיפסטי ירקות קלויים','סלט עלים עשיר ואנדיב','סלט נבטים, קולורבי וצנון','בטטה מדורה מקורמלת','עדשים ירוקות ובטטה קריספית','מטבוחה חריפה','פלפל חריף מטוגן בלימון','סלט טאבולה ים-תיכוני','כרוב אסייתי','קרפציו סלק ופיצוחים','קינואה ועשבי תיבול']},
+    {key:'sides',title:'תוספות',pick:2,items:['אורז לבן עם פירות יבשים ושקדים קלויים','אורז אושפלו, גרגרי חומוס וירקות שורש','תפוח אדמה זעיר בשמן זית ותימין','תפוח אדמה בדואט של בטטה','שעועית ירוקה','קרם תפוחי אדמה ובצל מטוגן קריספי','כוסמת, עדשים, בורגול ועשבי תיבול','סירות בטטה אפויות']},
     {key:'mains',title:'עיקריות',pick:3,items:[{n:'פרגית במגוון טעמים',opts:['מזרחי','אסייאתי','מלח פלפל']},{n:'קבב',opts:['טלה','עגל']},'עופות שלמים בצלייה ארוכה','קוביות פרגית ברוטב קארי וקוקוס',{n:'פילה מושט במגוון טעמים',opts:['עשבי תיבול','מרוקאי אותנטי','שום ולימון']},'אסאדו עגל בצלייה מעושנת','אסאדו עגל ברוטב טקסס','דונר טורקי (עגל וטלה)','שווארמה הודו על טחינה','קדירת בקר ביין ושזיפים','קדירת בקר בירקות שורש ופטריות']},
   ]},
 };
@@ -1653,7 +1656,7 @@ function fieldHTML(fld,val){
   }
   const al=fld.alert?' alert':'';
   const rq=fld.req?'<span class="reqm"> *</span>':'';
-  if(fld.type==='date' && fld.key==='eventDate'){ control += dateReadout(val); }
+  if(fld.type==='date' && fld.key==='eventDate'){ control = `<div class="evdate-wrap">${control}${dateReadout(val)}</div>`; }
   if(SUPPLIER_KEYS.indexOf(fld.key)>=0){ control += `<div class="sup-phone" data-sup="${fld.key}">${supPhoneHTML(val)}</div>`; }
   return `<div class="field${full}${al}"${depA}><label>${esc(fld.label)}${rq}${hint}</label>${control}</div>`;
 }
