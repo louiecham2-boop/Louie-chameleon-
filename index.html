@@ -304,7 +304,7 @@
   .doc h2.ops{background:var(--ops);color:var(--ops-tx)}
   .doc h2.ok{background:var(--ok);color:var(--ok-tx)}
   .doc table{width:100%;border-collapse:collapse;margin-bottom:4px}
-  .doc td{padding:6px 10px;border-bottom:1px solid #e7ebf0;vertical-align:top}
+  .doc td{padding:6px 10px;border-bottom:1px solid #e7ebf0;vertical-align:top;overflow-wrap:anywhere;word-break:break-word}
   .doc td.k{font-weight:700;color:#3a4654;width:46%;background:#fafbfc}
   .doc td.v{color:#1a2330;white-space:pre-wrap;direction:rtl;text-align:right;line-height:1.55}
   .doc bdi,.doc .m-v bdi{unicode-bidi:isolate}
@@ -562,7 +562,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v160</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v165</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -656,6 +656,9 @@
     <label>די-ג׳יי</label><select id="aDj" dir="rtl"></select>
     <label>צלם / וידאו</label><select id="aPhotog" dir="rtl"></select>
     <label>אחר (רישום ידני)</label><input id="aOther" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="תפקיד / שם נוסף — חופשי">
+    <label>מלצרים</label>
+    <div id="aWaiters"></div>
+    <button type="button" id="aAddWaiter" class="btn ghost sm" style="align-self:flex-start;margin-top:4px">➕ עוד מלצר</button>
     <label>הערות (לא חובה)</label><textarea id="aNotes" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
     <div class="modal-foot">
       <button id="aSave" class="btn primary">שמירה</button>
@@ -715,7 +718,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v160';
+const APP_VERSION = 'v165';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -784,7 +787,16 @@ function loadOlderBarHTML(area,olderCount){
 function repInWin(r){ const c=histCutoff(); const d=r&&r.fields&&r.fields.eventDate; return !!(d&&d>=c); }
 function rowInWin(r){ const c=histCutoff(); const d=r&&r.date; return !!(d&&d>=c); }
 function mergeWin(key,recent,inWin){ const older=MEM[key].filter(x=>!inWin(x)); MEM[key]=older.concat(recent); }
-function afterCloudSync(){ if(typeof refreshBell==='function') refreshBell(); if(typeof maybeAutoPopReminders==='function') setTimeout(maybeAutoPopReminders,200); if(CHEF_MODE||VIEW==='chef'){ renderChef(); return; } if(VIEW==='archive'){ const q=$('#searchBox'); buildTree(q?q.value.trim():''); } else if(VIEW==='endreport' && document.querySelector('.end-wrap')) renderEndHome(); else if(VIEW==='sched' && modalsClosed()) renderSched(); }
+function syncCurrentFromCloud(){
+  if(!current || dirty) return;
+  const fresh=MEM.reports.find(r=>r.id===current.id);
+  if(!fresh || fresh===current) return;
+  if((fresh.updatedAt||0) > (current._syncAt||0)){
+    current=fresh; current._syncAt=fresh.updatedAt||0;
+    if(document.querySelector('#app [data-key]')){ const y=window.scrollY; renderForm(); window.scrollTo(0,y); }
+  } else { current._syncAt=Math.max(current._syncAt||0, fresh.updatedAt||0); }
+}
+function afterCloudSync(){ syncCurrentFromCloud(); if(typeof refreshBell==='function') refreshBell(); if(typeof maybeAutoPopReminders==='function') setTimeout(maybeAutoPopReminders,200); if(CHEF_MODE||VIEW==='chef'){ renderChef(); return; } if(VIEW==='archive'){ const q=$('#searchBox'); buildTree(q?q.value.trim():''); } else if(VIEW==='endreport' && document.querySelector('.end-wrap')) renderEndHome(); else if(VIEW==='sched' && modalsClosed()) renderSched(); }
 async function loadHistory(){
   if(HIST_LOADED) return true;
   if(CLOUD && fb.db){
@@ -823,13 +835,32 @@ async function dbLoad(){
   if(!MEM.tastings) MEM.tastings=[];
   return MEM;
 }
-async function persist(report){
+async function persist(report, force){
   if(CLOUD && fb.db){
-    try{ await fb.db.collection('reports').doc(report.id).set(JSON.parse(JSON.stringify(report))); }
-    catch(e){ console.warn(e); toast('שמירה לענן נכשלה ('+((e&&(e.code||e.message))||'?')+') — נשמר מקומית'); usingMemoryOnly=true; }
+    const ref=fb.db.collection('reports').doc(report.id);
+    const base=report._syncAt||0;
+    const clean=JSON.parse(JSON.stringify(report)); delete clean._syncAt;
+    try{
+      await fb.db.runTransaction(async tx=>{
+        const snap=await tx.get(ref);
+        if(!force && snap.exists){
+          const cloud=snap.data();
+          // someone saved a newer version after we loaded → don't clobber it
+          if(cloud && cloud.updatedAt && cloud.updatedAt>base){ const err=new Error('conflict'); err.__conflict=true; err.__cloud=cloud; throw err; }
+        }
+        tx.set(ref, clean);
+      });
+      report._syncAt=report.updatedAt;
+      usingMemoryOnly=false;
+      return {ok:true};
+    }
+    catch(e){
+      if(e && e.__conflict){ console.warn('persist conflict', report.id); return {ok:false, conflict:true, cloud:e.__cloud}; }
+      console.warn(e); usingMemoryOnly=true; return {ok:false, error:((e&&(e.code||e.message))||'?')};
+    }
   } else {
-    try{ if(window.storage) await window.storage.set(KEY, JSON.stringify(MEM)); else usingMemoryOnly=true; }
-    catch(e){ usingMemoryOnly=true; }
+    try{ if(window.storage){ await window.storage.set(KEY, JSON.stringify(MEM)); report._syncAt=report.updatedAt; return {ok:true}; } else { usingMemoryOnly=true; return {ok:false, error:'no-storage'}; } }
+    catch(e){ usingMemoryOnly=true; return {ok:false, error:'storage'}; }
   }
 }
 async function persistDoc(coll,a){
@@ -1198,19 +1229,38 @@ const EVENT_TYPES={
 
 const $=(s,el=document)=>el.querySelector(s);
 const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-/* עוטף קטעי לטינית/מספרים ב-<bdi dir=ltr> כדי שלא יתערבבו/יתהפכו בייצוא PDF (html2canvas) */
+/* עוטף קטעי לטינית/מספרים ב-<bdi dir=ltr>. עברית+רווחים+פיסוק נשארים כ-run אחד כדי ש-html2canvas
+   לא יפצל אותם לקטעים נפרדים (מה שבולע רווחים ומהפך סוגריים). */
 function bidi(s){
   s=String(s==null?'':s);
   let out='';
-  const re=/[\u0590-\u05FF]+|[^\u0590-\u05FF]+/g; let m;
-  while((m=re.exec(s))){
-    const run=m[0];
-    if(/[\u0590-\u05FF]/.test(run)){ out+=esc(run); }
-    else if(/[A-Za-z0-9]/.test(run)){ out+='<bdi dir="ltr">'+esc(run)+'</bdi>'; }
-    else { out+=esc(run); }
-  }
+  const parts=s.split(/([A-Za-z0-9][A-Za-z0-9@._+%\/-]*(?:[ \t]+[A-Za-z0-9][A-Za-z0-9@._+%\/-]*)*)/);
+  for(const p of parts){ if(!p) continue; if(/^[A-Za-z0-9]/.test(p)){ out+='<bdi dir="ltr">'+esc(p)+'</bdi>'; } else { out+=esc(p); } }
   return out;
 }
+/* גרסה ללא-שבירה: הטקסט הקצר הופך ל"מילה אחת" (רווחים = NBSP) כדי שהמנוע ירנדר אותו בקריאה אחת
+   ואז הסוגריים/סימני השאלה והרווחים מסתדרים נכון. מתאים לתוויות/כותרות/פריטים קצרים. */
+function nbidi(s){
+  s=String(s==null?'':s);
+  let out='';
+  const parts=s.split(/([A-Za-z0-9][A-Za-z0-9@._+%\/-]*(?:[ \t]+[A-Za-z0-9][A-Za-z0-9@._+%\/-]*)*)/);
+  for(const p of parts){ if(!p) continue; if(/^[A-Za-z0-9]/.test(p)){ out+='<bdi dir="ltr">'+esc(p)+'</bdi>'; } else { out+=esc(p).replace(/ /g,'\u00A0'); } }
+  return '<span style="white-space:nowrap;unicode-bidi:isolate">'+out+'</span>';
+}
+/* תווית/כותרת: קצר → NBSP (מסתדר מושלם); ארוך → רגיל כדי שתישבר לשורות. */
+function lbl(s){ s=String(s==null?'':s); return (s.length<=30)?nbidi(s):bidi(s); }
+/* האם בדוח בת/בר מצווה מולאו שדות מבוגרים (כדי לסמן "+ מבוגרים" בכותרת) */
+function hasBatAdults(r){
+  if(!r||(r.type!=='bat'&&r.type!=='bar')) return false;
+  const f=r.fields||{};
+  const filled=v=>{ const s=String(v==null?'':v).trim(); if(!s) return false; return !['0','לא','אין','אין מבוגרים','-','—'].includes(s); };
+  if(filled(f.batAdultsCount)) return true;
+  if(filled(f.batAdultsChefQty)) return true;
+  if(f.adultsMenuPick&&typeof f.adultsMenuPick==='object'&&f.adultsMenuPick.menu) return true;
+  return false;
+}
+/* שם סוג האירוע לתצוגה, עם תוספת "+ מבוגרים" כשרלוונטי */
+function typeLabel(r){ const nm=(EVENT_TYPES[r&&r.type]&&EVENT_TYPES[r.type].name)||'אירוע'; return nm+(hasBatAdults(r)?' + מבוגרים':''); }
 /* גרסת רב-שורות: כל שורה מטופלת בנפרד ומופרדת ב-<br> */
 function bidiLines(s){ return String(s==null?'':s).split('\n').map(bidi).join('<br>'); }
 function uid(){ return 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
@@ -1432,7 +1482,7 @@ function renderForm(){
   const app=$('#app'); const def=EVENT_TYPES[current.type]; const f=current.fields;
   app.innerHTML=`
     <div class="form-head">
-      <span class="title">${def.icon} ${esc(def.name)}</span>
+      <span class="title">${def.icon} ${esc(typeLabel(current))}</span>
       <span class="badge brand"><span class="chip"></span>${BRAND_NAME[current.brand]}</span>
       <span class="badge type">${current.fields.celebrant?esc(current.fields.celebrant):'דוח חדש'}</span>
     </div>
@@ -1448,7 +1498,7 @@ function renderForm(){
       ${def.endReport?'':`<button class="btn pdf" id="pdfBtnTop">📲 שלח בוואטסאפ / שמור PDF</button>`}
     </div>
     ${!EDITING?`<div class="view-banner">👁 מצב צפייה — השדות נעולים מפני שינוי בטעות.<button class="btn mini-edit" id="editTop">✏️ ערוך / עדכן</button></div>`:''}
-    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); if(a.other)p.push('➕ אחר: '+esc(a.other)); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
+    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); if(a.other)p.push('➕ אחר: '+esc(a.other)); if(a.waiters&&a.waiters.length)p.push('🍽️ מלצרים: '+esc(a.waiters.join(', '))); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
     ${current.type==='bat'?`<div class="convert-bar"><button class="btn convert" id="toMeshulav">➕ להוסיף אירוע מבוגרים — להפוך למשולב</button></div>`:''}
     <div id="sections">
       ${def.sections.map((sec,si)=>`
@@ -1861,7 +1911,13 @@ function updateStatus(){
   const el=$('#statusBadge'); if(el){ el.textContent=STATUS_NAME[current.status]; el.className='status-auto '+current.status; }
   const h=document.querySelector('#statusPills .hint'); if(h) h.textContent=(current.status==='draft')?'התחילו למלא · טרם הושלם':'מתעדכן אוטומטית';
 }
-function markDirty(){ dirty=true; updateStatus(); const n=$('#saveNote'); if(n) n.textContent='יש שינויים שלא נשמרו'; }
+let _autosaveTimer=null;
+function scheduleAutosave(){
+  if(!current) return;
+  clearTimeout(_autosaveTimer);
+  _autosaveTimer=setTimeout(()=>{ if(dirty && current) saveReport(false); }, 1500);
+}
+function markDirty(){ dirty=true; updateStatus(); const n=$('#saveNote'); if(n) n.textContent='יש שינויים שלא נשמרו…'; scheduleAutosave(); }
 
 function validateRequired(){
   const def=EVENT_TYPES[current.type]; const missing=[];
@@ -1881,12 +1937,67 @@ function validateRequired(){
   }));
   return missing;
 }
+/* בדיקת שלמות "רכה" — מחזירה רשימת מה שחסר/לא תקין, להצגה כתזכורת לפני שמירה/שליחה. טהורה (לא נוגעת ב-DOM). */
+function collectIssues(r){
+  const out=[]; if(!r) return out;
+  const f=r.fields||{}; const def=EVENT_TYPES[r.type];
+  const blank=v=>String(v==null?'':v).trim()==='';
+  const depOK=fld=>{ if(!fld.dep) return true; const cur=String(f[fld.dep.key]==null?'':f[fld.dep.key]); const vals=Array.isArray(fld.dep.val)?fld.dep.val:[fld.dep.val]; return vals.indexOf(cur)>=0; };
+  if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{
+    if(!depOK(fld)) return;
+    if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; if(sel.indexOf('__none__')<0 && sel.length<(fld.min||3)) out.push(fld.label+': נבחרו '+sel.length+' (לפחות '+(fld.min||3)+')'); return; }
+    if(fld.req && blank(f[fld.key])) out.push('חסר: '+fld.label);
+    if(fld.type==='chefmenu'){ const cv=f[fld.key]; if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){ CHEF_MENUS[cv.menu].cats.forEach(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; const diff=cat.pick-seld.length; if(diff>0) out.push(menuMissMsg(cat.key,cat.title,diff)); else if(diff<0) out.push('נבחרו יותר מדי ב'+cat.title+' ('+seld.length+' מתוך '+cat.pick+')'); }); } }
+  }));
+  // עקביות מבוגרים
+  if(r.type==='meshulav'){
+    if(blank(f.adultsCount)) out.push('כמות מבוגרים לא מולאה');
+    const am=f.adultsMenuPick; if(!am||typeof am!=='object'||!am.menu) out.push('תפריט מבוגרים (שף) לא נבחר');
+  }
+  if(r.type==='bat'||r.type==='bar'){
+    const cnt=!blank(f.batAdultsCount), qty=!blank(f.batAdultsChefQty), menu=!!(f.adultsMenuPick&&f.adultsMenuPick.menu);
+    if(cnt&&!qty) out.push('מולאה כמות מבוגרים — חסרה "כמות מנות לשף"');
+    if((cnt||qty)&&!menu) out.push('יש מבוגרים — לא נבחר תפריט שף למבוגרים');
+  }
+  // לוגיסטיקה חשובה
+  if('acum' in f && blank(f.acum)) out.push('לא עודכן: שולם אקו״ם');
+  if('securityCheck' in f && blank(f.securityCheck)) out.push('לא עודכן: צ׳ק ביטחון');
+  return [...new Set(out)];
+}
+function menuMissMsg(key,title,n){
+  const M={rotating:{one:'מסתובב',many:'מסתובבים',g:'m'},salads:{one:'סלט',many:'סלטים',g:'m'},sides:{one:'תוספת',many:'תוספות',g:'f'},mains:{one:'מנה עיקרית',many:'מנות עיקריות',g:'f'}};
+  const c=M[key];
+  if(!c) return 'חסרות עוד '+n+' בחירות ב'+title;
+  if(n===1) return c.g==='m' ? ('חסר עוד '+c.one+' אחד') : ('חסרה עוד '+c.one+' אחת');
+  return (c.g==='m'?'חסרים':'חסרות')+' עוד '+n+' '+c.many;
+}
+function issuesMsg(issues, action){
+  const top=issues.slice(0,12).map(s=>'• '+s).join('\n');
+  const more=issues.length>12?('\n…ועוד '+(issues.length-12)+' פריטים'):'';
+  return '⚠ לפני '+action+' — שימי לב שחסר או לא תקין:\n\n'+top+more+'\n\nאישור = '+action+' בכל זאת · ביטול = לחזור ולהשלים';
+}
+let conflictPending=false, _saveFailNotified=false;
 async function saveReport(showToast){
-  if(showToast){ const miss=validateRequired(); if(miss.length){ toast('יש להשלים שדות חובה: '+miss.join(', ')); const fst=document.querySelector('.field.missing'); if(fst) fst.scrollIntoView({behavior:'smooth',block:'center'}); return; } }
+  if(showToast){ validateRequired(); const issues=collectIssues(current); if(issues.length){ const ok=await askConfirm(issuesMsg(issues,'לשמור')); if(!ok){ const fst=document.querySelector('.field.missing'); if(fst) fst.scrollIntoView({behavior:'smooth',block:'center'}); return {ok:false}; } } }
+  const force = !!showToast && conflictPending;   // only an explicit Save press may overwrite a newer cloud version
+  if(showToast) conflictPending=false;
   current.updatedAt=Date.now();
   const i=MEM.reports.findIndex(r=>r.id===current.id);
   if(i>=0) MEM.reports[i]=current; else MEM.reports.push(current);
-  await persist(current);
+  const res=await persist(current, force);
+  if(!res || !res.ok){
+    const n=$('#saveNote');
+    if(res && res.conflict){
+      const firstTime=!conflictPending; conflictPending=true;
+      if(n) n.textContent='⚠ נמצאה גרסה עדכנית יותר בענן — לא נדרס';
+      if(firstTime||showToast) toast('⚠ הדוח עודכן ממכשיר אחר. השינויים שלך לא נדרסו. לחץ "שמור" שוב כדי לדרוס בכל זאת.');
+    } else {
+      if(n) n.textContent='✗ לא נשמר בענן — נסה שוב';
+      if(!_saveFailNotified||showToast){ _saveFailNotified=true; toast('שמירה לענן נכשלה ('+((res&&res.error)||'?')+') — נסה שוב כשיש רשת'); }
+    }
+    return res||{ok:false};
+  }
+  _saveFailNotified=false;
   dirty=false;
   const n=$('#saveNote'); if(n) n.textContent='נשמר '+new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'})+(CLOUD?' · בענן':'');
   if(typeof refreshBell==='function') refreshBell();
@@ -1897,6 +2008,7 @@ async function saveReport(showToast){
     const back=isEnd?'endreport':(['chef','archive','endreport'].includes(VIEW)?VIEW:'new');
     setTimeout(()=>setView(back), 950);
   }
+  return {ok:true};
 }
 
 let archState={};
@@ -1959,7 +2071,7 @@ function buildTree(q,autoScroll){
               return `<div class="row${isToday?' today':''}" data-id="${r.id}" data-date="${esc(r.fields.eventDate||'')}">
                 <div class="date">${sd.d}<small>${sd.m}</small></div>
                 <div class="who"><div class="nm">${r.type==='endreport'?'<span class="end-badge">📋 סוף אירוע</span> ':''}${esc(nm)}</div>
-                  <div class="meta"><span>${esc(EVENT_TYPES[r.type]?.name||'')}</span>${r.fields.contact?'• '+esc(r.fields.contact):''}${r.fields.eventTime?'• '+esc(r.fields.eventTime):''}</div></div>
+                  <div class="meta"><span>${esc(typeLabel(r))}</span>${r.fields.contact?'• '+esc(r.fields.contact):''}${r.fields.eventTime?'• '+esc(r.fields.eventTime):''}</div></div>
                 <span class="st ${r.status}">${STATUS_NAME[r.status]}</span>
                 <button class="btn sm" data-pdf="${r.id}" title="צור PDF">PDF</button>
                 <button class="btn sm rdel" data-del="${r.id}" title="מחק דוח">🗑</button>
@@ -1979,7 +2091,7 @@ function buildTree(q,autoScroll){
     try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
   }
 }
-function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); }
+function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; current._syncAt=r.updatedAt||0; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); }
 
 async function deleteReport(){
   if(!current||!current.id) return;
@@ -2007,10 +2119,10 @@ function buildDocHTML(r){
         const cv=f[fld.key]; let inner='—';
         if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){
           const m=CHEF_MENUS[cv.menu];
-          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return bidi(nm)+(o?(' ('+bidi(o)+')'):'');}).join(' · '); return '<div style="margin-top:4px"><b>'+esc(cat.title)+' (לבחירה '+cat.pick+'):</b> '+list+'</div>'; }).filter(Boolean).join('');
+          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return nbidi(nm+(o?(' ('+o+')'):''));}).join(' · '); return '<div style="margin-top:4px"><b>'+nbidi(cat.title+' (לבחירה '+cat.pick+'):')+'</b> '+list+'</div>'; }).filter(Boolean).join('');
           inner='<b>'+bidi(m.name)+'</b>'+(parts||'<div style="color:#9aa6b3">לא סומנו מנות</div>');
         }
-        return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
+        return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
       if(fld.type==='calc'){
         const cv=calcVal(f[fld.key]); let inner='—';
@@ -2021,31 +2133,31 @@ function buildDocHTML(r){
           if(r.type==='shulchan'&&check) body+='<div style="margin-top:4px;font-weight:700;color:#7a5a10">צ׳ק ביטחון: <bdi dir="ltr">'+esc(check)+' ₪</bdi></div>';
           inner=body;
         }
-        return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
+        return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
       }
-            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
-      if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const t=sel.indexOf('__none__')>=0?'ללא': sel.join(' · '); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
-      if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+esc(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
-      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${esc(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}</td></tr>`;
+            if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
+      if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const none=sel.indexOf('__none__')>=0; const html=none?nbidi('ללא'):sel.map(x=>nbidi(x)).join(' · '); const has=none||sel.length; return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(has?'':'empty')+'">'+(has?html:'—')+'</td></tr>'; }
+      if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
+      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}</td></tr>`;
     }).join('');
-    return `<h2 class="${sec.kind}">${esc(sec.title)}</h2><table>${rows}</table>`;
+    return `<h2 class="${sec.kind}">${lbl(sec.title)}</h2><table>${rows}</table>`;
   }).join('');
   return `<div class="doc" dir="rtl" style="direction:rtl;text-align:right">
     <div class="d-head">
       <div class="d-brand">${BRAND_NAME[r.brand]}</div>
-      <div class="d-sub">דוח טרום-אירוע · ${esc(def.name)}</div>
+      <div class="d-sub">${nbidi('דוח טרום-אירוע')} · ${lbl(typeLabel(r))}</div>
     </div>
     <div class="d-meta">
-      <div class="m-cell"><span class="m-l">שם החוגג/ת</span><span class="m-v">${f.celebrant?bidi(f.celebrant):'—'}</span></div>
-      <div class="m-cell"><span class="m-l">תאריך האירוע</span><span class="m-v m-date">${docDate(f.eventDate)}</span></div>
-      <div class="m-cell"><span class="m-l">שעת האירוע</span><span class="m-v">${f.eventTime?bidi(f.eventTime):'—'}</span></div>
-      <div class="m-cell"><span class="m-l">איש קשר</span><span class="m-v">${f.contact?bidi(f.contact):'—'}${f.phone?' · '+bidi(f.phone):''}</span></div>
-      <div class="m-cell"><span class="m-l">סטטוס</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
-      <div class="m-cell"><span class="m-l">הופק בתאריך</span><span class="m-v"><bdi dir="ltr">${esc(today)}</bdi></span></div>
-      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+bidi(a.op)); if(a.dj)p.push('DJ: '+bidi(a.dj)); if(a.photog)p.push('צלם: '+bidi(a.photog)); if(a.other)p.push('אחר: '+bidi(a.other)); return p.length?`<div class="m-cell m-wide"><span class="m-l">צוות משובץ</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
+      <div class="m-cell"><span class="m-l">${nbidi('שם החוגג/ת')}</span><span class="m-v">${f.celebrant?bidi(f.celebrant):'—'}</span></div>
+      <div class="m-cell"><span class="m-l">${nbidi('תאריך האירוע')}</span><span class="m-v m-date">${docDate(f.eventDate)}</span></div>
+      <div class="m-cell"><span class="m-l">${nbidi('שעת האירוע')}</span><span class="m-v">${f.eventTime?bidi(f.eventTime):'—'}</span></div>
+      <div class="m-cell"><span class="m-l">${nbidi('איש קשר')}</span><span class="m-v">${f.contact?bidi(f.contact):'—'}${f.phone?' · '+bidi(f.phone):''}</span></div>
+      <div class="m-cell"><span class="m-l">${nbidi('סטטוס')}</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
+      <div class="m-cell"><span class="m-l">${nbidi('הופק בתאריך')}</span><span class="m-v"><bdi dir="ltr">${esc(today)}</bdi></span></div>
+      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+bidi(a.op)); if(a.dj)p.push('DJ: '+bidi(a.dj)); if(a.photog)p.push('צלם: '+bidi(a.photog)); if(a.other)p.push('אחר: '+bidi(a.other)); if(a.waiters&&a.waiters.length)p.push('מלצרים: '+bidi(a.waiters.join(', '))); return p.length?`<div class="m-cell m-wide"><span class="m-l">${nbidi('צוות משובץ')}</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
     </div>
     ${secs}
-    <div class="d-foot"><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת המשרד</div></div><div class="sig"><div class="line"></div><div class="lbl">חתימת מנהל/ת האירוע</div></div><div class="sig"><div class="line"></div><div class="lbl">אישור לקוח</div></div></div>
+    <div class="d-foot"><div class="sig"><div class="line"></div><div class="lbl">${nbidi('חתימת מנהל/ת המשרד')}</div></div><div class="sig"><div class="line"></div><div class="lbl">${nbidi('חתימת מנהל/ת האירוע')}</div></div><div class="sig"><div class="line"></div><div class="lbl">${nbidi('אישור לקוח')}</div></div></div>
     <div class="d-bottom">הופק ב-${today} · ${BRAND_NAME[r.brand]} · מסמך פנימי לתיאום אירוע</div>
   </div>`;
 }
@@ -2053,8 +2165,11 @@ function preparePdf(r){
   const f=r.fields; const area=$('#pdfArea'); area.innerHTML=buildDocHTML(r);
   area.querySelector('.d-brand').style.color=r.brand==='kamilion'?'#4f2c79':'#16456f';
   area.querySelector('.d-head').style.borderBottomColor=r.brand==='kamilion'?'#6b3fa0':'#1e5b9c';
-  const namePart=(f.celebrant||'דוח').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,'-');
-  const fileName=`${f.eventDate||'ללא-תאריך'}_${EVENT_TYPES[r.type].name}_${namePart}.pdf`;
+  const TYPE_LATIN={bat:'bar-bat-mitzva',bar:'bar-mitzva',brit:'brit',meshulav:'mixed',shulchan:'seated',endreport:'summary'};
+  const brandLatin=(r.brand==='kamilion')?'kamilion':'louie';
+  const typeLatin=TYPE_LATIN[r.type]||'event';
+  const dpart=(f.eventDate||'no-date').replace(/[^0-9-]/g,'');
+  const fileName=`${brandLatin}_${dpart}_${typeLatin}.pdf`;
   const el=area.firstElementChild;
   const opt={margin:[8,8,8,8],filename:fileName,image:{type:'jpeg',quality:0.96},
     html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0,imageTimeout:0,
@@ -2089,7 +2204,8 @@ async function markSummarySent(){
 }
 async function sharePDF(){
   if(typeof html2pdf==='undefined'){ return downloadPDF(); }
-  if(current){ const stt=computeStatus(); if(stt!=='filled'&&stt!=='confirmed'){ const ok=await askConfirm('⚠ הדוח עדיין לא הושלם (טיוטה) — ייתכן שחסרים שדות חובה.\nלשלוח / לייצא את הדוח בכל זאת?'); if(!ok) return; } }
+  if(current && current.type!=='endreport'){ const issues=collectIssues(current); if(issues.length){ const ok=await askConfirm(issuesMsg(issues,'לשלוח')); if(!ok) return; } }
+  else if(current){ const stt=computeStatus(); if(stt!=='filled'&&stt!=='confirmed'){ const ok=await askConfirm('⚠ הדוח עדיין לא הושלם (טיוטה) — ייתכן שחסרים שדות חובה.\nלשלוח / לייצא את הדוח בכל זאת?'); if(!ok) return; } }
   if(current && current.type!=='endreport'){
     const f=current.fields;
     const a=(MEM.assignments||[]).find(x=>x.date===f.eventDate && x.brand===current.brand);
@@ -2101,7 +2217,14 @@ async function sharePDF(){
     const hasCrew=[f.operator,f.dj,f.photographer,f.eventManager,f.bartender].some(v=>roleState(v)==='set');
     if(!hasCrew){ const ok=await askConfirm('⚠ לא שובץ צוות לאירוע (מפעיל / DJ / צלם). שליחת דוח בלי עובדים עלולה לפגוע בזרימה.\nלהשלים שיבוץ לפני השליחה?\n\nאישור = לשלוח בכל זאת · ביטול = לחזור ולשבץ'); if(!ok) return; }
   }
-  if(dirty) await saveReport(false);
+  if(dirty){
+    const sr=await saveReport(false);
+    if(!sr || !sr.ok){
+      const why = (sr&&sr.conflict) ? 'נמצאה גרסה עדכנית יותר ממכשיר אחר' : 'אין חיבור לענן';
+      const ok=await askConfirm('⚠ השמירה לענן לא הושלמה ('+why+').\nאם תשלח עכשיו, ייתכן שמה שמילאת לא יישמר במערכת ויחסר במכשיר אחר.\n\nאישור = לשלוח בכל זאת · ביטול = לחזור ולנסות לשמור שוב');
+      if(!ok) return;
+    }
+  }
   const {el,opt,fileName}=preparePdf(current);
   toast('מכין PDF לשליחה...');
   if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
@@ -2408,7 +2531,7 @@ function renderSchedList(){
       <div class="sc-date"><span class="scd-dow">${sd.w}</span><span class="scd-day">${sd.d}</span><span class="scd-mon">${sd.m}</span></div>
       <div class="sc-body">
         <div class="sc-title">${esc(row.type||'אירוע')}${manual?'<span class="sc-manual">ידני</span>':''}${row.name?' · '+esc(row.name):''}</div>
-        <div class="sc-roles">${role('🎛️ מפעיל:','op',row.op)}${role('🎧 DJ:','dj',row.dj)}${role('📷 צלם:','photog',row.photog)}${roleState(row.other)==='set'?`<div class="sc-role"><b>➕ אחר:</b> <span class="val">${esc(row.other)}</span></div>`:''}</div>
+        <div class="sc-roles">${role('🎛️ מפעיל:','op',row.op)}${role('🎧 DJ:','dj',row.dj)}${role('📷 צלם:','photog',row.photog)}${roleState(row.other)==='set'?`<div class="sc-role"><b>➕ אחר:</b> <span class="val">${esc(row.other)}</span></div>`:''}${(row.a&&row.a.waiters&&row.a.waiters.length)?`<div class="sc-role"><b>🍽️ מלצרים:</b> <span class="val">${esc(row.a.waiters.join(', '))}</span></div>`:''}</div>
       </div>
       <div class="sc-go">‹</div>
     </div>`; };
@@ -2482,18 +2605,23 @@ function openAssign(id,presetDate){
   setCrewSel($('#aDj'),'dj', a?a.dj:'');
   setCrewSel($('#aPhotog'),'photographer', a?a.photog:'');
   $('#aOther').value=a?(a.other||''):'';
+  renderWaiterInputs(a&&Array.isArray(a.waiters)?a.waiters:[]);
   $('#aNotes').value=a?(a.notes||''):'';
   $('#aDel').style.display=id?'':'none';
   $('#aModalTitle').textContent=id?'עריכת שיבוץ':'שיבוץ חדש';
   $('#schedModal').style.display='flex';
 }
 function closeAssign(){ const m=$('#schedModal'); if(m) m.style.display='none'; editingAssign=null; }
+function waiterRow(val){ const d=document.createElement('div'); d.style.cssText='display:flex;gap:6px;margin-bottom:6px'; d.innerHTML='<input type="text" class="awaiter" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="שם מלצר" style="flex:1" value="'+esc(val||'')+'"><button type="button" class="btn ghost sm awaiter-del" title="הסר">✕</button>'; d.querySelector('.awaiter-del').onclick=()=>{ d.remove(); if(!$('#aWaiters').children.length) addWaiterRow(''); }; return d; }
+function addWaiterRow(val){ const w=$('#aWaiters'); if(w) w.appendChild(waiterRow(val)); }
+function renderWaiterInputs(list){ const w=$('#aWaiters'); if(!w) return; w.innerHTML=''; const arr=(list&&list.length)?list:['']; arr.forEach(v=>addWaiterRow(v)); }
+function collectWaiters(){ return Array.from(document.querySelectorAll('#aWaiters .awaiter')).map(i=>i.value.trim()).filter(Boolean); }
 async function saveAssign(){
   const date=$('#aDate').value;
   if(!date){ toast('יש לבחור תאריך'); return; }
   let a=editingAssign?MEM.assignments.find(x=>x.id===editingAssign):null;
   if(!a){ a={id:uid(),createdAt:Date.now(),reportId:(($('#schedModal').dataset.reportId)||'')}; MEM.assignments.push(a); }
-  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.other=$('#aOther').value.trim(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
+  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.other=$('#aOther').value.trim(); a.waiters=collectWaiters(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
   closeAssign(); renderSched(); toast('השיבוץ נשמר ✓');
   await persistAssignment(a);
 }
@@ -2694,7 +2822,7 @@ document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=async()=>{
 });
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 { const m=$('#hebCalModal'); if(m){ const p=$('#hcPrev'),n=$('#hcNext'),cc=$('#hcCancel'),cl=$('#hcClear'); if(p)p.onclick=()=>hebCalNav(-1); if(n)n.onclick=()=>hebCalNav(1); if(cc)cc.onclick=closeHebCal; if(cl)cl.onclick=hebCalClear; m.onclick=e=>{ if(e.target===m) closeHebCal(); }; } }
-{ const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; m.onclick=(e)=>{ if(e.target===m) closeAssign(); };
+{ const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; { const aw=$('#aAddWaiter'); if(aw) aw.onclick=()=>addWaiterRow(''); } m.onclick=(e)=>{ if(e.target===m) closeAssign(); };
   ['#aOp','#aDj','#aPhotog'].forEach(id=>{ const s=$(id); if(s) s.onchange=()=>guardCrewSelect(s); });
 } }
 function setCrewSel(el,roleKey,val){ if(!el) return; el.innerHTML=crewOptionsHTML(roleKey, val||''); el.dataset.prev=el.value; }
@@ -2741,6 +2869,9 @@ async function startApp(){
   await initCloud();
   const c=$('#conn'); c.textContent=CLOUD?'☁︎ ענן מחובר':'● מצב מקומי'; c.className='conn '+(CLOUD?'on':'');
   await dbLoad(); subscribeCloud();
+  const retrySave=()=>{ if(dirty && current) saveReport(false); };
+  window.addEventListener('online', retrySave);
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') retrySave(); });
   await seedJune();
   await seedJuly();
   applyBrand();
