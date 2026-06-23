@@ -562,7 +562,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v165</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v167</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -718,7 +718,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v165';
+const APP_VERSION = 'v167';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1022,7 +1022,7 @@ const KIDS_FIELDS=[
   F('balloons','בלונים — צבעים לבחירה (2)','text'),
   F('kidsCount','כמות ילדים','number'),
   F('vegMeals','מנות צמחוניות','text'),
-  F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+  F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'דגש: לשאול את הלקוח/ה רק לגבי גלוטן. אם מציינים רגישות אחרת — לרשום אותה כאן. חובה לעדכן את השף'}),
   F('kidsMenu','תפריט ילדים','textarea',{full:true}),
   F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
   F('bus','הילדים מגיעים באוטובוס?','yesno'),
@@ -1085,7 +1085,7 @@ const EVENT_TYPES={
     F('guestsCount','כמות מוזמנים','number'),
     F('menu','תפריט','textarea',{full:true}),
     F('vegMeals','מנות צמחוניות','text'),
-    F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+    F('glutenLactose','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'דגש: לשאול את הלקוח/ה רק לגבי גלוטן. אם מציינים רגישות אחרת — לרשום אותה כאן. חובה לעדכן את השף'}),
     F('externalSupplier','ספק חיצוני?','textarea',{full:true}),
   ]},SEC_LOGISTICS,{title:'צוות ותפעול',kind:'ops',fields:OPS_FIELDS},SEC_APPROVAL]},
   meshulav:{name:'משולב (ילדים + מבוגרים)',icon:'✨',sections:[SEC_DETAILS,
@@ -1120,7 +1120,7 @@ const EVENT_TYPES={
       F('kidsEat','מה הילדים אוכלים?','text',{full:true,hint:'המבורגר וצ׳יפס / שניצל וצ׳יפס'}),
       F('vegPersonal','מנות צמחוניות (אישיות)','text'),
       F('veganPersonal','מנות טבעוניות (אישיות)','text'),
-      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'דגש: לשאול את הלקוח/ה רק לגבי גלוטן. אם מציינים רגישות אחרת — לרשום אותה כאן. חובה לעדכן את השף'}),
       F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
     ]},
     {title:'תפריט מבוגרים',kind:'info',fields:[
@@ -1159,7 +1159,7 @@ const EVENT_TYPES={
       F('bar','חבילת בר / שתייה','textarea',{full:true}),
       F('vegPersonal','מנות צמחוניות','text'),
       F('veganPersonal','מנות טבעוניות','text'),
-      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'פרטו כל אלרגיה — כולל אגוזים/פיסטוק/שומשום/ביצים. חובה לעדכן את השף'}),
+      F('sensitivities','רגישויות ואלרגיות (גלוטן, לקטוז, אגוזים/פיסטוק ועוד)','allergens',{full:true,alert:true,hint:'דגש: לשאול את הלקוח/ה רק לגבי גלוטן. אם מציינים רגישות אחרת — לרשום אותה כאן. חובה לעדכן את השף'}),
       F('wheelchair','נדרשת נגישות לכיסא גלגלים?','yesno'),
     ]},
     {title:'לוגיסטיקה ותשלומים',kind:'info',fields:[
@@ -1401,17 +1401,35 @@ function hebCalClear(){
   const btn=document.querySelector('.hebdate-btn[data-key="'+HEBCAL.key+'"]');
   if(btn){ btn.classList.remove('has'); btn.textContent='📅 בחר/י תאריך'; }
 }
-const SUPPLIER_KEYS=['dj','photographer','operator','bartender','eventManager','ee_photographer','ee_operator','ee_digi'];
+const SUPPLIER_KEYS=['dj','photographer','operator','bartender','eventManager','additionalManager','ee_manager','ee_floorManager','ee_photographer','ee_operator','ee_digi'];
+// תווית לפי תפקיד — כדי שיהיה ברור של מי המספר (מנהל / די-ג׳יי / צלם וכו׳)
+function supRoleLabel(key){
+  switch(key){
+    case 'ee_manager': case 'eventManager': return 'טלפון מנהל אירוע';
+    case 'additionalManager': return 'טלפון מנהל נוסף';
+    case 'ee_floorManager': return 'טלפון מנהל קומה';
+    case 'dj': case 'ee_digi': return 'טלפון די-ג׳יי';
+    case 'photographer': case 'ee_photographer': return 'טלפון צלם';
+    case 'operator': case 'ee_operator': return 'טלפון מפעיל';
+    case 'bartender': return 'טלפון ברמן/ית';
+    default: return 'טלפון ספק';
+  }
+}
 function findWorkerByName(name){
   const n=String(name||'').trim().toLowerCase(); if(!n||!MEM.workers||!MEM.workers.length) return null;
   let w=MEM.workers.find(x=>String(x.name||'').trim().toLowerCase()===n && x.phone);
   if(!w) w=MEM.workers.find(x=>{ const wn=String(x.name||'').trim().toLowerCase(); return x.phone && wn.length>=2 && (n.indexOf(wn)>=0||wn.indexOf(n)>=0); });
   return w||null;
 }
-function supPhoneHTML(name){
+function supPhoneHTML(name,key){
   const w=findWorkerByName(name); if(!w||!w.phone) return '';
   const tel=String(w.phone).replace(/[^0-9+]/g,'');
-  return '📞 טלפון ספק: <a href="tel:'+tel+'" onclick="event.stopPropagation()">'+esc(w.phone)+'</a>';
+  return '📞 '+supRoleLabel(key)+': <a href="tel:'+tel+'" onclick="event.stopPropagation()">'+esc(w.phone)+'</a>';
+}
+// שורת טלפון מתויגת לדוח/PDF (ללא קישור tel)
+function supPhoneDocHTML(name,key){
+  const w=findWorkerByName(name); if(!w||!w.phone) return '';
+  return '<div style="margin-top:3px;font-size:13px;font-weight:700;color:#16456f">📞 '+nbidi(supRoleLabel(key))+': <bdi dir="ltr">'+esc(w.phone)+'</bdi></div>';
 }
 function autofillEndStaff(){
   if(!current || current.type!=='endreport') return;
@@ -1425,7 +1443,7 @@ function autofillEndStaff(){
       const cur=String(current.fields[fk]||'').trim();
       if(!cur){ current.fields[fk]=val;
         const el=document.querySelector('[data-key="'+fk+'"]');
-        if(el){ el.value=val; const fc=el.closest('.field'); if(fc){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(val); } }
+        if(el){ el.value=val; const fc=el.closest('.field'); if(fc){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(val,fk); } }
         filled++;
       }
     }
@@ -1707,7 +1725,7 @@ function fieldHTML(fld,val){
   const al=fld.alert?' alert':'';
   const rq=fld.req?'<span class="reqm"> *</span>':'';
   if(fld.type==='date' && fld.key==='eventDate'){ control = `<div class="evdate-wrap">${control}${dateReadout(val)}</div>`; }
-  if(SUPPLIER_KEYS.indexOf(fld.key)>=0){ control += `<div class="sup-phone" data-sup="${fld.key}">${supPhoneHTML(val)}</div>`; }
+  if(SUPPLIER_KEYS.indexOf(fld.key)>=0){ control += `<div class="sup-phone" data-sup="${fld.key}">${supPhoneHTML(val,fld.key)}</div>`; }
   return `<div class="field${full}${al}"${depA}><label>${esc(fld.label)}${rq}${hint}</label>${control}</div>`;
 }
 function sendMenuToChef(key){
@@ -1841,7 +1859,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
+    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -2138,7 +2156,7 @@ function buildDocHTML(r){
             if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const none=sel.indexOf('__none__')>=0; const html=none?nbidi('ללא'):sel.map(x=>nbidi(x)).join(' · '); const has=none||sel.length; return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(has?'':'empty')+'">'+(has?html:'—')+'</td></tr>'; }
       if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
-      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}</td></tr>`;
+      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); const supTel=(!empty&&SUPPLIER_KEYS.indexOf(fld.key)>=0)?supPhoneDocHTML(v,fld.key):''; return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}${supTel}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${lbl(sec.title)}</h2><table>${rows}</table>`;
   }).join('');
