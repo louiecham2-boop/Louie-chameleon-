@@ -132,7 +132,7 @@
   .date-readout .dr-ico{font-size:15px}
   /* תאריך האירוע — מציגים את הקריאון היפה (יום + תאריך), ומעליו שדה תאריך אמיתי שקוף שלוכד את הלחיצה ופותח את בורר התאריך הטבעי (אמין ב-iOS) */
   .evdate-wrap{position:relative}
-  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;pointer-events:none;-webkit-appearance:none;appearance:none;background:transparent}
   .viewmode .evdate-wrap input.evdate{display:none}
   .date-readout{cursor:pointer}
   .viewmode .date-readout{cursor:default}
@@ -571,7 +571,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v175</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v176</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -727,7 +727,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v175';
+const APP_VERSION = 'v176';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -3281,12 +3281,13 @@ function renderGate(){
 }
 /* לחיצה על קריאון התאריך פותחת את בורר התאריך (במצב עריכה בלבד) — התיבה המקורית מוסתרת */
 document.addEventListener('click', function(e){
-  const dr = e.target && e.target.closest && e.target.closest('.date-readout');
-  if(!dr) return;
   if(typeof EDITING!=='undefined' && !EDITING) return;
-  const fc = dr.closest('.field'); if(!fc) return;
-  const inp = fc.querySelector('input[data-key="eventDate"]'); if(!inp || inp.readOnly) return;
-  try{ if(typeof inp.showPicker==='function'){ inp.showPicker(); } else { inp.focus(); inp.click(); } }
+  let inp=null, viaInput=false;
+  const dr = e.target && e.target.closest && e.target.closest('.date-readout');
+  if(dr){ const fc = dr.closest('.field'); if(fc) inp = fc.querySelector('input[data-key="eventDate"]'); }
+  else if(e.target && e.target.matches && e.target.matches('input.evdate[data-key="eventDate"]')){ inp = e.target; viaInput=true; }
+  if(!inp || inp.readOnly) return;
+  try{ if(typeof inp.showPicker==='function'){ inp.showPicker(); } else { inp.focus(); if(!viaInput) inp.click(); } }
   catch(_){ try{ inp.focus(); }catch(__){} }
 });
 if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
