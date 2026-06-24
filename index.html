@@ -307,6 +307,7 @@
   .doc td{padding:6px 10px;border-bottom:1px solid #e7ebf0;vertical-align:top;overflow-wrap:anywhere;word-break:break-word}
   .doc td.k{font-weight:700;color:#3a4654;width:46%;background:#fafbfc}
   .doc td.v{color:#1a2330;white-space:pre-wrap;direction:rtl;text-align:right;line-height:1.55}
+  .doc td.v .sup-name{display:block;font-weight:700;color:#1a2330}
   .doc bdi,.doc .m-v bdi{unicode-bidi:isolate}
   .doc td.v.empty{color:#9aa6b3}
   .doc .d-foot{margin-top:22px;display:flex;gap:30px;border-top:2px solid #e7ebf0;padding-top:16px}
@@ -379,6 +380,7 @@
   .btn.convert:hover{background:#fff;border-style:solid}
   /* ---- chef menu picker ---- */
   .chefmenu{border:1px solid var(--line2);border-radius:11px;padding:11px;background:#fcfdfe}
+  .cm-note{font-size:12px;font-weight:600;color:#8a6d1a;background:#fff7e0;border:1px solid #ecd793;border-radius:7px;padding:4px 8px;margin-top:5px}
   .cm-tabs{display:flex;gap:8px;margin-bottom:8px}
   .cm-tab{flex:1;border:1px solid var(--line2);background:#fff;border-radius:9px;padding:10px;font-weight:800;cursor:pointer;color:var(--muted);font-size:14px}
   .cm-tab.on{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
@@ -464,6 +466,13 @@
   .er-txt{min-width:0}
   .er-name{font-size:17px;font-weight:900;color:var(--ink)}
   .er-meta{font-size:13px;color:var(--muted);font-weight:700;margin-top:2px}
+  .er-card.er-ok{border:2px solid #1f9d57;background:#f3faf5}
+  .er-card.er-pend{border:2px solid #e23b2e;background:#fdf5f4}
+  .er-stat{font-size:12.5px;font-weight:800;margin-top:4px}
+  .er-stat.ok{color:#137a40}
+  .er-stat.pend{color:#b3261e}
+  .btn.revok{background:#1f9d57;color:#fff;border-color:#1f9d57}
+  .btn.revpend{background:#fff;color:#b3261e;border:1.5px solid #e23b2e}
   .end-badge{display:inline-block;background:#eef3fb;color:#1e5b9c;border:1px solid #cdddf2;border-radius:6px;font-size:11px;font-weight:800;padding:1px 7px;vertical-align:middle}
   body.kamilion .end-badge{background:#f1ecf8;color:#6b3fa0;border-color:#ddccef}
   .cf-edit{flex:none;margin-inline-start:auto;align-self:flex-start;border:1px solid var(--line2);background:#fff;color:var(--muted);font-weight:700;font-size:12.5px;border-radius:8px;padding:5px 11px;cursor:pointer}
@@ -562,7 +571,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v167</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v174</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -718,7 +727,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v167';
+const APP_VERSION = 'v174';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1069,12 +1078,14 @@ const CHEF_MENUS={
     {key:'salads',title:'סלטים / ראשונות',pick:7,items:['קרפצ׳יו חציל שרוף','סלט עלים עשיר','קרפצ׳ו בקר','סלט פנצ׳נלה ים-תיכוני','אנטיפסטי ירקות קלויים','חומוס אבו פיראס','טאבולה מסורתית','בטטה מדורה מקורמלת','קרפצ׳ו סלק מרענן','פטה כבד קלאסי','ירקות שורש ונבטים']},
     {key:'sides',title:'תוספות',pick:2,items:['אורז לבן עם פירות יבשים ושקדים קלויים','אורז אושפלו, גרגרי חומוס וירקות שורש','תפוח אדמה זעיר בשמן זית ותימין','תפוח אדמה בדואט של בטטה','שעועית ירוקה','קרם תפוחי אדמה ובצל מטוגן קריספי','כוסמת, עדשים, בורגול ועשבי תיבול','סירות בטטה אפויות']},
     {key:'mains',title:'עיקריות',pick:3,items:[{n:'אסאדו דרום אמריקאי',opts:['על פולנטת תירס','על פירה כמהין']},{n:'נתחי פרגית בגריל',opts:['מצע אורז ופירות יבשים','אושפלו מתובל','ג׳אלה ועשבי תיבול']},'ביף בורגיניון קלאסי','נתח סלמון בגריל','חריימה של סבתא מרים','רביולי עגבניות','שווארמה טבעונית']},
+    {key:'veg',title:'מהצומח (צמחוני/טבעוני)',pick:0,optional:true,note:'מנות בודדות — מציעים רק אם הלקוחה מבקשת',items:['רביולי עגבניות ובזיליקום','שווארמה טבעונית (סייטן/טופו) עם קרם פירה טבעוני']},
   ]},
   ashir:{name:'תפריט שף',cats:[
     {key:'rotating',title:'מסתובבים',pick:2,items:['קרוסטון פטה כבד וריבת בצל','פטריות בטמפורה חריפה','קבב על מקל קינמון וטחינה','אגרול סיני ברוטב חמוץ-מתוק','עראיס לצד סלסת עגבניות','צ׳וריסוס דרום אמריקאי','רול סביח עם טוויסט בטטה','ברוסקטה עם חציל מקורמל']},
     {key:'salads',title:'סלטים',pick:7,items:['קרפצ׳יו חציל ים-תיכוני','חומוס ביתי עם מסבחה','טריו שרי עם פסטו ושקדים','אנטיפסטי ירקות קלויים','סלט עלים עשיר ואנדיב','סלט נבטים, קולורבי וצנון','בטטה מדורה מקורמלת','עדשים ירוקות ובטטה קריספית','מטבוחה חריפה','פלפל חריף מטוגן בלימון','סלט טאבולה ים-תיכוני','כרוב אסייתי','קרפציו סלק ופיצוחים','קינואה ועשבי תיבול']},
     {key:'sides',title:'תוספות',pick:2,items:['אורז לבן עם פירות יבשים ושקדים קלויים','אורז אושפלו, גרגרי חומוס וירקות שורש','תפוח אדמה זעיר בשמן זית ותימין','תפוח אדמה בדואט של בטטה','שעועית ירוקה','קרם תפוחי אדמה ובצל מטוגן קריספי','כוסמת, עדשים, בורגול ועשבי תיבול','סירות בטטה אפויות']},
     {key:'mains',title:'עיקריות',pick:3,items:[{n:'פרגית במגוון טעמים',opts:['מזרחי','אסייאתי','מלח פלפל']},{n:'קבב',opts:['טלה','עגל']},'עופות שלמים בצלייה ארוכה','קוביות פרגית ברוטב קארי וקוקוס',{n:'פילה מושט במגוון טעמים',opts:['עשבי תיבול','מרוקאי אותנטי','שום ולימון']},'אסאדו עגל בצלייה מעושנת','אסאדו עגל ברוטב טקסס','דונר טורקי (עגל וטלה)','שווארמה הודו על טחינה','קדירת בקר ביין ושזיפים','קדירת בקר בירקות שורש ופטריות']},
+    {key:'veg',title:'מהצומח (צמחוני/טבעוני)',pick:0,optional:true,note:'מנות בודדות — מציעים רק אם הלקוחה מבקשת',items:['רביולי עגבניות ובזיליקום','שווארמה טבעונית (סייטן/טופו) עם קרם פירה טבעוני']},
   ]},
 };
 const EVENT_TYPES={
@@ -1274,6 +1285,32 @@ function askConfirm(msg){
     y.onclick=()=>done(true); n.onclick=()=>done(false); m.onclick=(e)=>{ if(e.target===m) done(false); };
   });
 }
+// חלון התרעה עם כפתור אחד (אישור/הבנתי) — שימוש חוזר במודאל הקיים
+function askAlert(msg, okLabel){
+  return new Promise(res=>{
+    const m=$('#confirmModal'),mm=$('#confirmMsg'),y=$('#confirmYes'),n=$('#confirmNo');
+    if(!m||!mm||!y||!n){ try{window.alert(msg);}catch(e){} res(true); return; }
+    mm.textContent=msg; m.style.display='flex';
+    const prevNoDisp=n.style.display, prevYesTxt=y.textContent;
+    n.style.display='none'; y.textContent=okLabel||'הבנתי 👍';
+    const done=()=>{ m.style.display='none'; y.onclick=null; m.onclick=null; n.style.display=prevNoDisp; y.textContent=prevYesTxt; res(true); };
+    y.onclick=done; m.onclick=(e)=>{ if(e.target===m) done(); };
+  });
+}
+// אירועים אחרים (אותו מותג, לא דוח סוף) באותו תאריך
+function eventsOnDate(date, exceptId){
+  const d=String(date||'').trim(); if(!/^\d{4}-\d{2}-\d{2}$/.test(d)) return [];
+  return (MEM.reports||[]).filter(r=> r && r.id!==exceptId && r.brand===BRAND && r.type!=='endreport'
+      && String((r.fields&&r.fields.eventDate)||'').trim()===d );
+}
+let _dupWarnedFor='';
+// אזהרה קצרה: כבר יש אירוע באותו תאריך — אישור/ביטול
+function dupDateAlert(date, exceptId){
+  const others=eventsOnDate(date, exceptId);
+  if(!others.length) return Promise.resolve(true);
+  const p=String(date).split('-'); const nice=p[2]+'.'+p[1]+'.'+p[0];
+  return askConfirm('⚠️ שים לב — כבר קיים אירוע בתאריך הזה ('+nice+').\nתוודא/י שזה אירוע צהריים.');
+}
 function askInput(title,cur){
   return new Promise(res=>{
     const m=$('#inputModal'),t=$('#inputMsg'),f=$('#inputField'),ok=$('#inputOk'),no=$('#inputCancel');
@@ -1415,21 +1452,51 @@ function supRoleLabel(key){
     default: return 'טלפון ספק';
   }
 }
-function findWorkerByName(name){
+// תפקיד העובד התואם למפתח השדה (כדי לא לשלוף טלפון מעובד בתפקיד אחר)
+function supRoleFor(key){
+  switch(key){
+    case 'dj': case 'ee_digi': return 'dj';
+    case 'photographer': case 'ee_photographer': return 'photographer';
+    case 'operator': case 'ee_operator': return 'operator';
+    case 'eventManager': case 'additionalManager': case 'ee_manager': case 'ee_floorManager': return 'manager';
+    default: return null; // ברמן/לא ידוע — בלי הגבלת תפקיד
+  }
+}
+function findWorkerByName(name, preferRole){
   const n=String(name||'').trim().toLowerCase(); if(!n||!MEM.workers||!MEM.workers.length) return null;
-  let w=MEM.workers.find(x=>String(x.name||'').trim().toLowerCase()===n && x.phone);
-  if(!w) w=MEM.workers.find(x=>{ const wn=String(x.name||'').trim().toLowerCase(); return x.phone && wn.length>=2 && (n.indexOf(wn)>=0||wn.indexOf(n)>=0); });
+  // מסננים לפי תפקיד אם התבקש — כך שם זהה בתפקיד אחר לא ייתפס
+  const pool=preferRole?MEM.workers.filter(x=>x.role===preferRole):MEM.workers;
+  if(!pool.length) return null;
+  const toks=n.split(/\s+/).filter(Boolean);
+  // 1) התאמה מדויקת
+  let w=pool.find(x=>x.phone && String(x.name||'').trim().toLowerCase()===n);
+  if(w) return w;
+  // 2) התאמת מילים שלמות (לא תת-מחרוזת חלקית): שם העובד = מילה בשם שבשדה, או להפך
+  w=pool.find(x=>{ if(!x.phone) return false; const wn=String(x.name||'').trim().toLowerCase(); if(wn.length<2) return false; const wt=wn.split(/\s+/).filter(Boolean); return toks.includes(wn) || wt.includes(n) || (wt.length>1 && toks.length>1 && wt.every(t=>toks.includes(t))); });
   return w||null;
 }
-function supPhoneHTML(name,key){
-  const w=findWorkerByName(name); if(!w||!w.phone) return '';
-  const tel=String(w.phone).replace(/[^0-9+]/g,'');
-  return '📞 '+supRoleLabel(key)+': <a href="tel:'+tel+'" onclick="event.stopPropagation()">'+esc(w.phone)+'</a>';
+// קיבוץ ספרות לקריאות: 052-390-7187 / 09-555-1234
+function fmtPhoneNice(p){
+  const d=String(p==null?'':p).replace(/\D/g,'');
+  if(/^05\d{8}$/.test(d)) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  if(/^0\d{8}$/.test(d))  return d.slice(0,2)+'-'+d.slice(2,5)+'-'+d.slice(5);
+  return String(p==null?'':p);
 }
-// שורת טלפון מתויגת לדוח/PDF (ללא קישור tel)
+function supPhoneHTML(name,key){
+  const w=findWorkerByName(name, supRoleFor(key)); if(!w||!w.phone) return '';
+  const tel=String(w.phone).replace(/[^0-9+]/g,'');
+  return '📞 '+supRoleLabel(key)+': <a href="tel:'+tel+'" onclick="event.stopPropagation()" dir="ltr">'+esc(fmtPhoneNice(w.phone))+'</a>';
+}
+// שורת טלפון מתויגת לדוח/PDF — צ׳יפ עצמאי, סדר RTL יציב, מספר מקובץ ב-LTR
 function supPhoneDocHTML(name,key){
-  const w=findWorkerByName(name); if(!w||!w.phone) return '';
-  return '<div style="margin-top:3px;font-size:13px;font-weight:700;color:#16456f">📞 '+nbidi(supRoleLabel(key))+': <bdi dir="ltr">'+esc(w.phone)+'</bdi></div>';
+  const w=findWorkerByName(name, supRoleFor(key)); if(!w||!w.phone) return '';
+  return '<div style="margin-top:5px">'
+    + '<span style="display:inline-block;direction:rtl;unicode-bidi:isolate;white-space:nowrap;'
+    + 'font-size:12.5px;font-weight:700;color:#16456f;background:#eef4fb;border:1px solid #d3e2f0;'
+    + 'border-radius:8px;padding:3px 10px">'
+    + '\uD83D\uDCDE\u00A0' + esc(supRoleLabel(key)) + ':\u00A0'
+    + '<bdi dir="ltr" style="letter-spacing:.3px">' + esc(fmtPhoneNice(w.phone)) + '</bdi>'
+    + '</span></div>';
 }
 function autofillEndStaff(){
   if(!current || current.type!=='endreport') return;
@@ -1465,10 +1532,12 @@ function renderPicker(){
   app.querySelectorAll('.pick-card').forEach(c=>c.onclick=()=>newReport(c.dataset.type));
 }
 function newReport(type){
+  _dupWarnedFor='';
   current={id:uid(),brand:BRAND,type,status:'draft',fields:{eventKind:EVENT_TYPES[type].name},createdAt:Date.now(),updatedAt:Date.now()};
   EDITING=true; renderForm();
 }
 function newEndReport(){
+  _dupWarnedFor='';
   current={id:uid(),brand:BRAND,type:'endreport',status:'draft',fields:{eventKind:'דוח סוף אירוע'},createdAt:Date.now(),updatedAt:Date.now()};
   EDITING=true; renderForm(); window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1480,9 +1549,9 @@ function renderEndHome(){
   else {
     const groups=[]; let cur=null;
     reps.forEach(r=>{ const mon=(r.fields.eventDate||'').slice(0,7)||'none'; if(!cur||cur.mon!==mon){ cur={mon,label:monLabel(r.fields.eventDate),rows:[]}; groups.push(cur);} cur.rows.push(r); });
-    list=groups.map(g=>`<div class="chef-mhead">${esc(g.label)} <span class="chef-mcount">${g.rows.length}</span></div>`+g.rows.map(r=>{ const f=r.fields,d=fmtDateShort(f.eventDate); return `<div class="er-card" data-open="${r.id}">
+    list=groups.map(g=>`<div class="chef-mhead">${esc(g.label)} <span class="chef-mcount">${g.rows.length}</span></div>`+g.rows.map(r=>{ const f=r.fields,d=fmtDateShort(f.eventDate); const revd=!!r.reviewed; return `<div class="er-card ${revd?'er-ok':'er-pend'}" data-open="${r.id}">
       <div class="cf-tile"><span class="cf-dow">${d.w}</span><span class="cf-day">${d.d}</span><span class="cf-mon">${d.m}</span></div>
-      <div class="er-txt"><div class="er-name">${esc(f.celebrant||'—')}</div><div class="er-meta">${esc(f.ee_etype||'')}${f.ee_manager?' · מנהל: '+esc(f.ee_manager):''}</div></div>
+      <div class="er-txt"><div class="er-name">${esc(f.celebrant||'—')}</div><div class="er-meta">${esc(f.ee_etype||'')}${f.ee_manager?' · מנהל: '+esc(f.ee_manager):''}</div><div class="er-stat ${revd?'ok':'pend'}">${revd?'✔️ נבדק ע״י מנהל — מלא ותקין':'🔴 טרם נבדק / לא הושלם'}</div></div>
     </div>`; }).join('')).join('');
   }
   app.innerHTML=`<div class="end-wrap">
@@ -1528,6 +1597,7 @@ function renderForm(){
     <div class="form-foot">
       ${EDITING?`<button class="btn primary" id="saveBtn">${def.endReport?'💾 שמור במערכת':'שמירה בתיקייה'}</button>`:`<button class="btn primary" id="editBtn">✏️ ערוך / עדכן דוח</button>`}
       ${def.endReport?`<button class="btn ${f.summarySent?'sent':'pdf'}" id="pdfBtnEnd" style="padding:9px 13px;font-size:13.5px">${f.summarySent?'✓ נשלח בוואטסאפ':'📲 שלח כ-PDF בוואטסאפ'}</button>`:`<button class="btn pdf" id="pdfBtn">📄 צור PDF (לשמירה / שליחה)</button>`}
+      ${def.endReport?`<button class="btn ${current.reviewed?'revok':'revpend'}" id="mgrReviewBtn" style="padding:9px 13px;font-size:13.5px">${current.reviewed?'✔️ אושר ע״י מנהל — מלא ותקין':'🔍 אישור מנהל — עברתי על הדוח'}</button>`:''}
       <button class="btn ghost" id="backBtn">חזרה</button>
       ${(EDITING && MEM.reports.some(r=>r.id===current.id))?`<button class="btn del" id="delBtn">🗑 מחק דוח</button>`:''}
       <span class="save-note" id="saveNote"></span>
@@ -1546,6 +1616,13 @@ function renderForm(){
   { const et=$('#editTop'); if(et) et.onclick=()=>{ EDITING=true; renderForm(); window.scrollTo({top:0,behavior:'smooth'}); }; }
   { const pb=$('#pdfBtn'); if(pb) pb.onclick=()=>sharePDF(); }
   { const pe=$('#pdfBtnEnd'); if(pe) pe.onclick=()=>sharePDF(); }
+  { const mr=$('#mgrReviewBtn'); if(mr) mr.onclick=async()=>{
+      if(!current.reviewed){ const ok=await askConfirm('עברת על כל הדוח והוא מלא ותקין?'); if(!ok) return; current.reviewed=true; current.reviewedAt=Date.now(); }
+      else { const un=await askConfirm('הדוח מסומן כנבדק ותקין. לבטל את הסימון?'); if(!un) return; current.reviewed=false; current.reviewedAt=0; }
+      await saveReport(false);
+      toast(current.reviewed?'הדוח סומן כנבדק ותקין ✓':'הסימון בוטל');
+      renderForm();
+    }; }
   { const pt=$('#pdfBtnTop'); if(pt) pt.onclick=()=>sharePDF(); }
   { const etb=$('#editTopBar'); if(etb) etb.onclick=()=>{ EDITING=true; renderForm(); window.scrollTo({top:0,behavior:'smooth'}); }; }
   $('#backBtn').onclick=()=>setView(['chef','archive','endreport'].includes(VIEW)?VIEW:'new');
@@ -1558,12 +1635,15 @@ function chefmenuInner(key,v){
     h+='<div class="cm-cats">';
     CHEF_MENUS[v.menu].cats.forEach(cat=>{
       const seld=(v.sel&&v.sel[cat.key])||[];
-      h+='<div class="cm-cat"><div class="cm-cat-h">'+esc(cat.title)+' · לבחירה '+cat.pick+' <span class="cm-count'+(seld.length>cat.pick?' over':'')+'" data-cat="'+cat.key+'">('+seld.length+'/'+cat.pick+')</span></div>';
+      const head=cat.optional
+        ? esc(cat.title)+' <span class="cm-count" data-cat="'+cat.key+'">('+seld.length+')</span>'+(cat.note?'<div class="cm-note">'+esc(cat.note)+'</div>':'')
+        : esc(cat.title)+' · לבחירה '+cat.pick+' <span class="cm-count'+(seld.length>cat.pick?' over':'')+'" data-cat="'+cat.key+'">('+seld.length+'/'+cat.pick+')</span>';
+      h+='<div class="cm-cat"><div class="cm-cat-h">'+head+'</div>';
       cat.items.forEach(item=>{
         const name=(typeof item==='string')?item:item.n;
         const opts=(item&&typeof item==='object'&&item.opts)?item.opts:null;
         const checked=seld.indexOf(name)>=0;
-        const dis=(!checked&&seld.length>=cat.pick);
+        const dis=(!cat.optional&&!checked&&seld.length>=cat.pick);
         h+='<label class="cm-item '+(checked?'on':'')+(dis?' dis':'')+'"><input type="checkbox" data-cat="'+cat.key+'" data-item="'+esc(name)+'" '+(checked?'checked':'')+(dis?' disabled':'')+'><span>'+esc(name)+'</span></label>';
         if(opts){ const chosen=(v.opt&&v.opt[cat.key+'::'+name])||''; h+='<div class="cm-opts" data-cat="'+cat.key+'" data-dish="'+esc(name)+'" style="'+(checked?'':'display:none')+'">'+opts.map(o=>'<button type="button" class="cm-opt '+(chosen===o?'on':'')+'" data-opt="'+esc(o)+'">'+esc(o)+'</button>').join('')+'</div>'; }
       });
@@ -1733,7 +1813,7 @@ function sendMenuToChef(key){
   if(!v||!v.menu||!CHEF_MENUS[v.menu]){ toast('בחר/י תפריט תחילה'); return; }
   const m=CHEF_MENUS[v.menu], f=current.fields;
   const lines=['תפריט לשף — '+BRAND_NAME[current.brand],'אירוע: '+EVENT_TYPES[current.type].name+' · '+dmy(f.eventDate)+(f.celebrant?' · '+f.celebrant:''),'תפריט: '+m.name,''];
-  m.cats.forEach(cat=>{ const seld=(v.sel&&v.sel[cat.key])||[]; if(!seld.length) return; const list=seld.map(nm=>{const o=v.opt&&v.opt[cat.key+'::'+nm]; return nm+(o?(' ('+o+')'):'');}).join(', '); lines.push(cat.title+' (לבחירה '+cat.pick+'): '+list); });
+  m.cats.forEach(cat=>{ const seld=(v.sel&&v.sel[cat.key])||[]; if(!seld.length) return; const list=seld.map(nm=>{const o=v.opt&&v.opt[cat.key+'::'+nm]; return nm+(o?(' ('+o+')'):'');}).join(', '); lines.push(cat.title+(cat.optional?' (מנות בודדות — לפי בקשה)':' (לבחירה '+cat.pick+')')+': '+list); });
   const text=lines.join('\n');
   window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
 }
@@ -1793,7 +1873,7 @@ function sendCalcToClient(key){
 }
 function bindChefmenu(c){
   const key=c.dataset.key;
-  const syncCat=(cat)=>{ const v=current.fields[key]; if(!v||!v.menu||!CHEF_MENUS[v.menu]) return; const cd=CHEF_MENUS[v.menu].cats.find(x=>x.key===cat); if(!cd) return; const sel=(v.sel&&v.sel[cat])||[]; c.querySelectorAll('.cm-item input[data-cat="'+cat+'"]').forEach(chk=>{ const ck=sel.indexOf(chk.dataset.item)>=0; const dis=(!ck&&sel.length>=cd.pick); chk.disabled=dis; chk.closest('.cm-item').classList.toggle('dis',dis); }); };
+  const syncCat=(cat)=>{ const v=current.fields[key]; if(!v||!v.menu||!CHEF_MENUS[v.menu]) return; const cd=CHEF_MENUS[v.menu].cats.find(x=>x.key===cat); if(!cd) return; if(cd.optional) return; const sel=(v.sel&&v.sel[cat])||[]; c.querySelectorAll('.cm-item input[data-cat="'+cat+'"]').forEach(chk=>{ const ck=sel.indexOf(chk.dataset.item)>=0; const dis=(!ck&&sel.length>=cd.pick); chk.disabled=dis; chk.closest('.cm-item').classList.toggle('dis',dis); }); };
   c.querySelectorAll('.cm-tab').forEach(b=>b.onclick=()=>{
     const v={menu:b.dataset.menu,sel:{},opt:{}};
     current.fields[key]=v; c.innerHTML=chefmenuInner(key,v); bindChefmenu(c); markDirty();
@@ -1806,7 +1886,7 @@ function bindChefmenu(c){
     current.fields[key]=v; chk.closest('.cm-item').classList.toggle('on',chk.checked);
     const opc=c.querySelector('.cm-opts[data-cat="'+cat+'"][data-dish="'+item+'"]'); if(opc) opc.style.display=chk.checked?'':'none';
     const cd=CHEF_MENUS[v.menu].cats.find(x=>x.key===cat), cnt=c.querySelector('.cm-count[data-cat="'+cat+'"]');
-    if(cnt&&cd){ const n=v.sel[cat].length; cnt.textContent='('+n+'/'+cd.pick+')'; cnt.classList.toggle('over',n>cd.pick); }
+    if(cnt&&cd){ const n=v.sel[cat].length; if(cd.optional){ cnt.textContent='('+n+')'; } else { cnt.textContent='('+n+'/'+cd.pick+')'; cnt.classList.toggle('over',n>cd.pick); } }
     syncCat(cat);
     markDirty();
   });
@@ -1859,7 +1939,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
+    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(_dupWarnedFor!==v && current && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -1935,7 +2015,7 @@ function scheduleAutosave(){
   clearTimeout(_autosaveTimer);
   _autosaveTimer=setTimeout(()=>{ if(dirty && current) saveReport(false); }, 1500);
 }
-function markDirty(){ dirty=true; updateStatus(); const n=$('#saveNote'); if(n) n.textContent='יש שינויים שלא נשמרו…'; scheduleAutosave(); }
+function markDirty(){ if(current && current.type==='endreport' && current.reviewed && EDITING){ current.reviewed=false; current.reviewedAt=0; const mr=$('#mgrReviewBtn'); if(mr){ mr.className='btn revpend'; mr.style.padding='9px 13px'; mr.style.fontSize='13.5px'; mr.textContent='🔍 אישור מנהל — עברתי על הדוח'; } } dirty=true; updateStatus(); const n=$('#saveNote'); if(n) n.textContent='יש שינויים שלא נשמרו…'; scheduleAutosave(); }
 
 function validateRequired(){
   const def=EVENT_TYPES[current.type]; const missing=[];
@@ -1965,7 +2045,7 @@ function collectIssues(r){
     if(!depOK(fld)) return;
     if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; if(sel.indexOf('__none__')<0 && sel.length<(fld.min||3)) out.push(fld.label+': נבחרו '+sel.length+' (לפחות '+(fld.min||3)+')'); return; }
     if(fld.req && blank(f[fld.key])) out.push('חסר: '+fld.label);
-    if(fld.type==='chefmenu'){ const cv=f[fld.key]; if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){ CHEF_MENUS[cv.menu].cats.forEach(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; const diff=cat.pick-seld.length; if(diff>0) out.push(menuMissMsg(cat.key,cat.title,diff)); else if(diff<0) out.push('נבחרו יותר מדי ב'+cat.title+' ('+seld.length+' מתוך '+cat.pick+')'); }); } }
+    if(fld.type==='chefmenu'){ const cv=f[fld.key]; if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){ CHEF_MENUS[cv.menu].cats.forEach(cat=>{ if(cat.optional) return; const seld=(cv.sel&&cv.sel[cat.key])||[]; const diff=cat.pick-seld.length; if(diff>0) out.push(menuMissMsg(cat.key,cat.title,diff)); else if(diff<0) out.push('נבחרו יותר מדי ב'+cat.title+' ('+seld.length+' מתוך '+cat.pick+')'); }); } }
   }));
   // עקביות מבוגרים
   if(r.type==='meshulav'){
@@ -2109,7 +2189,7 @@ function buildTree(q,autoScroll){
     try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
   }
 }
-function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; current._syncAt=r.updatedAt||0; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); }
+function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; current._syncAt=r.updatedAt||0; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); const od=String((r.fields&&r.fields.eventDate)||'').trim(); _dupWarnedFor=od; if(!pdf && /^\d{4}-\d{2}-\d{2}$/.test(od) && eventsOnDate(od,r.id).length){ setTimeout(()=>dupDateAlert(od,r.id),260); } }
 
 async function deleteReport(){
   if(!current||!current.id) return;
@@ -2137,7 +2217,7 @@ function buildDocHTML(r){
         const cv=f[fld.key]; let inner='—';
         if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){
           const m=CHEF_MENUS[cv.menu];
-          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return nbidi(nm+(o?(' ('+o+')'):''));}).join(' · '); return '<div style="margin-top:4px"><b>'+nbidi(cat.title+' (לבחירה '+cat.pick+'):')+'</b> '+list+'</div>'; }).filter(Boolean).join('');
+          const parts=m.cats.map(cat=>{ const seld=(cv.sel&&cv.sel[cat.key])||[]; if(!seld.length) return ''; const list=seld.map(nm=>{const o=cv.opt&&cv.opt[cat.key+'::'+nm]; return nbidi(nm+(o?(' ('+o+')'):''));}).join(' · '); return '<div style="margin-top:4px"><b>'+nbidi(cat.title+(cat.optional?' (לפי בקשה):':' (לבחירה '+cat.pick+'):'))+'</b> '+list+'</div>'; }).filter(Boolean).join('');
           inner='<b>'+bidi(m.name)+'</b>'+(parts||'<div style="color:#9aa6b3">לא סומנו מנות</div>');
         }
         return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v">'+inner+'</td></tr>';
@@ -2156,7 +2236,7 @@ function buildDocHTML(r){
             if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const none=sel.indexOf('__none__')>=0; const html=none?nbidi('ללא'):sel.map(x=>nbidi(x)).join(' · '); const has=none||sel.length; return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(has?'':'empty')+'">'+(has?html:'—')+'</td></tr>'; }
       if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
-      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); const supTel=(!empty&&SUPPLIER_KEYS.indexOf(fld.key)>=0)?supPhoneDocHTML(v,fld.key):''; return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${empty?'—':bidiLines(v)}${supTel}</td></tr>`;
+      let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); const isSup=SUPPLIER_KEYS.indexOf(fld.key)>=0; const supTel=(!empty&&isSup)?supPhoneDocHTML(v,fld.key):''; const nameHTML=empty?'—':(isSup?('<span class="sup-name">'+bidiLines(v)+'</span>'):bidiLines(v)); return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${nameHTML}${supTel}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${lbl(sec.title)}</h2><table>${rows}</table>`;
   }).join('');
@@ -2900,7 +2980,7 @@ function chefHasMenu(r){ const f=r.fields||{}; return !!(f.kidsMenu||(f.adultsMe
 function chefMissing(cv){
   if(!(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu])) return [];
   const m=CHEF_MENUS[cv.menu];
-  return m.cats.map(cat=>{ const n=((cv.sel&&cv.sel[cat.key])||[]).length; return n<cat.pick?(cat.title+': נבחרו '+n+' מתוך '+cat.pick):''; }).filter(Boolean);
+  return m.cats.map(cat=>{ if(cat.optional) return ''; const n=((cv.sel&&cv.sel[cat.key])||[]).length; return n<cat.pick?(cat.title+': נבחרו '+n+' מתוך '+cat.pick):''; }).filter(Boolean);
 }
 function chefAdultsHTML(cv){
   if(!(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu])) return '';
