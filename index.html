@@ -571,7 +571,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v174</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v175</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -727,7 +727,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v174';
+const APP_VERSION = 'v175';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1304,6 +1304,7 @@ function eventsOnDate(date, exceptId){
       && String((r.fields&&r.fields.eventDate)||'').trim()===d );
 }
 let _dupWarnedFor='';
+let NEW_REPORT=false;
 // אזהרה קצרה: כבר יש אירוע באותו תאריך — אישור/ביטול
 function dupDateAlert(date, exceptId){
   const others=eventsOnDate(date, exceptId);
@@ -1532,12 +1533,12 @@ function renderPicker(){
   app.querySelectorAll('.pick-card').forEach(c=>c.onclick=()=>newReport(c.dataset.type));
 }
 function newReport(type){
-  _dupWarnedFor='';
+  _dupWarnedFor=''; NEW_REPORT=true;
   current={id:uid(),brand:BRAND,type,status:'draft',fields:{eventKind:EVENT_TYPES[type].name},createdAt:Date.now(),updatedAt:Date.now()};
   EDITING=true; renderForm();
 }
 function newEndReport(){
-  _dupWarnedFor='';
+  _dupWarnedFor=''; NEW_REPORT=false;
   current={id:uid(),brand:BRAND,type:'endreport',status:'draft',fields:{eventKind:'דוח סוף אירוע'},createdAt:Date.now(),updatedAt:Date.now()};
   EDITING=true; renderForm(); window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1939,7 +1940,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(_dupWarnedFor!==v && current && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
+    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -2189,7 +2190,7 @@ function buildTree(q,autoScroll){
     try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
   }
 }
-function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; current._syncAt=r.updatedAt||0; BRAND=r.brand; EDITING=false; applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); const od=String((r.fields&&r.fields.eventDate)||'').trim(); _dupWarnedFor=od; if(!pdf && /^\d{4}-\d{2}-\d{2}$/.test(od) && eventsOnDate(od,r.id).length){ setTimeout(()=>dupDateAlert(od,r.id),260); } }
+function openById(id,pdf){ const r=MEM.reports.find(x=>x.id===id); if(!r) return; current=r; current._syncAt=r.updatedAt||0; BRAND=r.brand; EDITING=false; NEW_REPORT=false; _dupWarnedFor=String((r.fields&&r.fields.eventDate)||'').trim(); applyBrand(); syncBrandUI(); renderForm(); if(pdf) setTimeout(downloadPDF,120); else window.scrollTo({top:0,behavior:'smooth'}); }
 
 async function deleteReport(){
   if(!current||!current.id) return;
