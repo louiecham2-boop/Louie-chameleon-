@@ -56,8 +56,9 @@
   .brand-switch button .chip{width:10px;height:10px;border-radius:50%}
   .brand-switch button.on{background:var(--brand);color:#fff}
   .brand-switch button.on .chip{background:#fff}
-  .nav{display:flex;gap:4px;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:3px}
-  .nav button{border:0;background:transparent;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--muted);font-size:14px}
+  .nav{display:flex;gap:4px;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:3px;flex-wrap:nowrap;min-width:0;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav button{border:0;background:transparent;padding:8px 16px;border-radius:8px;cursor:pointer;font-weight:700;color:var(--muted);font-size:14px;white-space:nowrap;flex:0 0 auto}
   .nav button.on{background:var(--ink);color:#fff}
 
   .btn{border:1px solid var(--line2);background:#fff;color:var(--ink);padding:10px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:8px;transition:.12s}
@@ -74,7 +75,7 @@
 
   /* gate */
   .gate{min-height:72vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .gate-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px;width:300px;text-align:center}
+  .gate-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:34px 30px;width:300px;max-width:100%;text-align:center}
   .gate-card .g-dot{width:18px;height:18px;border-radius:6px;background:var(--brand);box-shadow:0 0 0 6px var(--brand-soft);margin:0 auto 14px}
   .gate-card .g-dot.pulse{animation:gpulse 1s ease-in-out infinite}
   @keyframes gpulse{0%,100%{transform:scale(1);box-shadow:0 0 0 6px var(--brand-soft)}50%{transform:scale(1.18);box-shadow:0 0 0 11px var(--brand-soft)}}
@@ -83,6 +84,22 @@
   .gate-card input{width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px;text-align:center;font-size:16px;letter-spacing:3px;margin-bottom:12px;font-family:inherit}
   .gate-card input:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
   .gate-card .btn{width:100%;justify-content:center}
+  /* חוזים ופרוטוקולים */
+  .ct-card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px;box-shadow:var(--shadow)}
+  .ct-card .ct-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px}
+  .ct-card .ct-title{font-weight:800;font-size:15.5px;flex:1;min-width:120px}
+  .ct-badge{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:var(--brand-soft);color:var(--brand-ink);white-space:nowrap}
+  .ct-badge.b-doc{background:#eaf4ff;color:#1f5fa8}
+  .ct-badge.b-proto{background:#eef7ee;color:#2f7d32}
+  .ct-badge.b-other{background:#f3eefb;color:#6a3fb0}
+  .ct-body{font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.55;margin:4px 0 8px;max-height:130px;overflow:hidden;position:relative}
+  .ct-body.clamped::after{content:"";position:absolute;inset-block-end:0;inset-inline:0;height:34px;background:linear-gradient(transparent,var(--panel))}
+  .ct-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .ct-empty{text-align:center;color:var(--muted);padding:34px 12px;font-weight:700}
+  .ct-filebar{display:flex;align-items:center;gap:10px;margin:2px 0 4px;flex-wrap:wrap}
+  .ct-filename{font-size:13px;color:var(--muted);font-weight:700;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #ctSearch{border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-size:16px;font-family:inherit;background:#fff;color:var(--ink)}
+  #ctSearch:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
   .g-err{color:#c0392b;font-size:13px;font-weight:700;margin-top:10px;min-height:16px}
 
   h1.page{font-size:22px;font-weight:800;margin:4px 0 2px;letter-spacing:-.3px}
@@ -130,13 +147,12 @@
   .date-readout .dr-num{font-weight:900;letter-spacing:.3px}
   .date-readout.empty{background:#f3f5f8;border-color:var(--line2);color:var(--muted);font-weight:700}
   .date-readout .dr-ico{font-size:15px}
-  /* תאריך האירוע — לחיצה על הקריאון פותחת לוח-שנה מובנה (לא תלוי בבורר התאריך של הדפדפן — עובד בכל מכשיר) */
+  /* תאריך האירוע — מציגים את הקריאון היפה (יום + תאריך), ומעליו שדה תאריך אמיתי שקוף שלוכד את הלחיצה ופותח את בורר התאריך הטבעי (אמין ב-iOS) */
   .evdate-wrap{position:relative}
+  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+  .viewmode .evdate-wrap input.evdate{display:none}
   .date-readout{cursor:pointer}
-  .evdate-wrap .date-readout:hover{filter:brightness(.98)}
   .viewmode .date-readout{cursor:default}
-  .viewmode .evdate-wrap .date-readout:hover{filter:none}
-  .hc-cell[disabled]{opacity:.32;cursor:not-allowed;background:#f3f5f8}
   .doc .d-meta .m-date{color:var(--brand);font-weight:900}
   .field .hint{font-size:11.5px;color:var(--muted);font-weight:600}
   .field input,.field textarea,.field select{width:100%;border:1px solid var(--line2);border-radius:9px;padding:10px 12px;font-size:16px;background:#fcfdfe;color:var(--ink);font-family:inherit}
@@ -145,7 +161,7 @@
   .field textarea.big{min-height:172px;line-height:1.6}
   .yn-raw{font-size:12.5px;color:var(--amber);font-weight:700;margin-top:5px;white-space:pre-wrap}
   .viewmode .field input,.viewmode .field textarea,.viewmode .field select{pointer-events:none;background:#eef2f7;color:#3a4654}
-  .viewmode .yesno button,.viewmode .ynn-btns button,.viewmode .cm-tab,.viewmode .cm-item,.viewmode .cm-opt,.viewmode .cr-op,.viewmode .cr-del,.viewmode .calc-add,.viewmode .calc-reset,.viewmode #statusPills button,.viewmode .convert-bar button,.viewmode .et-sel,.viewmode .et-other{pointer-events:none;opacity:.85}
+  .viewmode .yesno button,.viewmode .ynn-btns button,.viewmode .cm-tab,.viewmode .cm-item,.viewmode .cm-opt,.viewmode .cr-op,.viewmode .cr-del,.viewmode .calc-add,.viewmode .calc-reset,.viewmode #statusPills button,.viewmode .convert-bar button,.viewmode .et-sel,.viewmode .et-other,.viewmode .eet-tog button,.viewmode .eet-refresh{pointer-events:none;opacity:.85}
   .view-banner{display:flex;align-items:center;gap:10px;background:#fff7e6;border:1px solid #f0d488;color:#7a5a10;border-radius:11px;padding:10px 13px;margin-bottom:12px;font-weight:700;font-size:13.5px}
   .view-banner .mini-edit{margin-inline-start:auto;background:var(--brand);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap}
   .seg{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:#fff}
@@ -381,6 +397,30 @@
   .btn.convert:hover{background:#fff;border-style:solid}
   /* ---- chef menu picker ---- */
   .chefmenu{border:1px solid var(--line2);border-radius:11px;padding:11px;background:#fcfdfe}
+  .eeteam{border:1px solid var(--line2);border-radius:11px;padding:11px;background:#fcfdfe}
+  .eet-grp{margin-bottom:12px} .eet-grp:last-child{margin-bottom:0}
+  .eet-gh{font-weight:800;font-size:14px;color:var(--brand-ink);margin:2px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .eet-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 9px;margin-bottom:6px}
+  .eet-role{font-size:12px;color:#5a6675;font-weight:700;min-width:60px}
+  .eet-name{flex:1;min-width:120px;border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font-size:14px;direction:rtl}
+  .eet-name[readonly]{background:#f6f8fb;border-color:#eef1f5;color:#1a2330}
+  .eet-tog{display:flex;gap:4px;flex:0 0 auto}
+  .eet-tog button{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:6px 11px;font-size:13px;font-weight:700;cursor:pointer;color:#5a6675}
+  .eet-tog button.on.yes{background:#e6f6ec;border-color:#9ed8b4;color:#1f7a44}
+  .eet-tog button.on.no{background:#fdeaea;border-color:#e6a6a6;color:#b3331f}
+  .eet-phone{flex-basis:100%;font-size:12px}
+  .eet-other{margin-top:6px}
+  .eet-other input{width:100%;border:1px dashed var(--line2);border-radius:7px;padding:7px 9px;font-size:14px;direction:rtl;background:#fff}
+  .eet-other input[readonly]{background:#f6f8fb}
+  .eet-refresh{background:#eef4fb;border:1px solid #d3e2f0;color:#16456f;border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer}
+  .eet-empty{color:#9aa6b3;font-size:13px;padding:4px 2px}
+  .eet-confirm{margin-top:11px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px dashed var(--line2);padding-top:11px}
+  .eet-approve{background:var(--brand);color:#fff;border:0;border-radius:9px;padding:10px 15px;font-size:14px;font-weight:800;cursor:pointer}
+  .eet-confirm.done .eet-approve{background:#1f7a44}
+  .eet-need{color:#b3331f;font-size:12.5px;font-weight:700}
+  .eet-cstat{font-weight:800}
+  .eet-confirm.done .eet-cstat{color:#1f7a44}
+  .field.missing .eet-confirm{background:#fdeaea;border-top:0;border-radius:9px;padding:9px 10px}
   .cm-note{font-size:12px;font-weight:600;color:#8a6d1a;background:#fff7e0;border:1px solid #ecd793;border-radius:7px;padding:4px 8px;margin-top:5px}
   .cm-tabs{display:flex;gap:8px;margin-bottom:8px}
   .cm-tab{flex:1;border:1px solid var(--line2);background:#fff;border-radius:9px;padding:10px;font-weight:800;cursor:pointer;color:var(--muted);font-size:14px}
@@ -417,6 +457,11 @@
   .chk-opt.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand-ink)}
   .chk-opt.none{margin-inline-start:auto}
   .chk-opt.none.on{background:var(--gray-bg);border-color:#9aa6b3;color:#445}
+  .checklist{display:flex;flex-wrap:wrap;gap:8px}
+  .checklist .chk-opt.on{background:#e6f6ec;border-color:#9ed8b4;color:#1f7a44}
+  .cl-status{flex-basis:100%;font-size:12.5px;font-weight:700;margin-top:1px}
+  .cl-status.ok{color:#1f7a44}
+  .cl-status.miss{color:#b3331f}
   .welcome-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:14px}
   .welcome-card.sent{border-color:#cfe9d8;background:#fff}
   .welcome-card .wc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
@@ -430,6 +475,8 @@
   .welcome-card .wc-note{margin-top:8px;font-size:12px;color:var(--muted);font-weight:600}
   .srow .btn.sm.wa101{background:#25d366;color:#fff;border:none;font-weight:800}
   body.chefmode .nav, body.chefmode .brand-switch, body.chefmode #brandBanner{display:none!important}
+  #nav button[data-view="contracts"]{display:none}
+  body.owner #nav button[data-view="contracts"]{display:inline-block}
   .chef-wrap{max-width:760px;margin:0 auto}
   .chef-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 4px}
   .chef-title{font-size:22px;font-weight:900;color:var(--ink)}
@@ -449,14 +496,14 @@
   .sup-phone:empty{display:none}
   .sup-phone a{color:#1f8a4c;font-weight:800;text-decoration:none;direction:ltr;display:inline-block}
   .hebdate-btn[disabled]{opacity:1;cursor:default}
-  .modal.hebcal{width:min(92vw,330px);max-width:330px;margin:auto;padding:16px}
-  .hc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
-  .hc-title{font-weight:800;font-size:16px;color:var(--ink);flex:1;text-align:center;white-space:nowrap}
-  .hc-nav{flex:0 0 auto;background:var(--brand-soft);border:1px solid var(--brand);color:var(--brand);border-radius:9px;width:38px;height:38px;font-size:20px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit}
-  .hc-dows{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:3px;margin-bottom:5px;width:100%}
-  .hc-dows span{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:4px 0;min-width:0}
-  .hc-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:4px;width:100%}
-  .hc-cell{aspect-ratio:1;min-width:0;border:0;background:#f3f5f8;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
+  .modal.hebcal{max-width:340px}
+  .hc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .hc-title{font-weight:800;font-size:17px;color:var(--ink)}
+  .hc-nav{background:var(--brand-soft);border:1px solid var(--brand);color:var(--brand);border-radius:9px;width:40px;height:40px;font-size:22px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit}
+  .hc-dows{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:3px;margin-bottom:5px}
+  .hc-dows span{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:4px 0}
+  .hc-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:4px}
+  .hc-cell{aspect-ratio:1;border:0;background:#f3f5f8;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
   .hc-cell.empty{background:transparent;pointer-events:none}
   .hc-cell.today{outline:2px solid var(--brand);outline-offset:-2px}
   .hc-cell.sel{background:var(--brand);color:#fff}
@@ -519,6 +566,26 @@
   .cf-doneat{text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
   .file101-row{display:flex;align-items:center;gap:10px;margin:2px 0 4px;flex-wrap:wrap}
   .file101-name{font-size:13px;color:var(--muted);font-weight:700;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sigpad-wrap{margin:2px 0 2px}
+  .sigpad{width:100%;max-width:100%;height:120px;border:1.5px dashed var(--line2);border-radius:10px;background:#fff;touch-action:none;display:block}
+  .sigclear{margin-top:6px}
+  #signOverlay{position:fixed;inset:0;z-index:200;background:#f3f5f8;overflow:auto;-webkit-overflow-scrolling:touch;direction:rtl;padding:0}
+  #signOverlay .sign-wrap{max-width:620px;margin:0 auto;padding:18px 16px 40px}
+  #signOverlay .sign-head{text-align:center;padding:16px 12px;border-radius:14px;color:#fff;margin-bottom:14px}
+  #signOverlay .sign-head h1{margin:0;font-size:22px;font-weight:800}
+  #signOverlay .sign-head p{margin:4px 0 0;opacity:.92;font-size:13.5px}
+  #signOverlay .sign-card{background:#fff;border:1px solid var(--line2);border-radius:14px;padding:16px;margin-bottom:14px}
+  #signOverlay .sign-text{font-size:13.5px;line-height:1.7;text-align:right;white-space:pre-wrap;max-height:46vh;overflow:auto;border:1px solid #eef1f5;border-radius:10px;padding:12px;background:#fcfdff}
+  #signOverlay label{display:block;font-weight:700;font-size:13px;margin:12px 2px 5px}
+  #signOverlay input[type=text]{width:100%;border:1px solid var(--line2);border-radius:9px;padding:11px;font-size:16px;font-family:inherit}
+  #signOverlay .big{width:100%;border:0;border-radius:12px;padding:15px;font-size:17px;font-weight:800;color:#fff;font-family:inherit}
+  .supct-sec{margin:14px 0 4px;font-weight:800;font-size:14px;color:var(--ink)}
+  .supct-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#fff;border:1px solid var(--line2);border-radius:11px;padding:10px 12px;margin:6px 0}
+  .supct-row .who{flex:1;min-width:120px}
+  .supct-row .nm{font-weight:700}
+  .supct-row .st{font-size:12px;font-weight:700;border-radius:20px;padding:2px 10px}
+  .supct-row .st.pend{background:#fff4d6;color:#8a6b12}
+  .supct-row .st.done{background:#dff3e4;color:#1b7a3d}
   /* ===== תזכורות מנהלת המשרד ===== */
   .rem-bell{position:fixed;inset-inline-end:16px;bottom:18px;z-index:75;width:56px;height:56px;border-radius:50%;background:#b3261e;color:#fff;border:none;box-shadow:0 8px 24px rgba(179,38,30,.4);font-size:24px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:.15s}
   .rem-bell:hover{filter:brightness(1.08)}
@@ -572,7 +639,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v179</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v188</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -585,6 +652,7 @@
       <button data-view="archive">ארכיון הדוחות</button>
       <button data-view="endreport">📋 דוחות סוף אירוע</button>
       <button data-view="chef">👨‍🍳 תפריטי שף</button>
+      <button data-view="contracts">📁 חוזים ופרוטוקולים</button>
     </div>
   </div>
 </header>
@@ -682,7 +750,7 @@
     <div class="modal-h" id="wModalTitle">עובד / ספק חדש</div>
     <label>שם</label><input id="wName" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <label>תפקיד</label><select id="wRole">
-      <option value="manager">מנהל</option><option value="operator">מפעיל</option><option value="dj">די-ג׳יי</option><option value="photographer">צלם</option><option value="other">אחר</option>
+      <option value="manager">מנהל</option><option value="operator">מפעיל</option><option value="dj">די-ג׳יי</option><option value="photographer">צלם</option><option value="runner">ראנר/ית</option><option value="bartender">ברמן/ית</option><option value="other">אחר</option>
     </select>
     <label>טלפון</label><input id="wPhone" type="tel" dir="ltr">
     <div class="chk-row"><label class="chk"><input type="checkbox" id="wContract"> חוזה עבודה</label><label class="chk"><input type="checkbox" id="w101"> טופס 101</label></div>
@@ -695,6 +763,41 @@
       <button id="wSave" class="btn primary">שמירה</button>
       <button id="wDel" class="btn del">מחק</button>
       <button id="wCancel" class="btn ghost">ביטול</button>
+    </div>
+  </div>
+</div>
+<div id="contractWModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-h" id="cwModalTitle">שליחת חוזה עבודה</div>
+    <label>מותג</label><select id="cwBrand">
+      <option value="louie">לואי</option><option value="kamilion">קמיליון</option>
+    </select>
+    <p class="sub" style="margin:6px 0 2px">אפשר לערוך את כל הטקסט לפני השליחה. שדות למילוי מסומנים ב-______ (ת.ז, כתובת, שכר לשעה, פיקדון, תאריך).</p>
+    <label>נוסח החוזה</label><textarea id="cwBody" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" rows="16" style="line-height:1.5"></textarea>
+    <div class="modal-foot">
+      <button id="cwSend" class="btn primary">📲 שלח חוזה בוואטסאפ</button>
+      <button id="cwReset" class="btn ghost">↺ אפס נוסח</button>
+      <button id="cwCancel" class="btn ghost">ביטול</button>
+    </div>
+  </div>
+</div>
+<div id="supplierContractModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-h" id="scModalTitle">חוזה ספק</div>
+    <label>מותג</label><select id="scBrand">
+      <option value="louie">לואי</option><option value="kamilion">קמיליון</option>
+    </select>
+    <p class="sub" style="margin:6px 0 2px">אפשר לערוך את כל הטקסט לפני השליחה. שדות למילוי מסומנים ב-______ (ת.ז/ח.פ, כתובת, דוא"ל, סכום, תאריך).</p>
+    <label>נוסח החוזה</label><textarea id="scBody" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" rows="14" style="line-height:1.5"></textarea>
+    <label>חתימת החברה (לא חובה — חתמו באצבע)</label>
+    <div class="sigpad-wrap"><canvas id="scSigCompany" class="sigpad" width="760" height="240"></canvas><button type="button" class="btn sm ghost sigclear" data-sig="scSigCompany">נקה חתימה</button></div>
+    <label>חתימת הספק/ית (לא חובה — מסרו את המכשיר לחתימה)</label>
+    <div class="sigpad-wrap"><canvas id="scSigSupplier" class="sigpad" width="760" height="240"></canvas><button type="button" class="btn sm ghost sigclear" data-sig="scSigSupplier">נקה חתימה</button></div>
+    <div class="modal-foot">
+      <button id="scSend" class="btn primary">📲 צור ושלח PDF</button>
+      <button id="scRemote" class="btn wa101">✍️ שלח לספק לחתימה מרחוק</button>
+      <button id="scReset" class="btn ghost">↺ אפס נוסח</button>
+      <button id="scCancel" class="btn ghost">ביטול</button>
     </div>
   </div>
 </div>
@@ -725,10 +828,31 @@
     </div>
   </div>
 </div>
+<div id="contractModal" class="modal-bg" style="display:none">
+  <div class="modal">
+    <div class="modal-h" id="ctModalTitle">פריט חדש</div>
+    <label>כותרת</label><input id="ctTitle" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="למשל: חוזה ספק קייטרינג / פרוטוקול פתיחת אירוע">
+    <label>סוג</label><select id="ctCat">
+      <option value="contract">📄 חוזה</option>
+      <option value="protocol">📋 פרוטוקול</option>
+      <option value="other">🗂️ אחר</option>
+    </select>
+    <label>תוכן / טקסט (לא חובה)</label><textarea id="ctBody" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" rows="6" placeholder="אפשר להקליד או להדביק כאן את הטקסט המלא"></textarea>
+    <label>צירוף קובץ (PDF/תמונה · עד 700KB)</label>
+    <input id="ctFileInput" type="file" accept="application/pdf,image/*" style="display:none">
+    <div class="ct-filebar"><button type="button" class="btn sm" id="ctFileBtn">📎 בחר/י קובץ</button><span id="ctFileName" class="ct-filename">—</span><button type="button" class="btn sm ghost" id="ctFileClear" style="display:none">הסר</button></div>
+    <label>או קישור לקובץ גדול (Drive/iCloud)</label><input id="ctLink" type="url" dir="ltr" placeholder="https://..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <div class="modal-foot">
+      <button id="ctSave" class="btn primary">שמירה</button>
+      <button id="ctDel" class="btn del">מחק</button>
+      <button id="ctCancel" class="btn ghost">ביטול</button>
+    </div>
+  </div>
+</div>
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v179';
+const APP_VERSION = 'v188';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -758,7 +882,11 @@ const FIREBASE_CONFIG = {
 };
 const APP_PASSCODE = "3334";   /* קוד כניסה אחד לכל הצוות. שנה/י למספר שתרצה, או השאר/י "" לביטול */
 const CHEF_PASSCODE = "2580";  /* קוד נפרד לשף — רואה רק את התפריטים */
+const OWNER_PASSCODE = "5072";  /* הקוד האישי שלך (מנהל-על) — גישה מלאה + רובריקת החוזים. ניתן לשנות כאן בעתיד אם תרצה */
 let CHEF_MODE = false;
+let ROLE = 'manager';
+let CONTRACTS_UNLOCKED = false;
+let CONTRACTS_LOCKED = false;
 let CHEF_TAB = 'kids';
 let CHEF_COLLAPSED = {};
 let HEBCAL = {key:'',y:0,m:0};
@@ -819,7 +947,7 @@ async function loadHistory(){
   HIST_LOADED=true; return true;
 }
 async function dbLoad(){
-  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[],tastings:[]};
+  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[],tastings:[],contracts:[],supplierContracts:[]};
   if(CLOUD && fb.db){
     const cutoff=histCutoff();
     try{ const s=await fb.db.collection('reports').where('fields.eventDate','>=',cutoff).get(); MEM.reports=s.docs.map(d=>d.data()); }
@@ -829,6 +957,10 @@ async function dbLoad(){
     try{ const sw=await fb.db.collection('workers').get(); MEM.workers=sw.docs.map(d=>d.data()); }
     catch(e){ console.warn(e); }
     try{ const st=await fb.db.collection('tastings').get(); MEM.tastings=st.docs.map(d=>d.data()); }
+    catch(e){ console.warn(e); }
+    try{ const sk=await fb.db.collection('contracts').get(); MEM.contracts=sk.docs.map(d=>d.data()); }
+    catch(e){ console.warn(e); }
+    try{ const ss=await fb.db.collection('supplierContracts').get(); MEM.supplierContracts=ss.docs.map(d=>d.data()); }
     catch(e){ console.warn(e); }
     try{ const sc=await fb.db.collection('catering').where('date','>=',cutoff).get(); MEM.catering=sc.docs.map(d=>d.data()); }
     catch(e){ try{ const sc=await fb.db.collection('catering').get(); MEM.catering=sc.docs.map(d=>d.data()); }catch(_){} }
@@ -843,6 +975,7 @@ async function dbLoad(){
   if(!MEM.workers) MEM.workers=[];
   if(!MEM.catering) MEM.catering=[];
   if(!MEM.tastings) MEM.tastings=[];
+  if(!MEM.supplierContracts) MEM.supplierContracts=[];
   return MEM;
 }
 async function persist(report, force){
@@ -943,6 +1076,16 @@ function subscribeCloud(){
   fb.db.collection('tastings').onSnapshot(snap=>{
     MEM.tastings=snap.docs.map(d=>d.data()); afterCloudSync();
   }, err=>console.warn('snapshot t',err));
+  fb.db.collection('contracts').onSnapshot(snap=>{
+    MEM.contracts=snap.docs.map(d=>d.data());
+    if(VIEW==='contracts' && !CONTRACTS_LOCKED && (ROLE==='owner'||CONTRACTS_UNLOCKED)){ const m=$('#contractModal'); if(!m||m.style.display==='none') renderContracts(); }
+  }, err=>console.warn('snapshot k',err));
+  fb.db.collection('supplierContracts').onSnapshot(snap=>{
+    const prev=(MEM.supplierContracts||[]).slice();
+    MEM.supplierContracts=snap.docs.map(d=>d.data());
+    try{ MEM.supplierContracts.forEach(c=>{ const before=prev.find(x=>x.id===c.id); if(c.status==='signed' && (!before || before.status!=='signed')){ toast('✅ '+(c.supplierName||'ספק')+' חתם/ה על החוזה'); } }); }catch(e){}
+    if(VIEW==='sched' && SCHEDTAB==='workers' && modalsClosed()) renderWorkers();
+  }, err=>console.warn('snapshot sc',err));
   fb.db.collection('catering').where('date','>=',cutoff).onSnapshot(snap=>{
     mergeWin('catering', snap.docs.map(d=>d.data()), rowInWin); afterCloudSync();
   }, err=>{ console.warn('snapshot c',err); fb.db.collection('catering').onSnapshot(s=>{ MEM.catering=s.docs.map(d=>d.data()); afterCloudSync(); }, e2=>console.warn(e2)); });
@@ -951,16 +1094,92 @@ function modalsClosed(){ return ['#schedModal','#workerModal','#cateringModal'].
 
 let BRAND='louie', VIEW='new', current=null, EDITING=true;
 let SCHEDVIEW='list', schedY=null, schedM=null, editingAssign=null;
-let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null, editingTasting=null;
+let SCHEDTAB='assign', editingWorker=null, editingCater=null, pendingFile101=null, editingTasting=null, contractWorkerId=null;
 let REM_AUTO_SHOWN=false;
 let TST_WARN_SHOWN=false;
-const WROLES=[['manager','מנהלים'],['operator','מפעילים'],['dj','די-ג׳יים'],['photographer','צלמים'],['other','אחר']];
+const WROLES=[['manager','מנהלים'],['operator','מפעילים'],['dj','די-ג׳יים'],['photographer','צלמים'],['runner','ראנרים'],['bartender','ברמניות'],['other','אחר']];
 const BRAND_NAME={louie:'לואי', kamilion:'קמיליון'};
+/* פרטי החברה לחוזה העבודה — לפי מותג */
+const CONTRACT_COMPANY={louie:{name:'לואיס אירועים בע״מ', hp:'514791664'}, kamilion:{name:'קמיליון אירועים בע״מ', hp:'515621118'}};
+/* תפקידים שעבורם מוצג חוזה עבודה (ראנרים / ברמניות בלבד) */
+const CONTRACT_ROLES=['runner','bartender'];
+/* תפקידים שעבורם מוצג חוזה ספק (די ג׳יי / צלם / מפעיל / אחר) */
+const SUPPLIER_CONTRACT_ROLES=['operator','dj','photographer','other'];
+/* בונה את נוסח חוזה העבודה כטקסט מלא הניתן לעריכה. שדות שלא ידועים מסומנים ב-______ למילוי ידני. */
+function buildContractText(w, brand){
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  const name=(w&&w.name)||'______';
+  const phone=(w&&w.phone)||'______';
+  return 'הסכם עבודה אישי – '+co.name+'\n\n'+
+'נערך ונחתם ביום __________ בין '+co.name+', ח.פ. '+co.hp+' (להלן: "המעסיק") לבין:\n\n'+
+'שם העובד/ת: '+name+'   ת.ז.: ______   כתובת: ______   טלפון: '+phone+'\n\n'+
+'1. תפקיד ותחילת עבודה\n'+
+'העובד/ת יועסק/תועסק בתפקיד ראנר/ית, ברמן/ית או כל תפקיד אחר שיוגדר על ידי המעסיק, ויבצע/תבצע את העבודה בנאמנות, במסירות ובהתאם להנחיות המעסיק.\n\n'+
+'2. שעות עבודה ומשמרות\n'+
+'העבודה מבוצעת במשמרות בהתאם לצורכי העסק. המעסיק רשאי לשנות, להוסיף או לבטל משמרות בהתאם לצרכי העסק. אין בהסכם זה כדי להבטיח מספר מינימלי של משמרות.\n\n'+
+'3. שכר\n'+
+'שכר העבודה יעמוד על ______ ₪ לשעה. דמי נסיעות ישולמו בהתאם להוראות הדין ויצוינו בתלוש השכר כנדרש.\n\n'+
+'4. איחורים, היעדרויות וביטול משמרות\n'+
+'העובד/ת מתחייב/ת להגיע בזמן למשמרות שנקבעו. אי-הגעה למשמרת ללא הודעה מוקדמת, ביטול משמרת ללא אישור או איחור משמעותי המוביל לנזק תפעולי לעסק, יהוו הפרת משמעת. בכפוף להוראות הדין, המעסיק יהיה רשאי לבצע ניכוי מוסכם של עד 200 ₪ בגין הוצאות ונזקים תפעוליים שנגרמו לעסק.\n\n'+
+'5. סודיות\n'+
+'העובד/ת מתחייב/ת לשמור בסודיות כל מידע עסקי, מסחרי או תפעולי שהגיע לידיעתו/ה במהלך העבודה ולאחריה.\n\n'+
+'6. מצלמות אבטחה\n'+
+'ידוע לעובד/ת כי בשטח העסק מותקנות מצלמות אבטחה לצורכי ביטחון, מניעת גניבות, שמירה על רכוש העסק ובקרה תפעולית. תיעוד המצלמות עשוי לשמש את המעסיק בהתאם לדין.\n\n'+
+'7. ציוד עבודה ופיקדון\n'+
+'המעסיק רשאי למסור לעובד/ת ציוד עבודה. להבטחת החזרת הציוד, יופקד סך של ______ ₪ כפיקדון, אשר יוחזר עם החזרת הציוד כשהוא תקין, למעט בלאי סביר. המעסיק רשאי לקזז מהפיקדון את שווי הציוד שלא הוחזר או שניזוק.\n\n'+
+'8. שמירה על רכוש העסק\n'+
+'חל איסור להוציא מהעסק ציוד, מוצרים, מזון או שתייה ללא אישור מפורש של הנהלת העסק.\n\n'+
+'9. שימוש בטלפון נייד\n'+
+'השימוש בטלפון במהלך המשמרת יתבצע לצורכי עבודה בלבד או במקרים דחופים ובאישור מנהל/ת המשמרת.\n\n'+
+'10. אלכוהול וסמים\n'+
+'חל איסור מוחלט להגיע לעבודה תחת השפעת אלכוהול או סמים.\n\n'+
+'11. פרסום ברשתות חברתיות\n'+
+'העובד/ת לא יצלם/תצלם ולא יפרסם/תפרסם תמונות, סרטונים או מידע מתוך העסק ללא אישור מראש ובכתב מהמעסיק.\n\n'+
+'12. בדיקת תיקים\n'+
+'המעסיק רשאי לבצע בדיקה סבירה של תיקים וחפצים אישיים ביציאת העובד/ת מהעסק, תוך שמירה על כבודו/ה ופרטיותו/ה.\n\n'+
+'13. סיום עבודה\n'+
+'סיום יחסי העבודה ייעשה בהתאם להוראות הדין וחוק הודעה מוקדמת.\n\n'+
+'14. שונות\n'+
+'הסכם זה אינו מקנה זכות לקביעות או להיקף עבודה מסוים. העובד/ת מצהיר/ה כי קרא/ה את ההסכם, הבין/ה אותו וחתם/ה עליו מרצונו/ה החופשי.\n\n'+
+'חתימת המעסיק: ____________________\n\n'+
+'חתימת העובד/ת: ____________________\n\n'+
+'תאריך: ____________________';
+}
+/* בונה את נוסח חוזה הספק (די ג׳יי / צלם / מפעיל) כטקסט מלא הניתן לעריכה. */
+function buildSupplierContractText(w, brand){
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  const name=(w&&w.name)||'______';
+  const phone=(w&&w.phone)||'______';
+  return 'הסכם התקשרות לביצוע עבודות ספק (די ג׳יי / צלם / מפעיל/ה)\n\n'+
+'שנערך ונחתם ביום ____ בחודש ____ שנת ________\n\n'+
+'בין: '+co.name+' (להלן: "החברה" או "המועדון") מצד אחד;\n\n'+
+'לבין: שם הספק/ית: '+name+'   ת.ז./ח.פ.: ______   טלפון: '+phone+'\n'+
+'כתובת: ______   דוא"ל: ______\n'+
+'(להלן: "הספק" או "הספקית") מצד שני;\n\n'+
+'הואיל והחברה מפעילה מועדון אירועים ומזמינה מעת לעת שירותי מוזיקה, צילום, הפעלה או שירותים אחרים עבור אירועים המתקיימים במועדון;\n'+
+'והואיל והספק/ית מצהיר/ה כי הינו/ה בעל/ת הידע, הניסיון, המיומנות, הציוד והאישורים הנדרשים לצורך מתן השירותים ברמה הגבוהה ביותר;\n'+
+'והואיל והצדדים מעוניינים להסדיר את התנאים המשפטיים והמסחריים של התקשרות זו במסגרת חוזה מחייב;\n'+
+'לפיכך הותנה והוסכם בין הצדדים כדלקמן:\n\n'+
+'1. כללי ולשון ההסכם\n'+
+'המבוא להסכם זה מהווה חלק בלתי נפרד ממנו ומחייב כיתר תנאיו. לשון ההסכם מנוסחת בלשון זכר מטעמי נוחות בלבד, אך פונה ומתייחסת לנשים ולגברים כאחד לכל דבר ועניין.\n\n'+
+'2. מהות השירות, היקף ולוחות זמנים\n'+
+'משך האירוע הסטנדרטי הינו 3 (שלוש) שעות, אלא אם הוסכם אחרת בכתב ומראש לגבי אירוע ספציפי. הספק מחויב להגיע למקום האירוע לפחות חצי שעה (30 דקות) לפני שעת תחילת האירוע הרשמית, וזאת לצורך הקמת הציוד, בדיקות סאונד, היערכות מקצועית מלאה ומוכנות מוחלטת לפתיחת האירוע.\n\n'+
+'3. שריון האירוע ואיסור החלפת ספק\n'+
+'הספק מודע לכך ומסכים כי שריון מועד אירוע מהווה התחייבות מוחלטת לכל דבר ועניין, הן כלפי המועדון והן כלפי הלקוחות שהזמינו את האירוע. חל איסור מוחלט על הספק להחליף את זהות המבצע בפועל של השירות (הדי ג׳יי, הצלם או המפעיל המיועד) ללא קבלת אישור מפורש, מראש ובכתב, החתום על ידי מנהל '+co.name+'.\n\n'+
+'4. כוח עליון, אי הגעה ואחריות לנזקים\n'+
+'במקרה של מניעה זמנית או קבועה להגיע לאירוע עקב כוח עליון או כל סיבה אחרת, חלה על הספק חובה בלעדית, מוחלטת ובלתי מותנית לדאוג למחליף מקצועי אחר, בעל ידע, ניסיון וכישורים דומים, המאושר מראש ובכתב על ידי מנהל המועדון. הספק מצהיר ומאשר כי אי הגעה לאירוע, איחור, או החלפת ספק ללא אישור בכתב של המנהל, עלולים לגרום לנזקים קשים, כספיים ותדמיתיים, מול לקוחות המועדון. הספק נושא באחריות הבלעדית לכל נזק, ישיר או עקיף, שייגרם למועדון או ללקוחותיו כתוצאה מהפרת סעיף זה, ויפצה את החברה במלוא סכום הנזק או הפיצוי שיידרש המועדון לשלם ללקוח.\n\n'+
+'5. מעמד משפטי, אישורים וביטוחים\n'+
+'הספק מצהיר כי הוא פועל כקבלן עצמאי ומנהל עסק מורשה או עוסק פטור כחוק, וכי לא מתקיימים יחסי עובד-מעביד בינו לבין החברה. הספק מתחייב להחזיק בכל עת בתוקף פוליסת ביטוח אחריות מקצועית וביטוח צד ג׳ המכסים את פעילותו ואת הציוד שלו במועדון. הספק יהיה האחראי הבלעדי לכל נזק שייגרם לגוף או לרכוש עקב פעילותו או הציוד שהביא עמו.\n\n'+
+'6. תמורה וסכום משמרת\n'+
+'עבור מתן שירות מלא ותקין בכל משמרת אירוע כאמור, ישולם לספק סכום קבוע של: ______ ש"ח (במילים: ______ ש"ח) בתוספת מע"מ כחוק במידה והספק עוסק מורשה. התשלום יבוצע בהתאם למדיניות התשלומים של החברה וכנגד מסירת חשבונית מס / קבלה כדין.';
+}
 const WELCOME_MSG={"louie": "היי מזל טוב, כיף שסגרתם אצלנו בלואי  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בלואי רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הלואי )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת לואיס אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533973786.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)", "kamilion": "היי מזל טוב, כיף שסגרתם אצלנו בקמיליון  🥳🤩\n\nאני מנהל השירות לקוחות , אני זמין בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד   (עדיף לשלוח הודעה בווצאפ לכל שאלה ואטפל ביסודיות ) .. *בכל מקרה אני אצור אתכם קשר חודש לפני האירוע שלכם ואעבור אתכם על כל הפרטים כולל הקטנים ביותר*, ואדאג לאירוע המושלם שלכם..\n*במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nבינתיים משאיר לכם דף שאלות תשובות חשוב מאוד שתקראו אותו ..\nיום טוב ושמח 😁 .\n\nלקוחות יקרים,\nשמחים שבחרתם לחגוג את שמחתכם אצלנו בקמיליון רעננה!\nריכזנו עבורכם את כל השאלות והתשובות ואנו לרשותכם לכל שאלה עד היום המיוחד.\n\nשאלה: אז ממה מתחילים?\nתשובה: בתור התחלה, יש לדבר עם גלי הצלמת ולשריין מועד ליום צילומי הבוק.\nשימו יש  יש לשלם לגלי סכום של 350 ₪ על צילומי הסטודיו. גלי-052-2204248\n\nשאלה: מתי יצרו איתי קשר לסגור את כל הפרטים לקראת האירוע?\nתשובה: כחודש לפני האירוע נציג מטעמנו יצור איתך קשר לעבור על כל הפרטים.\n\nשאלה: איך מעבירים תמונות/מצגת לאירוע?\nתשובה: כשבוע לפני האירוע יש להביא כ40 תמונות נבחרות מהבוק ומצגת/סרטון בפורמט MP4 על דיסק און קי.\n\nשאלה :איך ומתי מתאמים את הסדנת איפור?\nתשובה : במידה וסגרתם סדנת איפור בחבילה לתאם מול המאפרת זמינות במידי בשל עומס \nליטל - 0527501137 (נא לשלוח את השובר עם חתימת הקמיליון )\n\nשאלה: האם אני צריך להביא איתי עוד משהו?\nתשובה: כן, בפגישה שנתאם כשבוע - שבועיים לפני האירוע, תידרשו להגיע עם דיסק און קי, צ'ק לפירעון על סכום האירוע שנותר (לפקודת קמיליון אירועים בע\"מ), ואישור על תשלום אקו\"ם.\n\nשאלה: מהן שעות האירוע?\nתשובה: משך אירוע בת/בר מצווה בנוי ל3 שעות. \nימים א'-ה' ניתן להתחיל את האירוע בשעה 19:30/20:00.\nמוצ\"ש ניתן להתחיל כשעה אחרי צאת השבת.\n\nשאלה: האם ניתן להביא עוגה/ממתקים בנוסף למה שאתם מציעים?\nתשובה: בוודאי! חשוב שהכל יהיה פרווה \n\nשאלה: החוגגת רוצה לבחור שירים. איך ניתן להעביר לDJ?\nתשובה: את הDJ תפגשו ביום האירוע. ניתן לעשות רשימת שירים ולהעביר לנו דרך הווטסאפ. אנחנו נדאג להעביר את זה לDJ שיהיה באירוע שלכם.\n\nשאלה: מתי אנחנו צריכים להגיע?\nתשובה: כחצי שעה לפני השעה שהזמנתם את האורחים.\n\nשאלה: מתי החוגג/ת יפגש עם המפעיל?\nתשובה: כל הספקים שלנו – הצלם, הDJ והמפעיל יחכו לכם כשתגיעו. \nזהו הזמן לצילומי משפחה ולשבת עם המפעיל.\n\nשאלה :איך ניתן ליצור איתכם קשר?\nתשובה: ניתן ג לשלוח הודעת ווטסאפ במספר- 0533750860.\n\nשאלה: יש עוד משהו שעלינו לדעת לקראת האירוע?\nתשובה: עליכם להסדיר תשלום מראש לאקו\"ם כדי לקבל רישיון להשמעת מוזיקה באירוע. התשלום מתבצע דרך אתר האנטרנט שלהם והאישור מגיע אלינו אוטומטית (בשם הדיגי ניתן לרשום ליעד)"};
 const WELCOME_MSG_ADULTS={"louie": "היי מזל טוב, כיף שסגרתם אצלנו בלואי 🥳🤩\n\nאני מנהל שירות הלקוחות, וזמין לכל שאלה בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד (עדיף לשלוח הודעה בוואטסאפ ואטפל ביסודיות).\nבכל מקרה אצור איתכם קשר כחודש לפני האירוע ונעבור יחד על כל הפרטים — סידור ההושבה, התפריט והלו\"ז — כדי לדאוג לאירוע מושלם עבורכם.\n\nכמה דברים חשובים לקראת האירוע:\n• כחודש לפני המועד נציג מטעמנו יצור איתכם קשר לתיאום סופי של כל הפרטים.\n• בפגישת התיאום (כשבוע–שבועיים לפני) תתבקשו להגיע עם צ'ק לפירעון על יתרת סכום האירוע, לפקודת לואיס אירועים בע\"מ, ואישור תשלום אקו\"ם.\n• יש להסדיר מראש תשלום לאקו\"ם (רישיון להשמעת מוזיקה) דרך האתר שלהם — האישור מגיע אלינו אוטומטית.\n• ניתן להביא עוגה/קינוחים בנוסף למה שאנו מציעים, ובלבד שהכל פרווה.\n• מומלץ לחשוב מראש על סידור ההושבה — נשמח לקבל רשימת שולחנות/סקיצה ונסייע בארגון.\n\nלכל שאלה אני כאן — הודעת וואטסאפ למספר 0533973786.\nיום טוב ושמח 😁", "kamilion": "היי מזל טוב, כיף שסגרתם אצלנו בקמיליון 🥳🤩\n\nאני מנהל שירות הלקוחות, וזמין לכל שאלה בין השעות 15:00-17:00 בימים א,ב,ה ובין 16:00-18:00 בימים ג,ד (עדיף לשלוח הודעה בוואטסאפ ואטפל ביסודיות).\nבכל מקרה אצור איתכם קשר כחודש לפני האירוע ונעבור יחד על כל הפרטים — סידור ההושבה, התפריט והלו\"ז — כדי לדאוג לאירוע מושלם עבורכם.\n\nכמה דברים חשובים לקראת האירוע:\n• כחודש לפני המועד נציג מטעמנו יצור איתכם קשר לתיאום סופי של כל הפרטים.\n• בפגישת התיאום (כשבוע–שבועיים לפני) תתבקשו להגיע עם צ'ק לפירעון על יתרת סכום האירוע, לפקודת קמיליון אירועים בע\"מ, ואישור תשלום אקו\"ם.\n• יש להסדיר מראש תשלום לאקו\"ם (רישיון להשמעת מוזיקה) דרך האתר שלהם — האישור מגיע אלינו אוטומטית.\n• ניתן להביא עוגה/קינוחים בנוסף למה שאנו מציעים, ובלבד שהכל פרווה.\n• מומלץ לחשוב מראש על סידור ההושבה — נשמח לקבל רשימת שולחנות/סקיצה ונסייע בארגון.\n\nלכל שאלה אני כאן — הודעת וואטסאפ למספר 0533750860.\nיום טוב ושמח 😁"};
 
 function welcomeDefaults(){ return (current&&current.type==='shulchan')?WELCOME_MSG_ADULTS:WELCOME_MSG; }
-function getWelcomeMsg(){ const f=current.fields; if(f.welcomeMsg!=null && String(f.welcomeMsg).trim()!=='') return f.welcomeMsg; const src=welcomeDefaults(); return src[current.brand]||src.louie; }
+const ALLERGY_NOTICE='⚠️ חשוב — רגישויות ואלרגיות:\nבאחריות הלקוח/ה ליידע מראש את כלל המוזמנים כי האירוע מתקיים במקום שאינו סטרילי לאלרגנים. במטבח ובאולם מוכנים ומוגשים מזונות העלולים להכיל או לבוא במגע עם גלוטן, אגוזים, בוטנים, שומשום, חלב, ביצים, דגים וסויה. על מוזמנים בעלי רגישות/אלרגיה להביא זאת בחשבון ולנהוג באחריות אישית. החברה והמקום אינם אחראים לכל תגובה אלרגית של מי מהמוזמנים. אישורכם להודעה זו מהווה הסכמה לאמור.';
+function withAllergy(msg){ msg=String(msg||''); return (msg.indexOf('אינו סטרילי לאלרגנים')>=0)?msg:(msg.replace(/\s+$/,'')+'\n\n'+ALLERGY_NOTICE); }
+function getWelcomeMsg(){ const f=current.fields; const base=(f.welcomeMsg!=null && String(f.welcomeMsg).trim()!=='')?f.welcomeMsg:((welcomeDefaults()[current.brand])||welcomeDefaults().louie); return withAllergy(base); }
 function waNum(raw){ let num=String(raw||'').replace(/\D/g,''); if(num){ if(num.indexOf('972')===0){} else if(num.charAt(0)==='0'){ num='972'+num.slice(1); } else if(num.length===9&&num.charAt(0)==='5'){ num='972'+num; } } return num; }
 function welcomeCardHTML(){
   const f=current.fields; const sent=!!f.welcomeSent; const msg=getWelcomeMsg();
@@ -1028,7 +1247,8 @@ const SEC_DETAILS={title:'פרטי האירוע',kind:'info',fields:[
 ]};
 const KIDS_FIELDS=[
   F('attractions','אילו אטרקציות יש באירוע?','checks',{full:true,min:3,opts:ATTRACTIONS}),
-  F('cakeCeremony','טקס עוגה?','yesno'),
+  F('attractionsNote','הערות לאטרקציות (תוספות / שינויים)','text',{full:true,hint:'האטרקציות הסטנדרטיות מסומנות אוטומטית — לרשום כאן רק חריגים/תוספות'}),
+  F('cakeCeremony','הלקוח/ה מביא/ה עוגה?','yesno',{hint:'העוגה כלולה בחבילה — לציין רק אם הלקוח/ה מביא/ה עוגה משלו/ה'}),
   F('balloons','בלונים — צבעים לבחירה (2)','text'),
   F('kidsCount','כמות ילדים','number'),
   F('vegMeals','מנות צמחוניות','text'),
@@ -1070,7 +1290,7 @@ const SEC_BAT_ADULTS={title:'מבוגרים באירוע (אם מגיעים)',ki
   F('batAdultsNotes','הערות לגבי המבוגרים','textarea',{full:true}),
 ]};
 const SEC_APPROVAL={title:'אישור וסיכום',kind:'ok',fields:[
-  F('clientApproved','הלקוח/ה אישר/ה את הסיכום?','yesno'),
+  F('clientApproved','הלקוח/ה אישר/ה את הסיכום?','yesno',{req:true,hint:'חובה — יש לקבל אישור מהלקוח/ה לסיכום שנשלח לפני האירוע'}),
   F('inspector','חתימת מבקר','text'),
 ]};
 const CHEF_MENUS={
@@ -1208,20 +1428,23 @@ const EVENT_TYPES={
       F('ee_cooks','כמות טבחים','number',{hint:'0 אם אין'}),
     ]},
     {title:'צוות העובדים',kind:'ops',fields:[
-      F('ee_operator','מפעיל','text'),
-      F('ee_photographer','צלם','text'),
-      F('ee_digi','דיגי / DJ','text'),
-      F('ee_other','אחר','text',{hint:'רישום ידני — תפקיד / ספק נוסף'}),
-      F('ee_staffConfirm','האם אלו העובדים/הספקים שעבדו באירוע?','yesno',{hint:'מועתק אוטומטית מהשיבוצים — אפשר לשנות או להוסיף'}),
-      F('ee_staff','עובדים נוספים — שם, תפקיד ושעות','textarea',{full:true,big:true,hint:'שורה לכל עובד'}),
+      F('ee_team','אישור צוות שעבד בפועל','eeteam',{full:true,req:true,hint:'נמשך אוטומטית מהדוח לפני-אירוע — תקנו מה שצריך (✓/✗ או שם), ובסוף אשרו את כל הצוות בלחיצה אחת'}),
       F('ee_washers','שם שוטף/ים','text',{req:true,hint:'0 אם אין'}),
     ]},
     {title:'שבירות וציוד',kind:'info',fields:[
       F('ee_broke','האם משהו נשבר?','yesnonote',{notePh:'מה נשבר?'}),
     ]},
+    {title:'מהלך האירוע — סיכום מנהל',kind:'info',fields:[
+      F('ee_kidsEnergy','רמת האנרגיה של הילדים ברחבה','select',{opts:['נמוכה','בינונית','גבוהה','מצוינת'],hint:'אם אין ילדים — אפשר לדלג'}),
+      F('ee_foodSat','היו מרוצים מהאוכל?','yesnonote',{noteOn:'no',notePh:'אם לא — מה הייתה הבעיה?'}),
+      F('ee_serviceSat','היו מרוצים מהשירות?','yesnonote',{noteOn:'no',notePh:'אם לא — מה הייתה הבעיה?'}),
+      F('ee_maintenance','תקלות אחזקה / ליקויים באירוע?','yesnonote',{alert:true,noteOn:'yes',notePh:'פירוט התקלה — מה, היכן, מה הדחיפות'}),
+      F('ee_logistics','בעיות לוגיסטיקה (חוסרים, ציוד, אספקה)?','yesnonote',{alert:true,noteOn:'yes',notePh:'פירוט — מה חסר / מה השתבש'}),
+    ]},
+    {title:'סגירת המקום (לפני יציאה)',kind:'ops',fields:[
+      F('ee_closing','לפני היציאה — לוודא סגירה של:','checklist',{full:true,req:true,opts:['סגירת מזגנים','סגירת מנדף','סגירת הגברה','סגירת תאורה','סגירת ציפסר']}),
+    ]},
     {title:'תשלום',kind:'ops',fields:[
-      F('ee_totalContract','סכום כללי לפי חוזה (כולל מקדמה)','number',{req:true}),
-      F('ee_remaining','סכום שנותר לתשלום (אחרי קיזוז מקדמה)','number',{req:true}),
       F('ee_payMethod','איך הכסף עובר לחשבון?','select',{req:true,opts:['צק','העברה','אחר']}),
       F('ee_payNote','הערות לאופן התשלום','textarea',{full:true}),
       F('ee_depositCheck','האם להפקיד את צ׳ק הביטחון?','yesno',{req:true,dep:{key:'ee_payMethod',val:'צק'}}),
@@ -1404,45 +1627,13 @@ function dateReadout(iso){
 function docDate(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return 'יום '+WEEKDAYS_FULL[d.getDay()]+' · <bdi>'+dd+'.'+mm+'.'+d.getFullYear()+'</bdi>'; }
 function dmy(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return dd+'.'+mm+'.'+d.getFullYear(); }
 function openHebCal(key){
-  HEBCAL.key=key; HEBCAL.onPick=null; HEBCAL.min='';
+  HEBCAL.key=key;
   const cur=current&&current.fields&&current.fields[key];
   let d=cur?new Date(cur+'T00:00'):new Date(); if(isNaN(d.getTime())) d=new Date();
   HEBCAL.y=d.getFullYear(); HEBCAL.m=d.getMonth();
   const m=$('#hebCalModal'); if(!m) return; m.style.display='flex'; renderHebCal();
 }
-function closeHebCal(){ const m=$('#hebCalModal'); if(m) m.style.display='none'; HEBCAL.onPick=null; HEBCAL.min=''; }
-/* פתיחת לוח-שנה לתאריך האירוע (אותו לוח מובנה — עובד בכל דפדפן/מכשיר) */
-function openEventDateCal(){
-  if(!current) return;
-  HEBCAL.key='eventDate';
-  const cur=current.fields&&current.fields.eventDate;
-  let d=cur?new Date(cur+'T00:00'):new Date(); if(isNaN(d.getTime())) d=new Date();
-  HEBCAL.y=d.getFullYear(); HEBCAL.m=d.getMonth();
-  HEBCAL.min=(current.type==='endreport')?'':new Date().toISOString().slice(0,10);
-  HEBCAL.onPick=function(iso){ setEventDate(iso); };
-  const m=$('#hebCalModal'); if(!m) return; m.style.display='flex'; renderHebCal();
-}
-function rewireEventReadout(){
-  const wrap=document.querySelector('.evdate-wrap[data-key="eventDate"]'); if(!wrap) return;
-  const dr=wrap.querySelector('.date-readout');
-  if(dr) dr.onclick=()=>{ if(typeof EDITING!=='undefined' && !EDITING) return; openEventDateCal(); };
-}
-function setEventDate(iso){
-  if(!current) return; closeHebCal();
-  const apply=(v)=>{
-    current.fields.eventDate=v; markDirty();
-    const wrap=document.querySelector('.evdate-wrap[data-key="eventDate"]');
-    if(wrap){ const dr=wrap.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(v);
-      const h=wrap.querySelector('input[data-key="eventDate"]'); if(h) h.value=v;
-      const fc=wrap.closest('.field'); if(fc&&v) fc.classList.remove('missing'); rewireEventReadout(); }
-    if(current.type==='endreport') autofillEndStaff();
-  };
-  apply(iso);
-  if(NEW_REPORT && current.type!=='endreport' && _dupWarnedFor!==iso && /^\d{4}-\d{2}-\d{2}$/.test(iso) && eventsOnDate(iso,current.id).length){
-    _dupWarnedFor=iso;
-    dupDateAlert(iso,current.id).then(ok=>{ if(!ok){ apply(''); _dupWarnedFor=''; } });
-  }
-}
+function closeHebCal(){ const m=$('#hebCalModal'); if(m) m.style.display='none'; }
 function hebCalNav(delta){ let m=HEBCAL.m+delta,y=HEBCAL.y; if(m<0){m=11;y--;} if(m>11){m=0;y++;} HEBCAL.m=m; HEBCAL.y=y; renderHebCal(); }
 function renderHebCal(){
   const body=$('#hebCalBody'); if(!body) return;
@@ -1451,30 +1642,24 @@ function renderHebCal(){
   const days=new Date(y,m+1,0).getDate();
   const sel=current&&current.fields&&current.fields[HEBCAL.key];
   const todayIso=new Date().toISOString().slice(0,10);
-  const minIso=HEBCAL.min||'';
   let cells='';
   for(let i=0;i<startDow;i++) cells+='<div class="hc-cell empty"></div>';
   for(let dnum=1;dnum<=days;dnum++){
     const iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
-    const dis=minIso && iso<minIso;
     const cls=['hc-cell']; if(iso===sel) cls.push('sel'); if(iso===todayIso) cls.push('today');
-    cells+=`<button type="button" class="${cls.join(' ')}" data-iso="${iso}"${dis?' disabled':''}>${dnum}</button>`;
+    cells+=`<button type="button" class="${cls.join(' ')}" data-iso="${iso}">${dnum}</button>`;
   }
   const t=$('#hebCalTitle'); if(t) t.textContent=MONTHS[m]+' '+y;
   body.innerHTML=cells;
-  body.querySelectorAll('[data-iso]:not([disabled])').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
+  body.querySelectorAll('[data-iso]').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
 }
 function pickHebDate(iso){
-  if(!current) return;
-  if(typeof HEBCAL.onPick==='function'){ const cb=HEBCAL.onPick; HEBCAL.onPick=null; cb(iso); return; }
-  current.fields[HEBCAL.key]=iso; markDirty(); closeHebCal();
+  if(!current) return; current.fields[HEBCAL.key]=iso; markDirty(); closeHebCal();
   const btn=document.querySelector('.hebdate-btn[data-key="'+HEBCAL.key+'"]');
   if(btn){ btn.classList.add('has'); btn.textContent='📅 '+hebDateText(iso); const fc=btn.closest('.field'); if(fc) fc.classList.remove('missing'); }
 }
 function hebCalClear(){
-  if(!current) return;
-  if(HEBCAL.key==='eventDate'){ setEventDate(''); return; }
-  current.fields[HEBCAL.key]=''; markDirty(); closeHebCal();
+  if(!current) return; current.fields[HEBCAL.key]=''; markDirty(); closeHebCal();
   const btn=document.querySelector('.hebdate-btn[data-key="'+HEBCAL.key+'"]');
   if(btn){ btn.classList.remove('has'); btn.textContent='📅 בחר/י תאריך'; }
 }
@@ -1538,24 +1723,158 @@ function supPhoneDocHTML(name,key){
     + '<bdi dir="ltr" style="letter-spacing:.3px">' + esc(fmtPhoneNice(w.phone)) + '</bdi>'
     + '</span></div>';
 }
+/* ===== דוח סוף אירוע: משיכת צוות (ספקים + עובדים) מהדוח לפני-אירוע ===== */
+// שמות שעבד בפועל נמשכים אוטומטית; כל שורה עם סימון ✓ היה / ✗ לא היה + שדה "אחר" לכל קבוצה.
+function eeTeamSources(){
+  const f=current.fields; const date=String(f.eventDate||'').trim();
+  const rep=(MEM.reports||[]).find(r=> r && r.brand===current.brand && r.type!=='endreport'
+      && String((r.fields&&r.fields.eventDate)||'').trim()===date && date);
+  const a=(MEM.assignments||[]).find(x=>x.date===date && x.brand===current.brand);
+  const rf=(rep&&rep.fields)||{};
+  const nm=v=> (v!=null && roleState(v)==='set') ? String(v).trim() : '';
+  const sup=[
+    {role:'מפעיל', key:'ee_operator',     name: nm(rf.operator)     || nm(a&&a.op)    || nm(f.ee_operator)},
+    {role:'DJ',    key:'ee_digi',         name: nm(rf.dj)           || nm(a&&a.dj)    || nm(f.ee_digi)},
+    {role:'צלם',   key:'ee_photographer', name: nm(rf.photographer) || nm(a&&a.photog)|| nm(f.ee_photographer)},
+  ];
+  const map=[['eventManager','מנהל אירוע'],['additionalManager','מנהל נוסף'],['bartender','ברמן/ית'],
+             ['rigger1','ראגר'],['rigger2','ראגר שני'],
+             ['waiter1','מלצר 1'],['waiter2','מלצר 2'],['waiter3','מלצר 3'],['waiter4','מלצר 4']];
+  const staff=[];
+  map.forEach(([k,role])=>{ const v=nm(rf[k]); if(v) staff.push({role,name:v}); });
+  if(a && Array.isArray(a.waiters)){
+    a.waiters.forEach(w=>{ const v=nm(w); if(v && !staff.some(s=>s.name===v)) staff.push({role:'מלצר (משובץ)',name:v}); });
+  }
+  return {sup, staff};
+}
+function eeTeamData(rebuild){
+  const f=current.fields; const date=String(f.eventDate||'').trim();
+  const fresh=(f.ee_team==null);
+  let t=(f.ee_team&&typeof f.ee_team==='object')?f.ee_team:{sig:'',sup:[],staff:[],otherSup:'',otherStaff:''};
+  if(fresh){ t={sig:'',sup:[],staff:[],otherSup:String(f.ee_other||''),otherStaff:String(f.ee_staff||''),fresh:1}; }
+  const need = rebuild || !t.sig || t.sig!==date || (!(t.sup||[]).length && !(t.staff||[]).length);
+  if(need){
+    const src=eeTeamSources();
+    const keep=(t.sig===date); // שמירת סימונים/עריכות רק כשמדובר באותו תאריך
+    const prevS={}; (t.sup||[]).forEach(r=>{ prevS[r.role]=r; });
+    const prevW={}; (t.staff||[]).forEach(r=>{ prevW[r.role+'|'+r.name]=r; });
+    t.sup = src.sup.map(r=>{ const p=keep?prevS[r.role]:null; return {role:r.role,key:r.key, name:(p&&p.name!=null)?p.name:r.name, ok:(p&&typeof p.ok==='boolean')?p.ok:true}; });
+    t.staff = src.staff.map(r=>{ const p=keep?prevW[r.role+'|'+r.name]:null; return {role:r.role,name:r.name, ok:(p&&typeof p.ok==='boolean')?p.ok:true}; });
+    t.sig=date;
+    t.confirmed=false;
+    f.ee_team=t; delete t.fresh;
+    eeTeamMirror();
+  }
+  return t;
+}
+// אכלוס שדות ee_ ישנים לשמירת תאימות (סטטיסטיקות / קוד אחר שקורא אותם)
+function eeTeamMirror(){
+  const f=current.fields; const t=f.ee_team; if(!t) return;
+  const by={}; (t.sup||[]).forEach(r=>{ by[r.key]=r; });
+  f.ee_operator     = (by.ee_operator     && by.ee_operator.name)     || '';
+  f.ee_digi         = (by.ee_digi         && by.ee_digi.name)         || '';
+  f.ee_photographer = (by.ee_photographer && by.ee_photographer.name) || '';
+  f.ee_other        = t.otherSup||'';
+  const lines=[];
+  (t.staff||[]).forEach(r=>{ if(r.name) lines.push(r.role+': '+r.name+(r.ok===false?' (לא היה)':'')); });
+  if(t.otherStaff) lines.push('אחר: '+t.otherStaff);
+  f.ee_staff = lines.join('\n');
+  f.ee_teamConfirmed = t.confirmed ? 'yes' : '';
+}
+function eeTeamConfirmHTML(t,ed){
+  if(!ed) return '<span class="eet-cstat">'+(t.confirmed?'✔️ הצוות אושר':'⚠ הצוות טרם אושר')+'</span>';
+  return '<button type="button" class="eet-approve" data-act="approve">'
+    +(t.confirmed?'✔️ הצוות אושר — לחצו לעריכה':'✅ מאשר/ת את כל הצוות שעבד בפועל')
+    +'</button>'+(t.confirmed?'':'<span class="eet-need">חובה לאשר את כל הרשימה לפני סיום *</span>');
+}
+function eeTeamInner(key){
+  const t=eeTeamData(false);
+  const ed=(typeof EDITING!=='undefined'&&EDITING); const ro=ed?'':' readonly';
+  const tog=(ok)=>'<div class="eet-tog">'
+    +'<button type="button" data-ok="1" class="'+(ok!==false?'on yes':'')+'">✓ היה</button>'
+    +'<button type="button" data-ok="0" class="'+(ok===false?'on no':'')+'">✗ לא היה</button></div>';
+  const supRows=(t.sup||[]).map((r,i)=> r.name
+    ? '<div class="eet-row" data-grp="sup" data-i="'+i+'"><span class="eet-role">'+esc(r.role)+'</span>'
+      +'<input class="eet-name" data-grp="sup" data-i="'+i+'" dir="rtl"'+ro+' value="'+esc(r.name)+'">'
+      +tog(r.ok)+'<div class="eet-phone sup-phone">'+supPhoneHTML(r.name,r.key)+'</div></div>'
+    : '').join('');
+  const staffRows=(t.staff||[]).map((r,i)=> r.name
+    ? '<div class="eet-row" data-grp="staff" data-i="'+i+'"><span class="eet-role">'+esc(r.role)+'</span>'
+      +'<input class="eet-name" data-grp="staff" data-i="'+i+'" dir="rtl"'+ro+' value="'+esc(r.name)+'">'
+      +tog(r.ok)+'</div>'
+    : '').join('');
+  return ''
+    +'<div class="eet-grp"><div class="eet-gh">🎛️ ספקים'
+      +(ed?' <button type="button" class="eet-refresh" data-act="refresh">↻ רענון מהדוח</button>':'')+'</div>'
+      +(supRows||'<div class="eet-empty">— אין ספקים בדוח לפני-אירוע —</div>')
+      +'<div class="eet-other"><input class="eet-oth" data-grp="sup" dir="rtl"'+ro+' placeholder="ספק אחר שהיה בפועל (לא ברשימה)" value="'+esc(t.otherSup||'')+'"></div></div>'
+    +'<div class="eet-grp"><div class="eet-gh">👥 עובדים</div>'
+      +(staffRows||'<div class="eet-empty">— אין עובדים בדוח לפני-אירוע —</div>')
+      +'<div class="eet-other"><input class="eet-oth" data-grp="staff" dir="rtl"'+ro+' placeholder="עובד אחר שהיה בפועל (לא ברשימה)" value="'+esc(t.otherStaff||'')+'"></div></div>'
+    +'<div class="eet-confirm'+(t.confirmed?' done':'')+'">'+eeTeamConfirmHTML(t,ed)+'</div>';
+}
+function bindEeTeam(c){
+  const t=eeTeamData(false);
+  const ed=(typeof EDITING!=='undefined'&&EDITING);
+  const renderBar=()=>{
+    const bar=c.querySelector('.eet-confirm'); if(!bar) return;
+    bar.className='eet-confirm'+(t.confirmed?' done':'');
+    bar.innerHTML=eeTeamConfirmHTML(t,ed);
+    bindApprove();
+    const fc=c.closest('.field'); if(fc&&t.confirmed) fc.classList.remove('missing');
+  };
+  const bindApprove=()=>{ const ap=c.querySelector('.eet-approve'); if(ap) ap.onclick=()=>{
+    t.confirmed=!t.confirmed; eeTeamMirror(); renderBar(); markDirty(); updateStatus();
+    if(t.confirmed) toast('הצוות אושר ✓'); }; };
+  // כל שינוי מבטל את האישור — צריך לאשר מחדש
+  const commit=()=>{ if(t.confirmed){ t.confirmed=false; renderBar(); } eeTeamMirror(); markDirty(); };
+  c.querySelectorAll('.eet-row').forEach(row=>{
+    const grp=row.dataset.grp, i=+row.dataset.i;
+    const arr=(grp==='sup')?t.sup:t.staff; const rec=arr&&arr[i]; if(!rec) return;
+    row.querySelectorAll('.eet-tog button').forEach(b=>b.onclick=()=>{
+      rec.ok=(b.dataset.ok==='1');
+      row.querySelectorAll('.eet-tog button').forEach(x=>{ x.className=''; if((x.dataset.ok==='1')===rec.ok) x.classList.add('on',rec.ok?'yes':'no'); });
+      commit();
+    });
+    const nmI=row.querySelector('.eet-name');
+    if(nmI) nmI.oninput=()=>{ rec.name=nmI.value; if(grp==='sup'){ const ph=row.querySelector('.eet-phone'); if(ph) ph.innerHTML=supPhoneHTML(nmI.value,rec.key); } commit(); };
+  });
+  c.querySelectorAll('.eet-oth').forEach(inp=>{ inp.oninput=()=>{ if(inp.dataset.grp==='sup') t.otherSup=inp.value; else t.otherStaff=inp.value; commit(); }; });
+  const rf=c.querySelector('[data-act="refresh"]');
+  if(rf) rf.onclick=async()=>{
+    if(!(await askConfirm('למשוך מחדש את הצוות מהדוח לפני-אירוע?\nסימוני ה-✓ והעריכות יישמרו לפי תפקיד/שם, והאישור יתבטל עד אישור מחדש.'))) return;
+    eeTeamData(true); c.innerHTML=eeTeamInner(c.dataset.key); bindEeTeam(c); markDirty(); updateStatus(); toast('הרשימה רועננה מהדוח');
+  };
+  bindApprove();
+}
+function autofillEndDetails(){
+  if(!current || current.type!=='endreport') return;
+  const date=String(current.fields.eventDate||'').trim(); if(!date) return;
+  const rep=(MEM.reports||[]).find(r=> r && r.brand===current.brand && r.type!=='endreport'
+      && String((r.fields&&r.fields.eventDate)||'').trim()===date);
+  if(!rep) return;
+  const rf=rep.fields||{};
+  const nm=v=>(v!=null && roleState(v)==='set')?String(v).trim():'';
+  const ETYPE={bat:'בר/בת מצווה ילדים',bar:'בר/בת מצווה ילדים',meshulav:'אירוע משולב',shulchan:'מבוגרים',cocktail:'קוקטייל בר/מסיבה'};
+  const map={ celebrant:String(rf.celebrant||'').trim(), ee_manager:nm(rf.eventManager), ee_floorManager:nm(rf.additionalManager), ee_etype:ETYPE[rep.type]||'' };
+  let filled=0;
+  Object.keys(map).forEach(k=>{ const v=map[k]; if(!v) return;
+    current.fields[k]=v; filled++;
+    const el=document.querySelector('[data-key="'+k+'"]');
+    if(el){ el.value=v; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(v,k); } }
+  });
+  if(filled) markDirty();
+}
 function autofillEndStaff(){
   if(!current || current.type!=='endreport') return;
-  const date=current.fields.eventDate; if(!date) return;
-  const a=(MEM.assignments||[]).find(x=>x.date===date && x.brand===current.brand);
-  if(!a) return;
-  let filled=0;
-  [['op','ee_operator'],['photog','ee_photographer'],['dj','ee_digi'],['other','ee_other']].forEach(([rk,fk])=>{
-    const val=a[rk];
-    if(val && roleState(val)==='set'){
-      const cur=String(current.fields[fk]||'').trim();
-      if(!cur){ current.fields[fk]=val;
-        const el=document.querySelector('[data-key="'+fk+'"]');
-        if(el){ el.value=val; const fc=el.closest('.field'); if(fc){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(val,fk); } }
-        filled++;
-      }
-    }
-  });
-  if(filled){ markDirty(); toast('הצוות המשובץ הועתק — אשר/י או ערוך/י'); }
+  const date=String(current.fields.eventDate||'').trim(); if(!date) return;
+  eeTeamData(true);
+  const c=document.querySelector('.eeteam');
+  if(c){ c.innerHTML=eeTeamInner(c.dataset.key); bindEeTeam(c); }
+  const t=current.fields.ee_team;
+  const n=((t&&t.sup)||[]).filter(r=>r.name).length+((t&&t.staff)||[]).filter(r=>r.name).length;
+  markDirty();
+  if(n) toast('הצוות נמשך מהדוח לפני-אירוע — סמנו מי היה בפועל');
 }
 
 function renderPicker(){
@@ -1574,6 +1893,7 @@ function renderPicker(){
 function newReport(type){
   _dupWarnedFor=''; NEW_REPORT=true;
   current={id:uid(),brand:BRAND,type,status:'draft',fields:{eventKind:EVENT_TYPES[type].name},createdAt:Date.now(),updatedAt:Date.now()};
+  if(['bat','bar','meshulav'].indexOf(type)>=0) current.fields.attractions=ATTRACTIONS.slice();
   EDITING=true; renderForm();
 }
 function newEndReport(){
@@ -1775,6 +2095,19 @@ function fieldHTML(fld,val){
     const v=(val&&typeof val==='object')?val:{text:'',total:'',check:''};
     return `<div class="field full"><label>${esc(fld.label)}</label><div class="calc" data-key="${fld.key}">${calcInner(v)}</div></div>`;
   }
+  if(fld.type==='checklist'){
+    const sel=Array.isArray(val)?val:[];
+    const rq=fld.req?'<span class="reqm"> *</span>':'';
+    const opts=(fld.opts||[]).map(o=>{ const on=sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}><span>${esc(o)}</span></label>`; }).join('');
+    const total=(fld.opts||[]).length, n=(fld.opts||[]).filter(o=>sel.indexOf(o)>=0).length;
+    const st=(total&&n>=total)?'<span class="cl-status ok">✓ הכל סומן</span>':('<span class="cl-status miss">סומנו '+n+' מתוך '+total+'</span>');
+    return `<div class="field full"><label>${esc(fld.label)}${rq}${hint}</label><div class="checklist" data-key="${fld.key}">${opts}${st}</div></div>`;
+  }
+  if(fld.type==='eeteam'){
+    const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
+    const rq=fld.req?'<span class="reqm"> *</span>':'';
+    return `<div class="field full"><label>${esc(fld.label)}${rq}${hh}</label><div class="eeteam" data-key="${fld.key}">${eeTeamInner(fld.key)}</div></div>`;
+  }
   if(fld.type==='allergens'){
     const v=allergVal(val);
     const opts=ALLERG_OPTS.map(o=>{ const on=v.sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}><span>${esc(o)}</span></label>`; }).join('');
@@ -1820,17 +2153,12 @@ function fieldHTML(fld,val){
     const dis=(typeof EDITING!=='undefined'&&!EDITING)?' disabled':'';
     return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hint}</label><button type="button" class="hebdate-btn ${val?'has':''}" data-key="${fld.key}"${dis}>📅 ${esc(disp)}</button></div>`;
   }
-  if(fld.type==='date' && fld.key==='eventDate'){
-    const rq=fld.req?'<span class="reqm"> *</span>':'';
-    return `<div class="field${fld.full?' full':''}"><label>${esc(fld.label)}${rq}${hint}</label>`
-      +`<div class="evdate-wrap" data-key="eventDate"><input type="hidden" data-key="eventDate" value="${esc(val)}">${dateReadout(val)}</div></div>`;
-  }
   if(fld.type==='yesnonote'){
     const v=(val&&typeof val==='object')?val:{v:'',note:''};
     const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
     const btns=[['yes','כן'],['no','לא'],['na','לא רלוונטי']].map(([x,t])=>`<button type="button" data-v="${x}" class="${v.v===x?'on '+x:''}">${t}</button>`).join('');
     const noteOn=fld.noteOn||'yes';
-    return `<div class="field full"><label>${esc(fld.label)}${hh}</label><div class="ynn" data-key="${fld.key}" data-noteon="${noteOn}"><div class="yesno ynn-btns">${btns}</div><textarea class="ynn-note" dir="rtl" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${esc(fld.notePh||'הערות')}" style="${v.v===noteOn?'':'display:none'}">${esc(v.note||'')}</textarea></div></div>`;
+    return `<div class="field full${fld.alert?' alert':''}"><label>${esc(fld.label)}${hh}</label><div class="ynn" data-key="${fld.key}" data-noteon="${noteOn}"><div class="yesno ynn-btns">${btns}</div><textarea class="ynn-note" dir="rtl" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="${esc(fld.notePh||'הערות')}" style="${v.v===noteOn?'':'display:none'}">${esc(v.note||'')}</textarea></div></div>`;
   }
   if(fld.type==='yesno'){
     const std=(val==='yes'||val==='no'||val==='na');
@@ -1984,7 +2312,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport') autofillEndStaff(); };
+    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport'){ autofillEndStaff(); autofillEndDetails(); } };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -2004,8 +2332,19 @@ function bindInputs(app){
   });
   app.querySelectorAll('[data-imgdel]').forEach(b=>b.onclick=()=>{ current.fields[b.dataset.imgdel]=''; const y=window.scrollY; renderForm(); window.scrollTo(0,y); markDirty(); });
   app.querySelectorAll('.hebdate-btn:not([disabled])').forEach(b=>b.onclick=()=>openHebCal(b.dataset.key));
-  app.querySelectorAll('.evdate-wrap[data-key="eventDate"] .date-readout').forEach(dr=>dr.onclick=()=>{ if(typeof EDITING!=='undefined' && !EDITING) return; openEventDateCal(); });
   app.querySelectorAll('.chefmenu').forEach(c=>bindChefmenu(c));
+  app.querySelectorAll('.eeteam').forEach(c=>bindEeTeam(c));
+  app.querySelectorAll('.checklist').forEach(g=>{
+    const key=g.dataset.key; const total=g.querySelectorAll('input[type=checkbox]').length;
+    const upd=()=>{ const st=g.querySelector('.cl-status'); if(!st) return; const n=(Array.isArray(current.fields[key])?current.fields[key]:[]).length; if(n>=total){ st.className='cl-status ok'; st.textContent='✓ הכל סומן'; } else { st.className='cl-status miss'; st.textContent='סומנו '+n+' מתוך '+total; } };
+    g.querySelectorAll('input[type=checkbox]').forEach(chk=>chk.onchange=()=>{
+      let sel=Array.isArray(current.fields[key])?current.fields[key].slice():[];
+      const opt=chk.dataset.opt;
+      if(chk.checked){ if(sel.indexOf(opt)<0) sel.push(opt); } else sel=sel.filter(x=>x!==opt);
+      current.fields[key]=sel; chk.closest('.chk-opt').classList.toggle('on',chk.checked);
+      const fc=g.closest('.field'); if(fc) fc.classList.remove('missing'); upd(); markDirty();
+    });
+  });
   app.querySelectorAll('.checks').forEach(g=>{
     const key=g.dataset.key;
     g.querySelectorAll('input[type=checkbox]').forEach(chk=>chk.onchange=()=>{
@@ -2047,7 +2386,7 @@ function computeStatus(){
   const f=current.fields||{};
   if(f.clientApproved==='yes') return 'confirmed';
   const def=EVENT_TYPES[current.type]; let allReq=true;
-  if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{ if(fld.req && depActive(fld)){ const v=f[fld.key]; if(v==null||String(v).trim()==='') allReq=false; } }));
+  if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{ if(fld.req && depActive(fld)){ if(fld.type==='eeteam'){ if(!(f.ee_team&&f.ee_team.confirmed)) allReq=false; return; } if(fld.type==='checklist'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; if((fld.opts||[]).some(o=>sel.indexOf(o)<0)) allReq=false; return; } const v=f[fld.key]; if(v==null||String(v).trim()==='') allReq=false; } }));
   return allReq?'filled':'draft';
 }
 function updateStatus(){
@@ -2076,6 +2415,15 @@ function validateRequired(){
     }
     if(!fld.req) return;
     if(!depActive(fld)) return;
+    if(fld.type==='eeteam'){
+      if(!(current.fields.ee_team&&current.fields.ee_team.confirmed)){ missing.push('אישור הצוות שעבד בפועל'); const el=document.querySelector('[data-key="'+fld.key+'"]'); if(el){ const fc=el.closest('.field'); if(fc) fc.classList.add('missing'); } }
+      return;
+    }
+    if(fld.type==='checklist'){
+      const sel=Array.isArray(current.fields[fld.key])?current.fields[fld.key]:[]; const miss=(fld.opts||[]).filter(o=>sel.indexOf(o)<0);
+      if(miss.length){ missing.push(fld.label+' (חסר: '+miss.join(', ')+')'); const el=document.querySelector('[data-key="'+fld.key+'"]'); if(el){ const fc=el.closest('.field'); if(fc) fc.classList.add('missing'); } }
+      return;
+    }
     const val=current.fields[fld.key];
     if(val==null||String(val).trim()===''){ missing.push(fld.label); const el=document.querySelector('[data-key="'+fld.key+'"]'); if(el){ const fc=el.closest('.field'); if(fc) fc.classList.add('missing'); } }
   }));
@@ -2090,6 +2438,8 @@ function collectIssues(r){
   if(def) def.sections.forEach(sec=>sec.fields.forEach(fld=>{
     if(!depOK(fld)) return;
     if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; if(sel.indexOf('__none__')<0 && sel.length<(fld.min||3)) out.push(fld.label+': נבחרו '+sel.length+' (לפחות '+(fld.min||3)+')'); return; }
+    if(fld.type==='eeteam'){ if(fld.req && !(f.ee_team&&f.ee_team.confirmed)) out.push('חסר: אישור הצוות שעבד בפועל'); return; }
+    if(fld.type==='checklist'){ if(fld.req){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const miss=(fld.opts||[]).filter(o=>sel.indexOf(o)<0); if(miss.length) out.push('סגירת המקום — לא סומן: '+miss.join(', ')); } return; }
     if(fld.req && blank(f[fld.key])) out.push('חסר: '+fld.label);
     if(fld.type==='chefmenu'){ const cv=f[fld.key]; if(cv&&typeof cv==='object'&&cv.menu&&CHEF_MENUS[cv.menu]){ CHEF_MENUS[cv.menu].cats.forEach(cat=>{ if(cat.optional) return; const seld=(cv.sel&&cv.sel[cat.key])||[]; const diff=cat.pick-seld.length; if(diff>0) out.push(menuMissMsg(cat.key,cat.title,diff)); else if(diff<0) out.push('נבחרו יותר מדי ב'+cat.title+' ('+seld.length+' מתוך '+cat.pick+')'); }); } }
   }));
@@ -2281,7 +2631,24 @@ function buildDocHTML(r){
       }
             if(fld.type==='yesnonote'){ const yv=f[fld.key]; let t='—'; if(yv&&typeof yv==='object'&&yv.v){ t=yesnoText(yv.v); if(yv.v==='yes'&&yv.note) t+=' — '+yv.note; } return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t==='—'?'empty':'')+'">'+bidiLines(t)+'</td></tr>'; }
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const none=sel.indexOf('__none__')>=0; const html=none?nbidi('ללא'):sel.map(x=>nbidi(x)).join(' · '); const has=none||sel.length; return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(has?'':'empty')+'">'+(has?html:'—')+'</td></tr>'; }
+      if(fld.type==='checklist'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const opts=(fld.opts||[]); const html=opts.map(o=>{ const on=sel.indexOf(o)>=0; return '<div style="'+(on?'color:#1f7a44;font-weight:700':'color:#b3331f')+'">'+(on?'☑':'☐')+' '+nbidi(o)+'</div>'; }).join(''); const allok=opts.length&&opts.every(o=>sel.indexOf(o)>=0); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v">'+html+(allok?'':'<div style="color:#b3331f;font-weight:800;margin-top:3px">⚠ לא הושלמה הסגירה</div>')+'</td></tr>'; }
       if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
+      if(fld.type==='eeteam'){
+        const t=(f.ee_team&&typeof f.ee_team==='object')?f.ee_team:{sup:[],staff:[],otherSup:'',otherStaff:''};
+        const mark=ok=> ok===false
+          ? '<span style="color:#b3331f;font-weight:800">✗ לא היה</span>'
+          : '<span style="color:#1f7a44;font-weight:800">✓ היה</span>';
+        const grpRows=(arr,isSup)=>{
+          const items=(arr||[]).filter(r=>r&&r.name);
+          if(!items.length) return '<tr><td class="k">—</td><td class="v empty">—</td></tr>';
+          return items.map(r=>{ const tel=isSup?supPhoneDocHTML(r.name,r.key):''; return '<tr><td class="k">'+lbl(r.role)+'</td><td class="v">'+bidi(r.name)+' &nbsp;'+mark(r.ok)+tel+'</td></tr>'; }).join('');
+        };
+        let out='<tr><td class="k" style="font-weight:800;background:#eef4fb">ספקים</td><td class="v" style="background:#eef4fb"></td></tr>'+grpRows(t.sup,true);
+        if(t.otherSup) out+='<tr><td class="k">ספק אחר</td><td class="v">'+bidi(t.otherSup)+'</td></tr>';
+        out+='<tr><td class="k" style="font-weight:800;background:#eef4fb">עובדים</td><td class="v" style="background:#eef4fb"></td></tr>'+grpRows(t.staff,false);
+        if(t.otherStaff) out+='<tr><td class="k">עובד אחר</td><td class="v">'+bidi(t.otherStaff)+'</td></tr>';
+        return out;
+      }
       let v=f[fld.key]; if(fld.type==='yesno') v=yesnoText(v)||f[fld.key]; const empty=(v==null||v===''); const isSup=SUPPLIER_KEYS.indexOf(fld.key)>=0; const supTel=(!empty&&isSup)?supPhoneDocHTML(v,fld.key):''; const nameHTML=empty?'—':(isSup?('<span class="sup-name">'+bidiLines(v)+'</span>'):bidiLines(v)); return `<tr><td class="k">${lbl(fld.label)}</td><td class="v ${empty?'empty':''}">${nameHTML}${supTel}</td></tr>`;
     }).join('');
     return `<h2 class="${sec.kind}">${lbl(sec.title)}</h2><table>${rows}</table>`;
@@ -2782,7 +3149,8 @@ function roleName(r){ const x=WROLES.find(w=>w[0]===r); return x?x[1]:'אחר'; 
 function renderWorkers(){
   const rb=$('#rubricBody'); if(!rb) return;
   let h=`<p class="sub">רשימת העובדים והספקים לפי תפקיד — שם, טלפון, חוזה עבודה וטופס 101. משותף לשני המותגים.</p>
-    <div class="arch-tools"><button class="btn wa101" id="send101All">📲 שלח טופס 101 בוואטסאפ</button><button class="btn" id="newWorker">+ הוסף עובד / ספק</button></div>`;
+    <div class="arch-tools"><button class="btn wa101" id="send101All">📲 שלח טופס 101 בוואטסאפ</button><button class="btn" id="newSupContract">📄 חוזה ספק (ריק)</button><button class="btn" id="newWorker">+ הוסף עובד / ספק</button></div>`;
+  h+=supplierContractsListHTML();
   WROLES.forEach(function(rr){ const rk=rr[0], rn=rr[1];
     const list=MEM.workers.filter(w=>w.role===rk).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
     h+=`<div class="sched-sec">${rn} (${list.length})</div>`;
@@ -2792,9 +3160,13 @@ function renderWorkers(){
         const msg101='היי '+(w.name||'')+', לצורך העסקתך אצלנו נא למלא טופס 101 מקוון בקישור הבא ולשלוח לי בחזרה:\n'+TOFES101_URL;
         const wa101=`<a class="btn sm wa101" href="https://wa.me/${num||''}?text=${encodeURIComponent(msg101)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📲 טופס 101</a>`;
         const open101=w.form101file?`<button type="button" class="btn sm open101" data-file101="${w.id}" onclick="event.stopPropagation()">📄 פתח 101</button>`:(w.form101url?`<a class="btn sm open101" href="${esc(w.form101url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📄 פתח 101</a>`:'');
+        const ctBtn=CONTRACT_ROLES.includes(w.role)?`<button type="button" class="btn sm wa101" data-contract="${w.id}" onclick="event.stopPropagation()">📄 שלח חוזה</button>`:'';
+        const scBtn=SUPPLIER_CONTRACT_ROLES.includes(w.role)?`<button type="button" class="btn sm wa101" data-supcontract="${w.id}" onclick="event.stopPropagation()">📄 חוזה ספק</button>`:'';
         return `<div class="srow" data-id="${w.id}">
         <div class="who"><div class="nm">${esc(w.name||'—')}</div>
           <div class="meta">${w.phone?'📞 '+esc(w.phone):'ללא טלפון'}${w.contract?'  ·  ✓ חוזה':''}${(w.form101||w.form101url||w.form101file)?'  ·  ✓ 101':''}</div></div>
+        ${ctBtn}
+        ${scBtn}
         ${open101}
         ${wa101}
         ${w.phone?`<a class="btn sm" href="tel:${esc(String(w.phone).replace(/[^0-9+]/g,''))}" onclick="event.stopPropagation()">חיוג</a>`:''}
@@ -2803,10 +3175,16 @@ function renderWorkers(){
   });
   rb.innerHTML=h;
   $('#newWorker').onclick=()=>openWorker(null);
+  { const s=$('#newSupContract'); if(s) s.onclick=()=>openSupplierContract(null); }
   { const s=$('#send101All'); if(s) s.onclick=()=>{ const msg='היי, לצורך העסקתך אצלנו נא למלא טופס 101 מקוון בקישור הבא ולשלוח לי בחזרה:\n'+TOFES101_URL; const a=document.createElement('a'); a.href='https://wa.me/?text='+encodeURIComponent(msg); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }; }
   rb.querySelectorAll('.srow [data-del]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteWorker(b.dataset.del); });
   rb.querySelectorAll('.srow [data-file101]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openFile101(b.dataset.file101); });
-  rb.querySelectorAll('.srow').forEach(r=>r.onclick=e=>{ if(e.target.closest('[data-del]')||e.target.closest('a')) return; openWorker(r.dataset.id); });
+  rb.querySelectorAll('.srow [data-contract]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openWContract(b.dataset.contract); });
+  rb.querySelectorAll('.srow [data-supcontract]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openSupplierContract(b.dataset.supcontract); });
+  rb.querySelectorAll('[data-scpdf]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openSignedSupplierPDF(b.dataset.scpdf); });
+  rb.querySelectorAll('[data-sclink]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); const l=supContractLink(b.dataset.sclink); if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(l).then(()=>toast('הקישור הועתק'),()=>prompt('העתק/י את הקישור:',l)); } else { prompt('העתק/י את הקישור:',l); } });
+  rb.querySelectorAll('[data-scdel]').forEach(b=>b.onclick=async e=>{ e.stopPropagation(); if(!(await askConfirm('למחוק חוזה זה מהרשימה?'))) return; await deleteDoc('supplierContracts',b.dataset.scdel,'supplierContracts'); renderWorkers(); toast('נמחק'); });
+  rb.querySelectorAll('.srow').forEach(r=>r.onclick=e=>{ if(e.target.closest('[data-del]')||e.target.closest('[data-contract]')||e.target.closest('[data-supcontract]')||e.target.closest('[data-file101]')||e.target.closest('a')) return; openWorker(r.dataset.id); });
 }
 function openFile101(id){
   const w=MEM.workers.find(x=>x.id===id); if(!w||!w.form101file) return;
@@ -2847,6 +3225,261 @@ function openWorker(id){
   $('#workerModal').style.display='flex';
 }
 function closeWorker(){ const m=$('#workerModal'); if(m) m.style.display='none'; editingWorker=null; }
+/* ===================== חוזה עבודה לראנרים/ברמניות ===================== */
+function openWContract(id){
+  const w=MEM.workers.find(x=>x.id===id); if(!w) return;
+  contractWorkerId=id;
+  const brand=(w.brand==='louie'||w.brand==='kamilion')?w.brand:BRAND;
+  const bs=$('#cwBrand'); if(bs) bs.value=brand;
+  const body=$('#cwBody'); if(body) body.value=buildContractText(w,brand);
+  const ttl=$('#cwModalTitle'); if(ttl) ttl.textContent='שליחת חוזה עבודה — '+(w.name||'');
+  if(bs) bs.onchange=()=>{ const wk=MEM.workers.find(x=>x.id===contractWorkerId); if(wk&&body) body.value=buildContractText(wk,bs.value); };
+  $('#contractWModal').style.display='flex';
+}
+function closeWContract(){ const m=$('#contractWModal'); if(m) m.style.display='none'; contractWorkerId=null; }
+function buildContractHTML(text, brand){
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  return '<div class="doc">'+
+    '<div class="d-head"><div class="d-brand">'+esc(co.name)+'</div><div class="d-sub">חוזה עבודה אישי</div></div>'+
+    '<div style="font-size:13px;line-height:1.6;text-align:right">'+bidiLines(text)+'</div>'+
+    '</div>';
+}
+async function sendContract(){
+  if(!contractWorkerId){ closeWContract(); return; }
+  const w=MEM.workers.find(x=>x.id===contractWorkerId); if(!w){ closeWContract(); return; }
+  const brand=$('#cwBrand').value;
+  const text=$('#cwBody').value;
+  if(!String(text||'').trim()){ toast('הנוסח ריק'); return; }
+  const area=$('#pdfArea'); area.innerHTML=buildContractHTML(text,brand);
+  const bEl=area.querySelector('.d-brand'); if(bEl) bEl.style.color=(brand==='kamilion')?'#4f2c79':'#16456f';
+  const hEl=area.querySelector('.d-head'); if(hEl) hEl.style.borderBottomColor=(brand==='kamilion')?'#6b3fa0':'#1e5b9c';
+  const el=area.firstElementChild;
+  const fileName=(brand==='kamilion'?'kamilion':'louie')+'_contract.pdf';
+  const opt={margin:[8,8,8,8],filename:fileName,image:{type:'jpeg',quality:0.96},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0,imageTimeout:0,
+      onclone:(cdoc)=>{ const a=cdoc.getElementById('pdfArea'); if(a){ a.style.left='0'; a.style.top='0'; a.style.position='static'; a.style.width='794px'; } const d=cdoc.querySelector('#pdfArea .doc'); if(d){ d.style.width='794px'; d.style.margin='0'; } }},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
+  if(typeof html2pdf==='undefined'){ toast('שגיאה: רכיב ה-PDF לא נטען'); return; }
+  toast('מכין חוזה לשליחה...');
+  if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  try{ void el.offsetHeight; }catch(e){}
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r,150));
+  let blob;
+  try{ const worker=html2pdf().set(opt).from(el); const pdf=await worker.toPdf().get('pdf'); blob=pdf.output('blob'); }
+  catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
+  if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
+  const file=new File([blob],fileName,{type:'application/pdf'});
+  const num=waNum(w.phone);
+  const shareData={files:[file],title:'חוזה עבודה',text:'חוזה עבודה — '+(w.name||'')};
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share(shareData); }
+    catch(e){ if(e && e.name==='AbortError'){ return; } downloadBlob(blob,fileName); if(num){ window.open('https://wa.me/'+num,'_blank'); } toast('השיתוף לא זמין כאן — הקובץ ירד; נפתח צ׳אט וואטסאפ לצירוף'); }
+  } else {
+    downloadBlob(blob,fileName);
+    if(num){ window.open('https://wa.me/'+num,'_blank'); toast('הקובץ ירד — נפתח צ׳אט וואטסאפ של '+(w.name||'')+' לצירוף'); }
+    else { toast('הקובץ ירד — אפשר לצרפו לוואטסאפ'); }
+  }
+  closeWContract();
+}
+/* ===================== חוזה ספק (די ג׳יי / צלם / מפעיל) + חתימה דיגיטלית ===================== */
+let scWorkerId=null;
+function initSigPad(id){
+  const c=$('#'+id); if(!c||c._sigInit) return; c._sigInit=true;
+  const ctx=c.getContext('2d'); ctx.lineWidth=3; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#15324f';
+  let drawing=false,lastX=0,lastY=0;
+  function pos(e){ const r=c.getBoundingClientRect(); const sx=c.width/r.width, sy=c.height/r.height; return {x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy}; }
+  function start(e){ e.preventDefault(); drawing=true; c._hasInk=true; const p=pos(e); lastX=p.x; lastY=p.y; ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(lastX+0.1,lastY+0.1); ctx.stroke(); try{ c.setPointerCapture(e.pointerId); }catch(_){} }
+  function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke(); lastX=p.x; lastY=p.y; }
+  function end(){ drawing=false; }
+  c.addEventListener('pointerdown',start); c.addEventListener('pointermove',move);
+  c.addEventListener('pointerup',end); c.addEventListener('pointercancel',end);
+}
+function clearSigPad(id){ const c=$('#'+id); if(!c) return; const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); c._hasInk=false; }
+function sigData(id){ const c=$('#'+id); if(!c||!c._hasInk) return ''; try{ return c.toDataURL('image/png'); }catch(e){ return ''; } }
+function buildSupplierContractHTML(text, brand, sigCompany, sigSupplier){
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  const sigImg=d=> d ? '<img src="'+d+'" style="max-height:48px;max-width:92%;display:block;margin:0 auto 4px">' : '<div class="line"></div>';
+  return '<div class="doc">'+
+    '<div class="d-head"><div class="d-brand">'+esc(co.name)+'</div><div class="d-sub">הסכם התקשרות לביצוע עבודות ספק</div></div>'+
+    '<div style="font-size:13px;line-height:1.6;text-align:right">'+bidiLines(text)+'</div>'+
+    '<div class="d-foot">'+
+      '<div class="sig">'+sigImg(sigCompany)+'<div class="lbl">'+nbidi('חתימת '+co.name)+'</div></div>'+
+      '<div class="sig">'+sigImg(sigSupplier)+'<div class="lbl">'+nbidi('חתימת הספק/ית')+'</div></div>'+
+    '</div>'+
+  '</div>';
+}
+function openSupplierContract(id){
+  const w=id?MEM.workers.find(x=>x.id===id):null;
+  scWorkerId=(w&&w.id)||null;
+  const brand=(w&&(w.brand==='louie'||w.brand==='kamilion'))?w.brand:BRAND;
+  const bs=$('#scBrand'); if(bs) bs.value=brand;
+  const body=$('#scBody'); if(body) body.value=buildSupplierContractText(w,brand);
+  const ttl=$('#scModalTitle'); if(ttl) ttl.textContent='חוזה ספק'+(w&&w.name?' — '+w.name:'');
+  if(bs) bs.onchange=()=>{ const wk=scWorkerId?MEM.workers.find(x=>x.id===scWorkerId):null; if(body) body.value=buildSupplierContractText(wk,bs.value); };
+  $('#supplierContractModal').style.display='flex';
+  initSigPad('scSigCompany'); initSigPad('scSigSupplier');
+  clearSigPad('scSigCompany'); clearSigPad('scSigSupplier');
+}
+function closeSupplierContract(){ const m=$('#supplierContractModal'); if(m) m.style.display='none'; scWorkerId=null; }
+async function sendSupplierContract(){
+  const brand=$('#scBrand').value;
+  const text=$('#scBody').value;
+  if(!String(text||'').trim()){ toast('הנוסח ריק'); return; }
+  const w=scWorkerId?MEM.workers.find(x=>x.id===scWorkerId):null;
+  const sigC=sigData('scSigCompany'), sigS=sigData('scSigSupplier');
+  const area=$('#pdfArea'); area.innerHTML=buildSupplierContractHTML(text,brand,sigC,sigS);
+  const bEl=area.querySelector('.d-brand'); if(bEl) bEl.style.color=(brand==='kamilion')?'#4f2c79':'#16456f';
+  const hEl=area.querySelector('.d-head'); if(hEl) hEl.style.borderBottomColor=(brand==='kamilion')?'#6b3fa0':'#1e5b9c';
+  const el=area.firstElementChild;
+  const fileName=(brand==='kamilion'?'kamilion':'louie')+'_supplier_contract.pdf';
+  const opt={margin:[8,8,8,8],filename:fileName,image:{type:'jpeg',quality:0.96},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0,imageTimeout:0,
+      onclone:(cdoc)=>{ const a=cdoc.getElementById('pdfArea'); if(a){ a.style.left='0'; a.style.top='0'; a.style.position='static'; a.style.width='794px'; } const d=cdoc.querySelector('#pdfArea .doc'); if(d){ d.style.width='794px'; d.style.margin='0'; } }},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
+  if(typeof html2pdf==='undefined'){ toast('שגיאה: רכיב ה-PDF לא נטען'); return; }
+  toast('מכין חוזה לשליחה...');
+  if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  try{ void el.offsetHeight; }catch(e){}
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r,150));
+  let blob;
+  try{ const worker=html2pdf().set(opt).from(el); const pdf=await worker.toPdf().get('pdf'); blob=pdf.output('blob'); }
+  catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
+  if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
+  const file=new File([blob],fileName,{type:'application/pdf'});
+  const num=w?waNum(w.phone):'';
+  const shareData={files:[file],title:'חוזה ספק',text:'חוזה ספק'+(w&&w.name?' — '+w.name:'')};
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share(shareData); }
+    catch(e){ if(e && e.name==='AbortError'){ return; } downloadBlob(blob,fileName); if(num){ window.open('https://wa.me/'+num,'_blank'); } toast('השיתוף לא זמין כאן — הקובץ ירד; נפתח צ׳אט וואטסאפ לצירוף'); }
+  } else {
+    downloadBlob(blob,fileName);
+    if(num){ window.open('https://wa.me/'+num,'_blank'); toast('הקובץ ירד — נפתח צ׳אט וואטסאפ של '+(w.name||'')+' לצירוף'); }
+    else { toast('הקובץ ירד — אפשר לצרפו לוואטסאפ'); }
+  }
+  closeSupplierContract();
+}
+/* ---- חתימה מרחוק: צד מנהל (יצירת בקשה + שליחת קישור) ---- */
+function supContractLink(id){ return location.origin + location.pathname + '#sign=' + id; }
+async function sendSupplierContractRemote(){
+  const brand=$('#scBrand').value;
+  const text=$('#scBody').value;
+  if(!String(text||'').trim()){ toast('הנוסח ריק'); return; }
+  if(!CLOUD||!fb.db){ toast('נדרש חיבור לענן כדי לשלוח לחתימה מרחוק'); return; }
+  const w=scWorkerId?MEM.workers.find(x=>x.id===scWorkerId):null;
+  const doc={ id:uid(), brand, text, sigCompany:sigData('scSigCompany')||'', sigSupplier:'',
+    workerId:(w&&w.id)||'', supplierName:(w&&w.name)||'', supplierPhone:(w&&w.phone)||'',
+    status:'pending', signerName:'', createdAt:Date.now(), signedAt:0 };
+  toast('יוצר קישור לחתימה…');
+  await persistDoc('supplierContracts', doc);
+  if(!MEM.supplierContracts) MEM.supplierContracts=[];
+  if(!MEM.supplierContracts.some(x=>x.id===doc.id)) MEM.supplierContracts.push(doc);
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  const link=supContractLink(doc.id);
+  const msg='שלום'+(doc.supplierName?' '+doc.supplierName:'')+', מצורף הסכם התקשרות ספק מול '+co.name+'.\nנא לקרוא ולחתום בקישור הבא:\n'+link;
+  const num=w?waNum(w.phone):'';
+  closeSupplierContract();
+  const a=document.createElement('a'); a.href='https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg); a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast(num?'נפתח וואטסאפ של '+(w.name||'')+' — שלח/י את הקישור':'נפתח וואטסאפ — בחר/י נמען ושלח/י את הקישור');
+  if(VIEW==='sched' && SCHEDTAB==='workers' && modalsClosed()) renderWorkers();
+}
+async function openSignedSupplierPDF(id){
+  const c=(MEM.supplierContracts||[]).find(x=>x.id===id); if(!c) return;
+  const area=$('#pdfArea'); area.innerHTML=buildSupplierContractHTML(c.text,c.brand,c.sigCompany,c.sigSupplier);
+  const bEl=area.querySelector('.d-brand'); if(bEl) bEl.style.color=(c.brand==='kamilion')?'#4f2c79':'#16456f';
+  const hEl=area.querySelector('.d-head'); if(hEl) hEl.style.borderBottomColor=(c.brand==='kamilion')?'#6b3fa0':'#1e5b9c';
+  const el=area.firstElementChild;
+  const fileName=(c.brand==='kamilion'?'kamilion':'louie')+'_supplier_contract_signed.pdf';
+  const opt={margin:[8,8,8,8],filename:fileName,image:{type:'jpeg',quality:0.96},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0,imageTimeout:0,
+      onclone:(cdoc)=>{ const a=cdoc.getElementById('pdfArea'); if(a){ a.style.left='0'; a.style.top='0'; a.style.position='static'; a.style.width='794px'; } const d=cdoc.querySelector('#pdfArea .doc'); if(d){ d.style.width='794px'; d.style.margin='0'; } }},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
+  if(typeof html2pdf==='undefined'){ toast('שגיאה: רכיב ה-PDF לא נטען'); return; }
+  toast('מכין PDF חתום…');
+  if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  try{ void el.offsetHeight; }catch(e){}
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r,150));
+  let blob;
+  try{ const worker=html2pdf().set(opt).from(el); const pdf=await worker.toPdf().get('pdf'); blob=pdf.output('blob'); }
+  catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
+  if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
+  const file=new File([blob],fileName,{type:'application/pdf'});
+  const shareData={files:[file],title:'חוזה ספק חתום',text:'חוזה ספק חתום'+(c.supplierName?' — '+c.supplierName:'')};
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{ await navigator.share(shareData); }catch(e){ if(e&&e.name==='AbortError') return; downloadBlob(blob,fileName); }
+  } else { downloadBlob(blob,fileName); toast('הקובץ ירד'); }
+}
+function supplierContractsListHTML(){
+  const list=(MEM.supplierContracts||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(!list.length) return '';
+  let h='<div class="supct-sec">✍️ חוזי ספקים לחתימה מרחוק ('+list.length+')</div>';
+  h+=list.map(c=>{
+    const signed=c.status==='signed';
+    const st=signed?'<span class="st done">✅ נחתם</span>':'<span class="st pend">⏳ ממתין</span>';
+    const when=signed&&c.signedAt?new Date(c.signedAt).toLocaleDateString('he-IL'):new Date(c.createdAt||Date.now()).toLocaleDateString('he-IL');
+    return '<div class="supct-row"><div class="who"><div class="nm">'+esc(c.supplierName||'ספק ללא שם')+'</div>'+
+      '<div style="font-size:12px;color:var(--muted)">'+esc(BRAND_NAME[c.brand]||'')+' · '+when+(signed&&c.signerName?' · חתם/ה: '+esc(c.signerName):'')+'</div></div>'+st+
+      (signed?'<button type="button" class="btn sm wa101" data-scpdf="'+c.id+'">📄 PDF חתום</button>'
+             :'<button type="button" class="btn sm" data-sclink="'+c.id+'">🔗 העתק קישור</button>')+
+      '<button type="button" class="btn sm rdel" data-scdel="'+c.id+'">🗑</button></div>';
+  }).join('');
+  return h;
+}
+/* ---- חתימה מרחוק: צד הספק (מסך חתימה עצמאי דרך קישור) ---- */
+function signBrandColor(b){ return b==='kamilion'?'#6b3fa0':'#1e5b9c'; }
+function renderSignScreen(c){
+  let ov=document.getElementById('signOverlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='signOverlay'; document.body.appendChild(ov); }
+  const co=CONTRACT_COMPANY[c.brand]||CONTRACT_COMPANY.louie;
+  const color=signBrandColor(c.brand);
+  if(c.status==='signed'){
+    ov.innerHTML='<div class="sign-wrap"><div class="sign-head" style="background:'+color+'"><h1>'+esc(co.name)+'</h1><p>החוזה נחתם</p></div>'+
+      '<div class="sign-card"><p style="text-align:center;font-weight:700;font-size:16px">✅ החוזה נחתם בהצלחה'+(c.signedAt?' · '+new Date(c.signedAt).toLocaleDateString('he-IL'):'')+'</p>'+
+      '<p style="text-align:center;color:var(--muted);font-size:13px">תודה רבה. אפשר לסגור את החלון.</p></div></div>';
+    return;
+  }
+  ov.innerHTML='<div class="sign-wrap">'+
+    '<div class="sign-head" style="background:'+color+'"><h1>'+esc(co.name)+'</h1><p>הסכם התקשרות ספק — נא לקרוא ולחתום</p></div>'+
+    '<div class="sign-card"><div class="sign-text">'+esc(c.text||'')+'</div></div>'+
+    '<div class="sign-card">'+
+      '<label>שם מלא של החותם/ת</label><input id="signName" type="text" placeholder="שם מלא" value="'+esc(c.supplierName||'')+'">'+
+      '<label>חתימה (חתמו באצבע במסגרת)</label>'+
+      '<div class="sigpad-wrap"><canvas id="signSigPad" class="sigpad" width="760" height="240"></canvas><button type="button" class="btn sm ghost sigclear" id="signClear">נקה חתימה</button></div>'+
+      '<button id="signConfirm" class="big" style="background:'+color+';margin-top:14px">אני מאשר/ת וחותם/ת</button>'+
+      '<div id="signErr" style="color:#c0392b;font-size:13px;margin-top:8px;text-align:center"></div>'+
+    '</div></div>';
+  initSigPad('signSigPad');
+  const cl=document.getElementById('signClear'); if(cl) cl.onclick=()=>clearSigPad('signSigPad');
+  const cf=document.getElementById('signConfirm'); if(cf) cf.onclick=()=>submitSupplierSignature(c);
+}
+async function submitSupplierSignature(c){
+  const nmEl=document.getElementById('signName'); const errEl=document.getElementById('signErr');
+  const nm=(nmEl&&nmEl.value||'').trim();
+  const sig=sigData('signSigPad');
+  if(!sig){ if(errEl) errEl.textContent='נא לחתום במסגרת לפני האישור'; return; }
+  if(!nm){ if(errEl) errEl.textContent='נא להזין שם מלא'; return; }
+  const btn=document.getElementById('signConfirm'); if(btn){ btn.disabled=true; btn.textContent='שומר…'; }
+  try{
+    await fb.db.collection('supplierContracts').doc(c.id).update({sigSupplier:sig, signerName:nm, status:'signed', signedAt:Date.now()});
+    c.sigSupplier=sig; c.signerName=nm; c.status='signed'; c.signedAt=Date.now();
+    renderSignScreen(c);
+  }catch(e){ console.error(e); if(errEl) errEl.textContent='השמירה נכשלה — בדקו חיבור לאינטרנט ונסו שוב'; if(btn){ btn.disabled=false; btn.textContent='אני מאשר/ת וחותם/ת'; } }
+}
+async function startSigningMode(id){
+  let ov=document.getElementById('signOverlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='signOverlay'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">טוען חוזה…</p></div></div>';
+  document.body.classList.remove('locked');
+  await initCloud();
+  if(!CLOUD||!fb.db){ ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">לא ניתן להתחבר כעת. נסו שוב מאוחר יותר.</p></div></div>'; return; }
+  try{
+    const snap=await fb.db.collection('supplierContracts').doc(id).get();
+    if(!snap.exists){ ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">הקישור אינו תקין או שהחוזה הוסר.</p></div></div>'; return; }
+    renderSignScreen(snap.data());
+  }catch(e){ console.error(e); ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">שגיאה בטעינת החוזה. נסו לרענן.</p></div></div>'; }
+}
 async function saveWorker(){
   const name=$('#wName').value.trim();
   if(!name){ toast('יש להזין שם'); return; }
@@ -2937,7 +3570,7 @@ function setView(v){
   if(dirty && current) saveReport(false);
   VIEW=v;
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
-  if(v==='new') renderPicker(); else if(v==='sched') renderSched(); else if(v==='chef') renderChef(); else if(v==='endreport') renderEndHome(); else renderArchive();
+  if(v==='new') renderPicker(); else if(v==='sched') renderSched(); else if(v==='chef') renderChef(); else if(v==='endreport') renderEndHome(); else if(v==='contracts') renderContractsView(); else renderArchive();
   refreshBell();
 }
 function syncBrandUI(){ document.querySelectorAll('#brandSwitch button').forEach(b=>b.classList.toggle('on',b.dataset.brand===BRAND)); }
@@ -2972,7 +3605,10 @@ document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.data
 function setCrewSel(el,roleKey,val){ if(!el) return; el.innerHTML=crewOptionsHTML(roleKey, val||''); el.dataset.prev=el.value; }
 { const b=$('#notifyOk'); if(b) b.onclick=()=>{ const m=$('#notifyModal'); if(m) m.style.display='none'; }; const m=$('#notifyModal'); if(m) m.onclick=e=>{ if(e.target===m) m.style.display='none'; }; }
 { const m=$('#workerModal'); if(m){ $('#wSave').onclick=saveWorker; $('#wCancel').onclick=closeWorker; $('#wDel').onclick=()=>{ if(editingWorker) deleteWorker(editingWorker); }; m.onclick=e=>{ if(e.target===m) closeWorker(); }; } }
+{ const m=$('#contractWModal'); if(m){ $('#cwSend').onclick=sendContract; $('#cwCancel').onclick=closeWContract; $('#cwReset').onclick=()=>{ const w=MEM.workers.find(x=>x.id===contractWorkerId); const b=$('#cwBrand').value; if(w) $('#cwBody').value=buildContractText(w,b); }; m.onclick=e=>{ if(e.target===m) closeWContract(); }; } }
+{ const m=$('#supplierContractModal'); if(m){ $('#scSend').onclick=sendSupplierContract; $('#scRemote').onclick=sendSupplierContractRemote; $('#scCancel').onclick=closeSupplierContract; $('#scReset').onclick=()=>{ const w=scWorkerId?MEM.workers.find(x=>x.id===scWorkerId):null; const b=$('#scBrand').value; $('#scBody').value=buildSupplierContractText(w,b); }; m.querySelectorAll('.sigclear').forEach(b=>b.onclick=()=>clearSigPad(b.dataset.sig)); m.onclick=e=>{ if(e.target===m) closeSupplierContract(); }; } }
 { const m=$('#cateringModal'); if(m){ $('#cSave').onclick=saveCater; $('#cCancel').onclick=closeCater; $('#cDel').onclick=()=>{ if(editingCater) deleteCater(editingCater); }; m.onclick=e=>{ if(e.target===m) closeCater(); }; } }
+{ const m=$('#contractModal'); if(m){ $('#ctSave').onclick=saveContract; $('#ctCancel').onclick=closeContract; $('#ctDel').onclick=()=>{ if(editingContract) deleteContract(editingContract); }; m.onclick=e=>{ if(e.target===m) closeContract(); }; } }
 { const m=$('#tastingModal'); if(m){ $('#tSave').onclick=saveTasting; $('#tCancel').onclick=closeTasting; $('#tDel').onclick=()=>{ if(editingTasting) deleteTasting(editingTasting); }; m.onclick=e=>{ if(e.target===m) closeTasting(); }; } }
 
 const JUNE26=[{"type":"bat","fields":{"contact":"נועה","phone":"0523710344","eventTime":"19:30","celebrant":"שחר","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"תפריט שף ב400","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"פנקייקים וזיקוקים מתנה\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nלשים לב ללג\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 25\nתפריט מבוגרים: אסאדו פרגיות סלמון ובמסתובבים: צוריסוס עלי גפן סלטים : סלט עלים עשיר קרפצו סלק פטה כבד ירקות שורש ונבטים קרפצו חציל קרפצו בקר סלט פנצלנלה","managerNotes":"לשדרג אותם לתפריט שף במתנה לא רצתה בתוספת\nדיסק און קי: הביאו","eventDate":"2026-06-01"}},{"type":"bat","fields":{"contact":"אורטל","phone":"0549403072","eventTime":"19:30","celebrant":"דניאל וגאיה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"המבורגר וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"תמונות מתחלפות","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה זיקוק קר ב300 שח","eventDate":"2026-06-03","managerNotes":"דיסק און קי: יש"}},{"type":"bat","fields":{"contact":"דוד","phone":"0528754063","eventTime":"19:30","celebrant":"נועה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"50","kidsMenu":"תפריט שף ב800","vegMeals":"תפריט שף","glutenLactose":"6 שיהיה לחמניות","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"יש מצגת","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nזיקוק ב350 שח בלי נשיקה סטירה","eventDate":"2026-06-04","managerNotes":"דיסק און קי: יש מצגת"}},{"type":"bat","fields":{"contact":"דורית","phone":"0547777166","eventTime":"11:00","celebrant":"אביגיל","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"60+8 מבוגרים","kidsMenu":"תפריט שף ב500 שח","vegMeals":"3","glutenLactose":"3","wheelchair":"yes","externalSupplier":"לא","bus":"yes","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n10:30 – הגעה לתמונות\n11:00 – אטרקציות חטיפים והפעלה קלה\n11:30 – כניסה וריקודים\n12:00 – הפסקת אוכל\n12:30 – מצגת והפעלה\n13:15 – טקס עוגה וקינוחים\n13:30 – גאסט דנס\n13:45 – ריקודים עד הסוף","eventDate":"2026-06-05","managerNotes":"דיסק און קי: הביאה דיסק און קי עם מצגת וסירטונים ביום האירוע תביא דיסק און קי עם תמונות ."}},{"type":"meshulav","fields":{"contact":"שרה","phone":"0539630329","eventTime":"20:00","celebrant":"רומי","balloons":"לבן ורוד","attractions":["עמדת צילום"],"cakeCeremony":"yes","kidsCount":"40","kidsMenu":"תפריט שף ב800","vegMeals":"3","glutenLactose":"1","wheelchair":"yes","externalSupplier":"קייטרינג","bus":"no","galiBook":"no","presentation":"yes","packageNotes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – ריקודים\n22:45 – ריקודים עד הסוף עושים שולחן מתוקים לשים בוטרינה בכניסה לא רוצים גאסט דנס","adultsCount":"30","sides":"לעדכן","vegPersonal":"לעדכן","veganPersonal":"לעדכן","adultsNotes":"מבוגרים למעלה\n\nתפריט מבוגרים שנבחר:\nמסתובבים: לעדכן\nסלטים: לעדכן\nעיקריות: לעדכן","seating":"שולחן 1 - 12 מקומות שולחן 2 - 12 מקומות שולחן 3 -12-14 מקומות שולחן 4 - 12-14 מקומות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","eventManager":"ֿ","eventDate":"2026-06-07","managerNotes":"דיסק און קי: יש מצגת התקייה של רומי"}},{"type":"bat","fields":{"contact":"עדי","phone":"0545592575","eventTime":"19:30","celebrant":"מיקה ואלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"35","kidsMenu":"תפריט שף כלול","vegMeals":"0","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"1 מהבנות","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","eventDate":"2026-06-08","managerNotes":"דיסק און קי: רק תמונות תקייה תמונות של מיקה"}},{"type":"bat","fields":{"contact":"אפרת","phone":"0505297980","eventTime":"19:30","celebrant":"היללי","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"40","kidsMenu":"תפריט שף ב800","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"yes","galiBook":"yes","presentation":"תמונות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 40\nתפריט מבוגרים: 7 סלטים: *קרפצ'ו חציל *חומוס ביתי *טריו שרי *אנטיפסטי ירקות *סלט טאבולה ים תיכוני *סלט כרוב אסייתי *סלט עלים עשיר בירקות בייבי (לבקש אקסטרה לשולחנות פלפל ירוק חריף מטוגן). 2 תוספות: *אורז לבן עם פירות יבשים ושקדים *תפוח אדמה זעיר בשמן זית (לבקש אקסטרה תוספת של שעועית ירוקה). עיקריות: *פילה מושט ברוטב מרוקאי *פרגית טעם מזרחי *אסאדו ברוטב טקסס","eventDate":"2026-06-09","adultsMenuPick":{"menu":"ashir","sel":{"salads":["חומוס ביתי עם מסבחה","טריו שרי עם פסטו ושקדים","אנטיפסטי ירקות קלויים","סלט עלים עשיר ואנדיב","פלפל חריף מטוגן בלימון","סלט טאבולה ים-תיכוני","כרוב אסייתי"],"mains":["פרגית במגוון טעמים","פילה מושט במגוון טעמים","אסאדו עגל ברוטב טקסס"]},"opt":{}},"managerNotes":"אטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת סוני פלייסטיישן מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן\nדיסק און קי: עד שבוע לפני"}},{"type":"meshulav","fields":{"contact":"שירה","phone":"0532505469","eventTime":"19:30","celebrant":"אדל","balloons":"לבן ורוד","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","kidsCount":"40","kidsMenu":"תפריט שף ב1000 גלאט ! בריוש אסאדו מיני המבורגר פסטה עגבניות","vegMeals":"פסטה עגבניות","glutenLactose":"3","wheelchair":"yes","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","packageNotes":"הילדים אוכלים למעלה במידה וכולם מגיעים אם לא כולם מגיעים והילדים בכמות קטנה להושיב למטה בועות ערפל מתנה זיקוק ב300 שח\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","adultsCount":"30 מבוגרים +3 רזרבה","sides":"אורז לבן עם פירות יבשים שעועית ירוקה","vegPersonal":"0","veganPersonal":"0","adultsNotes":"מבוגרים למטה","seating":"שולחן 1- 10-12 מקומות שולחן 2 - 10-11 מקומות שולחן 7- 10 -12 מקומות","usbDate":"","acum":"yes","securityCheck":"yes","eventDate":"2026-06-10","adultsMenuPick":{"menu":"ashir","sel":{"rotating":["קרוסטון פטה כבד וריבת בצל","קבב על מקל קינמון וטחינה"],"salads":["קרפצ׳יו חציל ים-תיכוני","חומוס ביתי עם מסבחה","אנטיפסטי ירקות קלויים","סלט עלים עשיר ואנדיב","פלפל חריף מטוגן בלימון","סלט טאבולה ים-תיכוני","כרוב אסייתי"],"mains":["פרגית במגוון טעמים","פילה מושט במגוון טעמים","דונר טורקי (עגל וטלה)"]},"opt":{}},"managerNotes":"אטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת PlayStation 5 מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן סדנת איפור אמא ובת אצל מאפרת מקצועית בשווי 1000 ש''ח במתנה\nדיסק און קי: יש מצגת ותמונות"}},{"type":"bat","fields":{"contact":"מורן","phone":"0547606200","eventTime":"19:30","celebrant":"גפן","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"60","kidsMenu":"תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"אבידן מול האבא","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה להוסיף כיסאות ושולחנות בחוץ הרוב מעשנים!!!\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 31 \"עראיס מיני בריוש אסאדו","eventDate":"2026-06-11","managerNotes":"דיסק און קי: יש מצגת ותמונות 2 תקיות של תמונות"}},{"type":"bat","fields":{"contact":"ג'ודי","phone":"0542669344","eventTime":"19:30","glutenLactose":"0","wheelchair":"no","acum":"yes","externalSupplier":"צלם דיגי","presentation":"no","usbDate":"","securityCheck":"yes","notes":"לוז אירוע:\n19:30 – קבלת פנים\n20:15 – כניסה ראשונה וריקודים\n20:45 – מנה עיקרית\n21:15 – טקס חינה וריקודים\n21:40 – קינוחים ושתייה וחמה צריכים שולחן ליד הורטינה בכניסה למתנות יביאו שתייה אלכוהולית שולחן גדול לקינוחים לדאוג לשולחן לדבר עם אבידן על השעות\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: חינה\nכמות מנות מבוגרים (לפי התחייבות): 46 מבוגרים\nכמות מנות ילדים (לפי התחייבות): 8 ילדים\nמה הילדים אוכלים? המבורגר וציפס/שניצל וציפס: שניצל וציפס\nמנות צמחוניות (אישיות): 1 צמחוני שווארמה צימחונית\nמנות טבעוניות (אישיות): 0\nבחירת מנות מסתובבים: שיפודי עוף בטמפטרה עראיס\nבחירת סלטים: סלט עלים חסות וכו .. טריו עגבניות שרי קרפציו חציל חומוס מטבוחה קוסקוס עם ירקות צמחוני\nבחירת עיקריות: פרגית על האש על מצע אורז אושפלו אסאדו ניוקי ערמונים סלמון עשבי תיבול על רביולי ארטישוק קינוח- פירות...אבטיח מלון ענבים( במקום ביסקוטי)\nמנות גלאט (מיוחדות בתוספת תשלום) 15 שח: לא\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): איך שבא לנו","eventDate":"2026-06-14","managerNotes":"דיסק און קי: לא"}},{"type":"meshulav","fields":{"contact":"חן","phone":"0542211329","eventTime":"20:00","celebrant":"אדל","kidsCount":"30","kidsMenu":"המבורגר וציפס","vegMeals":"0","glutenLactose":"0","wheelchair":"no","externalSupplier":"זמר","bus":"no","galiBook":"no","presentation":"כן פורמט mp4","packageNotes":"אין חבילה ילדים למעלה ארוחת ילדים","adultsCount":"82","vegPersonal":"3","adultsNotes":"מבוגרים למטה ילדים למעלה\n\nלוז אירוע:\n19:00 – קבלת פנים\n19:45 – סלטים ברכות\n20:00 – ריקודים זמר\n20:30 – מנה עיקרית\n21:15 – מצגת\n21:30 – ריקודים וזמר\n21:45 – קינוחים\n\nתפריט מבוגרים שנבחר:\nמסתובבים: בריוש אסאדו קבב על מקל קינמון\nסלטים: עלים חומוס טאבולה מטבוחה קרפציו חציל פטה כבד קרפציו בקר סלט פלפלים חריף\nעיקריות: פרגית אושפלו אסאדו 6 פירה כמהין סלמון עם רביולי ארטישוק","seating":"יעשו וישלחו 5 שולחנות של 12","usbDate":"","acum":"yes","securityCheck":"yes","eventDate":"2026-06-15","notes":"— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מבוגרים","managerNotes":"דיסק און קי: תקייה מצגת אדל חדש אין סאוונד אין תמונות"}},{"type":"bat","fields":{"contact":"ליאור","phone":"0586424321","eventTime":"19:00","celebrant":"אריאל יעל","glutenLactose":"0","wheelchair":"no","acum":"yes","externalSupplier":"דיגי וצלם","presentation":"yes","usbDate":"","securityCheck":"yes","notes":"שולחן בווטרינה בכניסה עבור מתוקים שיביאו 19:00 קבלת פנים 19:30 כניסה וריקודים 20:00 הושבה וסלטים 20:20 ריקודים נוספים 21:00 מנה עיקרית 21:30 מצגת וברכה של יעל 21:40 ג'סטדאנס 22:20 קינוחים וריקודים נוספים לסיום מנהל אירוע שישים לב לאירוע ושהלוז יהיה דינמי תלוי בזמנים לדבר עם הלקוח לפני\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה\nכמות מנות מבוגרים (לפי התחייבות): 43\nכמות מנות ילדים (לפי התחייבות): 3\nמה הילדים אוכלים?: שניצלונים וציפס\nמנות צמחוניות (אישיות): 6 צמחוני\nמנות טבעוניות (אישיות): 0\nבחירת מנות מסתובבים: קבב על מקל קינמון אדרול סיני\nבחירת סלטים: חומוס טריו שרי אנטיפסטי סלט עלים בטטה מטבוחה סלט טאבולה\nבחירת תוספות: \"אורז לבן עם פירות יבשים תפוח אדמה בדואט של בטטה \"\nבחירת עיקריות: \"פרגית אסאדו עגל רך ונימוח שווארמה הודו \"\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): שולחן 5: 5 מוזמנים מש' אריאל שולחן 4: 5מוזמנים מש' אור שולחן 3: 8 מוזמנים מש' פרידמן שולחן 2: 8 מוזמנים מש' הגאין+זאבי אסולין שולחן 6+7: 20 בנות שולחן חברות. לחבר את השולחנות בבקשה. להדפיס את השמות של המשפחה","eventDate":"2026-06-16","managerNotes":"דיסק און קי: 2 סירטונים לא הביא דיסק און קי"}},{"type":"bat","fields":{"contact":"טליה","phone":"0523223405","eventTime":"19:30","celebrant":"איה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב ורוד","kidsCount":"60","kidsMenu":"שניצלונים ציפס והמבורגר תוספת 600","vegMeals":"3","glutenLactose":"1 להביא לחמניה ללא גלוטן","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות ערפל מתנה להוסיף קערת גומי בבר חטיפים !! בלי אייל גולן","operator":"מפעילה שלא תצעק זה לא היה להם נעים בקמיליון","eventDate":"2026-06-17","managerNotes":"דיסק און קי: יש תמונות"}},{"type":"bat","fields":{"contact":"דנה","phone":"0547107378","eventTime":"19:00","celebrant":"עלמה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"60","kidsMenu":"תפריט שף ב1000 חלק!!","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"yes","notes":"אירוע כל הספקים בנות צלמת - נועה דיגייית - ורד נועה מפעילה\n\nלוז אירוע:\n18:30 – הגעה לתמונות\n19:00 – אטרקציות חטיפים והפעלה קלה\n19:30 – טקס כניסה וריקודים\n20:00 – הפסקת אוכל\n20:30 – מצגת והפעלה\n21:15 – טקס עוגה וקינוחים\n21:30 – גאסט דנס\n21:45 – ריקודים עד הסוף","eventDate":"2026-06-18","managerNotes":"דיסק און קי: להקרין את התמונות מהתקייה- עלמה בוק ואת המצגת מהתקייה- סירטון תמונות עלמה"}},{"type":"bat","fields":{"contact":"רונית","phone":"0544946764","eventTime":"13:00","celebrant":"מעיין","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"30","kidsMenu":"תפריט שף בריוש אסאדו מיני המבורגר פסטה עגבניות","vegMeals":"3","glutenLactose":"3 שיהיה להם כיבוד","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"יש + רזרבה","notes":"החוגגת עם סכרת ויש בני משפחה עם צליאק\n\nלוז אירוע:\n12:30 – הגעה לתמונות\n13:00 – אטרקציות חטיפים והפעלה קלה\n13:30 – כניסה וריקודים\n14:00 – הפסקת אוכל\n14:30 – מצגת והפעלה\n15:15 – טקס עוגה וקינוחים\n15:30 – גאסט דנס\n15:45 – ריקודים לשים שולחן קטן למתנות בלי נשיקה סטירה כמסדרים את הגומי שיהיה סטרילי שהעובדים יהיו עם כפפות","eventDate":"2026-06-19","managerNotes":"דיסק און קי: מצגת ותמונות"}},{"type":"bat","fields":{"contact":"צאלה","phone":"0548004956","eventTime":"21:00","celebrant":"15 חוגגות- אלה יהודה ענבר רצון עטרה גוטליב ירדן אברהם אמילי אייזנברג גונר סיאנה שיר עובד שיר רפאל נאל לוין ליאל לייזר רומי צרפתי נויה קליימן זיו זייגנר הלנה ורמוס געש בר","attractions":["עמדת צילום"],"cakeCeremony":"2 עוגות עוגות שוקולד עם קצפת עוגה ללא גלוטן (לנסות שיהיה וניל עם קצפת)","balloons":"ורוד לבן","kidsCount":"50","kidsMenu":"ב100שח לחוגגת תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"כן תמונות מתחלפות","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n20:30 – הגעה לתמונות\n21:00 – אטרקציות חטיפים והפעלה קלה\n21:30 – כניסה וריקודים\n22:00 – הפסקת אוכל\n22:30 – מצגת והפעלה\n23:15 – טקס עוגה וקינוחים\n23:30 – גאסט דנס\n23:45 – ריקודים עד\n00:00","managerNotes":"להגיד לה ב120 שח למבוגר בופה עשיר כמו של הילדים במקום הבופה שלא מופיע אם רוצה בופה ב190\nדיסק און קי: עד שבוע לפני","eventDate":"2026-06-20"}},{"type":"bat","fields":{"contact":"יואל","phone":"0535964634","eventTime":"19:30","celebrant":"מאיה","attractions":["עמדת צילום","Virtual Reality","פלייסטיישן 5","מאפרת פול-מון","כדורגל שולחן"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"50","kidsMenu":"שניצלונים וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"","securityCheck":"yes","notes":"לוודא שיש שפע באירוע בעיקר בבר מתוקים\n\nלוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nשיהיה הכל בשפע!!!!! בכניסה שלה יתנגן המצגת עם התמונות שלה ולא התמונות שבתקייה\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: משולב\nכמות מבוגרים: 30\nתפריט מבוגרים: 🔹 מסתובבים (2): - קרוסטון פטה כבד וריבת בצל - אגרול סיני, רוטב חמוץ מתוק 🥗 סלטים (7): - קרפציו חציל עם נגיעות ים תיכוניות, לימון כבוש, טחינה, צימיצורי וטחינה לבנה ושמן זית - חומוס ביתי בלווי מסבחה גרגירים ופטרוזיליה קצוצה - בטטה מדורה מקורמלת עם טחינה גולמית, סילאן תמרים ושערות חלבה - עדשים ירוקות וקוביות בטטה קריספית, כוסברה, חסה, בתיבול ויניגרט סויה ג'ינג'ר וצ'ילי אדום - סלט טאבולה ים תיכוני עם המון ירק, חמוציות וזילוף טחינה גולמית - כרוב אסייתי, כרוב סגול ולבן, גזר, פלפל אדום ובצל ירוק ברוטב ויניגרט סויה ושקדים קלויים - קינואה, בזיליקום, נענע, פטרוזיליה, סלרי, פלפל חריף וקוביות זוקיני טריות 🍟 תוספות (2): - אורז לבן עם פירות יבשים ושקדים קלויים - תפוח אדמה בדואט של בטטה רוזמרין שום ושמן זית 🥩 מנות עיקריות (3): - פרגית במגוון טעמים (מזרחי, אסייאתי, מלח פלפל) - אסאדו עגל בצלייה איטית בניחוח מעושן - קדירת בקר בירקות שורש ופטריות","managerNotes":"החוגגת הייתה פה באירוע ואמרה לאבא שלא היה מספיק מתוקים !!!!\nאטרקציות (מקור): עמדת צילום מגניבה Virtual Reality – אטרקציה חדשנית ומדליקה של מציאות מדומה הגורמת לילדים לשחק ולהרגיש חלק מעולם מדומה עמדת סוני פלייסטיישן מאפרת פול- מון המאפרת את הילדים במגוון ציורים בצבעי אולטרה מיוחדים שזוהרים במהלך המסיבה באור אולטרה סגול כדורגל שולחן\nדיסק און קי: יש 2 סירטונים וסירטון אחד של תמונות ותמונות","eventDate":"2026-06-21"}},{"type":"bat","fields":{"contact":"דבורה","phone":"0525353343","eventTime":"19:30","celebrant":"אריאלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב לבן","kidsCount":"40 +22 מבוגרים שאוכלים גם עם הילדים","kidsMenu":"תפריט שף ב1000 שח בריוש אסאדו מיני המבורגר פסטה פנה עגבניות שלל ירקות ורטבים","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"yes","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nבועות זיקוקים מתנה לעדכן לגבי פנקייקים ב200 שח לעדכן לגבי וופל בלגי ב250 שח","eventDate":"2026-06-22","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"אנה","phone":"0507717627","eventTime":"19:00","celebrant":"הילה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"40","kidsMenu":"שניצלונים וציפס","vegMeals":"3","glutenLactose":"3","wheelchair":"","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\nמבוגרים למעלה רק אחרי הטקס הכניסה בועות ערפל מתנה זיקוק קר ב300 שח לעדכן לעדכן לגבי סידור הושבה 14 14 12 3 שולחנות\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 40\nתפריט מבוגרים: לעדכן","eventDate":"2026-06-23","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"סמדר","phone":"0523645041","eventTime":"19:30","celebrant":"אגם נעמה ובר","cakeCeremony":"yes","balloons":"לעדכן","kidsCount":"לעדכן","kidsMenu":"לעדכן לגבי תפריט שף 1000","vegMeals":"0","glutenLactose":"0","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"no","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה 3 חוגגות","eventDate":"2026-06-24"}},{"type":"bat","fields":{"contact":"שונטל","phone":"0503550019","eventTime":"20:00","attractions":["עמדת צילום"],"balloons":"לעדכן","kidsMenu":"לעדכן תפריט ב800 שח","vegMeals":"3","glutenLactose":"3","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – גאסט דנס\n22:45 – ריקודים עד הסוף\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מסיבת שכבה כיתות ו","eventDate":"2026-06-25","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"אור","phone":"0547129971","eventTime":"12:00","celebrant":"אריאל","balloons":"קשת בלונים. מתנה כסוף כחול","glutenLactose":"לעדכן","wheelchair":"yes","acum":"","externalSupplier":"לא","presentation":"yes","usbDate":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n12:00 – קבלת פנים\n12:40 – סלטים ברכות ריקודים\n13:15 – מנה עיקרית\n13:50 – מצגת\n14:00 – קינוחים וריקודים\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: מבוגרים בר מצווה\nכמות מנות מבוגרים (לפי התחייבות): 40\nכמות מנות ילדים (לפי התחייבות): לעדכן\nמה הילדים אוכלים? המבורגר וציפס/שניצל וציפס: שניצלונים וציפס\nמנות צמחוניות (אישיות): לעדכן\nמנות טבעוניות (אישיות): לעדכן\nבחירת מנות מסתובבים: לעדכן\nבחירת סלטים: מסתובבים : שיפודי עוף בטמפורה ירקות בטמפורה מיני בריוש במילוי אסאדו ראשונות : קרפצ'יו חציל שרוף קרפצ'ו בקר סלט פנצ'נלה ים תיכוני חומוס אבו פיראס בטטה מדורה מקורמלת קרפצ'ו סלק מרענן עיקריות : אסאדו דרום אמריקאי נתחי פרגית בגריל נתח סלמון בגריל\nבחירת תוספות: לעדכן\nבחירת עיקריות: לעדכן\nמנות גלאט (מיוחדות בתוספת תשלום) 15 שח: לא\nסידור הושבה (כולל שליחת סקיצה במידת הצורך): לעדכן","eventManager":"דגש למנהל אירוע ! הילד עם צרכים מיוחדים שיא הרגישות לתדרך את הספקים ביום האירוע !!","dj":"לשבץ","photographer":"לשבץ","eventDate":"2026-06-26","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"טלי","phone":"0547849009","eventTime":"20:30","celebrant":"נועם ונויה","cakeCeremony":"yes","balloons":"לעדכן","kidsCount":"50","kidsMenu":"הבורגר וציפס","vegMeals":"0","glutenLactose":"3 מבקשת גם קינוחים ללא גלוטן","wheelchair":"no","externalSupplier":"לא","bus":"no","usbDate":"","acum":"","securityCheck":"","eventDate":"2026-06-27","notes":"— פרטים נוספים מהדוח המקורי —\nסוג אירוע: בת מצווה 2 חוגגות","managerNotes":"דיסק און קי: כן"}},{"type":"bat","fields":{"contact":"תומר","phone":"0526013125","eventTime":"19:30","celebrant":"מתן","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"זהב ורוד","kidsCount":"60","kidsMenu":"תפריט שף","vegMeals":"3","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"yes","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי\n\n— פרטים נוספים מהדוח המקורי —\nסוג אירוע: חבילה","eventDate":"2026-06-29","managerNotes":"דיסק און קי: עד שבוע לפני"}},{"type":"bat","fields":{"contact":"עדי","phone":"0545592575","eventTime":"19:30","celebrant":"מיקה ואלה","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"לבן ורוד","kidsCount":"35","kidsMenu":"תפריט שף כלול","vegMeals":"0","glutenLactose":"3","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"1 מהבנות","presentation":"no","usbDate":"","acum":"yes","securityCheck":"yes","notes":"לוז אירוע:\n19:00 – הגעה לתמונות\n19:30 – אטרקציות חטיפים והפעלה קלה\n20:00 – כניסה וריקודים\n20:30 – הפסקת אוכל\n21:00 – מצגת והפעלה\n21:45 – טקס עוגה וקינוחים\n22:00 – גאסט דנס\n22:15 – ריקודים עד וחצי","eventDate":"2026-06-28","managerNotes":"דיסק און קי: רק תמונות תקייה תמונות של מיקה"}},{"type":"bat","fields":{"contact":"אנה","phone":"0542618577","eventTime":"20:00","celebrant":"מיכל","attractions":["עמדת צילום"],"cakeCeremony":"yes","balloons":"ורוד לבן","kidsCount":"40","kidsMenu":"תפריט שף","vegMeals":"אל רגיל בוטנים","glutenLactose":"לא","wheelchair":"no","externalSupplier":"לא","bus":"no","galiBook":"","presentation":"yes","usbDate":"","acum":"","securityCheck":"עד שבוע לפני","notes":"לוז אירוע:\n19:30 – הגעה לתמונות\n20:00 – אטרקציות חטיפים והפעלה קלה\n20:30 – טקס כניסה וריקודים\n21:00 – הפסקת אוכל\n21:30 – מצגת והפעלה\n22:15 – טקס עוגה וקינוחים\n22:30 – גאסט דנס\n22:45 – ריקודים עד הסוף לשים הרבה פרחים !! גם בחוץ חשוב מאוד העיצוב של האולם גם למעלה ולמטה\n\n— פרטים נוספים מהדוח המקורי —\nכמות מבוגרים: 30 לעדכן\nתפריט מבוגרים: לעדכן","eventDate":"2026-06-30","managerNotes":"דיסק און קי: עד שבוע לפני"}}];
@@ -3019,6 +3655,7 @@ async function startApp(){
   await seedJune();
   await seedJuly();
   applyBrand();
+  document.body.classList.toggle('owner', ROLE==='owner');
   if(CHEF_MODE){ document.body.classList.add('chefmode'); renderChef(); }
   else { document.body.classList.remove('chefmode'); syncBrandUI(); renderPicker(); refreshBell(); setTimeout(maybeAutoPopReminders,600); }
 }
@@ -3312,6 +3949,113 @@ function chefLogout(){
   document.body.classList.remove('chefmode'); document.body.classList.add('locked');
   renderGate();
 }
+/* ===== חוזים ופרוטוקולים — רובריקה אישית נעולה ===== */
+let editingContract=null, pendingContractFile=null;
+const CT_CAT={contract:{lbl:'חוזה',cls:'b-doc'},protocol:{lbl:'פרוטוקול',cls:'b-proto'},other:{lbl:'אחר',cls:'b-other'}};
+function renderContractsView(){
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.view==='contracts'));
+  if(!CONTRACTS_LOCKED && (ROLE==='owner' || CONTRACTS_UNLOCKED)) renderContracts(); else renderContractsGate();
+}
+function renderContractsGate(){
+  $('#app').innerHTML=`<div class="gate"><div class="gate-card">
+    <div class="g-dot"></div><h2>📁 חוזים ופרוטוקולים</h2><p>אזור אישי — הזן/י את הקוד האישי שלך</p>
+    <input id="ctcode" type="password" inputmode="text" placeholder="קוד מנהל אישי" autocomplete="off">
+    <button class="btn primary" id="ctcBtn">כניסה</button><div class="g-err" id="ctErr"></div>
+  </div></div>`;
+  const go=()=>{ const v=$('#ctcode').value;
+    if(OWNER_PASSCODE && v===OWNER_PASSCODE){ CONTRACTS_LOCKED=false; CONTRACTS_UNLOCKED=true; renderContracts(); }
+    else $('#ctErr').textContent='קוד שגוי'; };
+  $('#ctcBtn').onclick=go; $('#ctcode').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }); $('#ctcode').focus();
+}
+function lockContracts(){ CONTRACTS_LOCKED=true; CONTRACTS_UNLOCKED=false; renderContractsGate(); }
+function renderContracts(){
+  const list=(MEM.contracts||[]).slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  let h=`<div class="chef-head"><div class="chef-title">📁 חוזים ופרוטוקולים</div><button type="button" class="btn ghost sm" id="ctLock">🔒 נעל</button></div>
+    <p class="sub">אזור אישי לחוזים ופרוטוקולים — טקסט וקבצים. גלוי רק עם הקוד שלך.</p>
+    <div class="arch-tools"><input id="ctSearch" type="search" placeholder="חיפוש..." style="flex:1;min-width:140px"><button class="btn" id="ctNew">+ פריט חדש</button></div>`;
+  if(!list.length){ h+=`<div class="ct-empty">עדיין אין פריטים. לחצ/י על "פריט חדש" כדי להתחיל.</div>`; }
+  else { h+='<div id="ctList">'+list.map(ctCardHTML).join('')+'</div>'; }
+  $('#app').innerHTML=h;
+  $('#ctLock').onclick=lockContracts;
+  $('#ctNew').onclick=()=>openContract(null);
+  $('#app').querySelectorAll('[data-ctedit]').forEach(b=>b.onclick=()=>openContract(b.dataset.ctedit));
+  $('#app').querySelectorAll('[data-ctfile]').forEach(b=>b.onclick=()=>openContractFile(b.dataset.ctfile));
+  const sb=$('#ctSearch'); if(sb) sb.oninput=()=>ctFilter(sb.value.trim());
+}
+function ctCardHTML(c){
+  const cat=CT_CAT[c.cat]||CT_CAT.other;
+  const hasFile=!!(c.file&&c.file.data), hasLink=!!(c.link&&c.link.trim());
+  const body=c.body?`<div class="ct-body${(c.body.length>260)?' clamped':''}">${esc(c.body)}</div>`:'';
+  let acts='<button type="button" class="btn sm" data-ctedit="'+c.id+'">✎ פתח / ערוך</button>';
+  if(hasFile) acts+='<button type="button" class="btn sm" data-ctfile="'+c.id+'">📄 פתח קובץ</button>';
+  if(hasLink) acts+='<a class="btn sm" href="'+esc(c.link)+'" target="_blank" rel="noopener">🔗 פתח קישור</a>';
+  return `<div class="ct-card">
+    <div class="ct-top"><span class="ct-title">${esc(c.title||'ללא כותרת')}</span><span class="ct-badge ${cat.cls}">${cat.lbl}</span>${(hasFile||hasLink)?'<span class="ct-badge">📎 מצורף</span>':''}</div>
+    ${body}
+    <div class="ct-acts">${acts}</div>
+  </div>`;
+}
+function ctFilter(q){
+  q=(q||'').toLowerCase();
+  const list=(MEM.contracts||[]).slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0))
+    .filter(c=>!q || (String(c.title||'')+' '+String(c.body||'')).toLowerCase().indexOf(q)>=0);
+  const box=$('#ctList'); if(!box) return;
+  box.innerHTML=list.length?list.map(ctCardHTML).join(''):'<div class="ct-empty">לא נמצאו תוצאות.</div>';
+  box.querySelectorAll('[data-ctedit]').forEach(b=>b.onclick=()=>openContract(b.dataset.ctedit));
+  box.querySelectorAll('[data-ctfile]').forEach(b=>b.onclick=()=>openContractFile(b.dataset.ctfile));
+}
+function openContract(id){
+  editingContract=id||null;
+  const c=id?(MEM.contracts||[]).find(x=>x.id===id):null;
+  $('#ctTitle').value=c?(c.title||''):'';
+  $('#ctCat').value=c?(c.cat||'contract'):'contract';
+  $('#ctBody').value=c?(c.body||''):'';
+  $('#ctLink').value=c?(c.link||''):'';
+  pendingContractFile=null;
+  { const nm=$('#ctFileName'), clr=$('#ctFileClear'), inp=$('#ctFileInput'), btn=$('#ctFileBtn');
+    const has=c&&c.file&&c.file.name;
+    if(nm) nm.textContent=has?c.file.name:'—';
+    if(clr) clr.style.display=has?'':'none';
+    if(inp) inp.value='';
+    if(btn) btn.onclick=()=>inp&&inp.click();
+    if(inp) inp.onchange=()=>{ const f=inp.files&&inp.files[0]; if(!f) return;
+      if(f.size>700*1024){ toast('הקובץ גדול מ-700KB — שמור/י אותו ב-Drive והדבק/י קישור במקום'); inp.value=''; return; }
+      const rd=new FileReader(); rd.onload=()=>{ pendingContractFile={name:f.name,type:f.type||'application/octet-stream',data:rd.result}; if(nm) nm.textContent=f.name; if(clr) clr.style.display=''; }; rd.readAsDataURL(f);
+    };
+    if(clr) clr.onclick=()=>{ pendingContractFile='CLEAR'; if(nm) nm.textContent='—'; clr.style.display='none'; if(inp) inp.value=''; };
+  }
+  $('#ctDel').style.display=id?'':'none';
+  $('#ctModalTitle').textContent=id?'עריכת פריט':'פריט חדש';
+  $('#contractModal').style.display='flex';
+}
+function closeContract(){ const m=$('#contractModal'); if(m) m.style.display='none'; editingContract=null; pendingContractFile=null; }
+async function saveContract(){
+  const title=$('#ctTitle').value.trim();
+  const body=$('#ctBody').value.trim();
+  if(!title && !body && !pendingContractFile){ toast('יש להזין כותרת או תוכן'); return; }
+  let c=editingContract?(MEM.contracts||[]).find(x=>x.id===editingContract):null;
+  if(!c){ c={id:uid(),createdAt:Date.now()}; if(!MEM.contracts) MEM.contracts=[]; MEM.contracts.push(c); }
+  c.title=title; c.cat=$('#ctCat').value; c.body=body; c.link=$('#ctLink').value.trim(); c.updatedAt=Date.now();
+  if(pendingContractFile==='CLEAR') delete c.file; else if(pendingContractFile) c.file=pendingContractFile;
+  closeContract(); renderContracts(); toast('נשמר ✓');
+  await persistDoc('contracts',c);
+}
+async function deleteContract(id){
+  const c=(MEM.contracts||[]).find(x=>x.id===id); if(!c) return;
+  if(!(await askConfirm('למחוק את "'+(c.title||'הפריט')+'"?'))) return;
+  await deleteDoc('contracts',id,'contracts');
+  closeContract(); toast('נמחק'); renderContracts();
+}
+function openContractFile(id){
+  const c=(MEM.contracts||[]).find(x=>x.id===id); if(!c||!c.file||!c.file.data) return;
+  try{
+    const d=c.file.data; const arr=d.split(','); const mime=(arr[0].match(/:(.*?);/)||[])[1]||c.file.type||'application/octet-stream';
+    const bin=atob(arr[1]); const u8=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) u8[i]=bin.charCodeAt(i);
+    const url=URL.createObjectURL(new Blob([u8],{type:mime}));
+    const a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; if(!/pdf|image/i.test(mime)) a.download=c.file.name||'file';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),15000);
+  }catch(e){ toast('לא ניתן לפתוח את הקובץ'); }
+}
 function renderGate(){
   $('#app').innerHTML=`<div class="gate"><div class="gate-card">
     <div class="g-dot"></div><h2>כניסה למערכת</h2><p>הזן/י את קוד הכניסה של המשרד</p>
@@ -3319,19 +4063,26 @@ function renderGate(){
     <button class="btn primary" id="pcBtn">כניסה</button><div class="g-err" id="gErr"></div>
   </div></div>`;
   const go=()=>{ const v=$('#pcode').value;
-    if(v===APP_PASSCODE){ try{localStorage.setItem('louie_auth','1'); localStorage.setItem('louie_role','manager');}catch(e){} CHEF_MODE=false; startApp(); }
-    else if(CHEF_PASSCODE && v===CHEF_PASSCODE){ try{localStorage.setItem('louie_auth','1'); localStorage.setItem('louie_role','chef');}catch(e){} CHEF_MODE=true; startApp(); }
+    if(OWNER_PASSCODE && v===OWNER_PASSCODE){ try{localStorage.setItem('louie_auth','1'); localStorage.setItem('louie_role','owner');}catch(e){} ROLE='owner'; CHEF_MODE=false; startApp(); }
+    else if(v===APP_PASSCODE){ try{localStorage.setItem('louie_auth','1'); localStorage.setItem('louie_role','manager');}catch(e){} ROLE='manager'; CHEF_MODE=false; startApp(); }
+    else if(CHEF_PASSCODE && v===CHEF_PASSCODE){ try{localStorage.setItem('louie_auth','1'); localStorage.setItem('louie_role','chef');}catch(e){} ROLE='chef'; CHEF_MODE=true; startApp(); }
     else $('#gErr').textContent='קוד שגוי'; };
   $('#pcBtn').onclick=go; $('#pcode').addEventListener('keydown',e=>{ if(e.key==='Enter') go(); }); $('#pcode').focus();
 }
-/* לחיצה על קריאון תאריך-האירוע פותחת את לוח-השנה המובנה (במצב עריכה בלבד) — גיבוי דלגציה נוסף על הקישור הישיר */
+/* לחיצה על קריאון התאריך פותחת את בורר התאריך (במצב עריכה בלבד) — התיבה המקורית מוסתרת */
 document.addEventListener('click', function(e){
-  const dr = e.target && e.target.closest && e.target.closest('.evdate-wrap[data-key="eventDate"] .date-readout');
+  const dr = e.target && e.target.closest && e.target.closest('.date-readout');
   if(!dr) return;
   if(typeof EDITING!=='undefined' && !EDITING) return;
-  if(typeof openEventDateCal==='function') openEventDateCal();
+  const fc = dr.closest('.field'); if(!fc) return;
+  const inp = fc.querySelector('input[data-key="eventDate"]'); if(!inp || inp.readOnly) return;
+  try{ if(typeof inp.showPicker==='function'){ inp.showPicker(); } else { inp.focus(); inp.click(); } }
+  catch(_){ try{ inp.focus(); }catch(__){} }
 });
-if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
+function pendingSignId(){ const h=location.hash||''; let m=h.match(/sign=([A-Za-z0-9_-]+)/); if(m) return m[1]; const s=location.search||''; m=s.match(/[?&]sign=([A-Za-z0-9_-]+)/); return m?m[1]:''; }
+(function(){ const _sid=pendingSignId(); if(_sid){ startSigningMode(_sid); return; }
+if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ ROLE=role; CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
+})();
 </script>
 </body>
 </html>
