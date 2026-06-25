@@ -149,7 +149,7 @@
   .date-readout .dr-ico{font-size:15px}
   /* תאריך האירוע — מציגים את הקריאון היפה (יום + תאריך), ומעליו שדה תאריך אמיתי שקוף שלוכד את הלחיצה ופותח את בורר התאריך הטבעי (אמין ב-iOS) */
   .evdate-wrap{position:relative}
-  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent}
+  .evdate-wrap input.evdate{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;padding:0;border:0;z-index:2;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent;pointer-events:none}
   .viewmode .evdate-wrap input.evdate{display:none}
   .date-readout{cursor:pointer}
   .viewmode .date-readout{cursor:default}
@@ -193,6 +193,13 @@
   .cal-chip{font-size:10.5px;background:var(--brand-soft);color:var(--brand-ink);border-radius:5px;padding:2px 4px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
   .dj-banner{background:var(--brand-soft);border:1px solid var(--line2);color:var(--brand-ink);border-radius:11px;padding:11px 14px;margin-bottom:13px;font-weight:700;font-size:14.5px}
   .modal-bg{position:fixed;inset:0;background:rgba(15,22,32,.46);display:flex;align-items:center;justify-content:center;z-index:80;padding:16px;overscroll-behavior:contain}
+  #pdfPrevModal{z-index:150}
+  .pdfprev-card{background:#fff;border-radius:16px;width:min(760px,95vw);max-height:93vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 14px 44px rgba(0,0,0,.32)}
+  .pdfprev-head{font-weight:800;font-size:16px;padding:14px 16px;border-bottom:1px solid var(--line2);color:var(--brand-ink)}
+  .pdfprev-frame{flex:1;width:100%;min-height:52vh;border:0;background:#eef2f7}
+  .pdfprev-hint{font-size:12.5px;color:var(--muted);padding:8px 16px 0;text-align:center}
+  .pdfprev-btns{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line2)}
+  .pdfprev-btns .big{flex:1;min-width:150px;border:0;border-radius:10px;padding:13px;font-size:15px;font-weight:800;color:#fff;background:var(--brand);cursor:pointer;font-family:inherit}
   body.modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
   .modal{background:#fff;border-radius:16px;width:100%;max-width:430px;max-height:92vh;overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:18px 18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
   .modal-h{font-weight:800;font-size:18px;margin-bottom:6px}
@@ -237,6 +244,9 @@
   .sched-card.need .sc-date{background:#fde6e3;border-color:#e23b2e;color:#b3261e}
   .sched-card.need .sc-date .scd-dow{color:#e23b2e}
   .sched-card.need .sc-date .scd-mon{color:#c2564a}
+  .sched-card.today{box-shadow:inset 0 0 0 2.5px var(--brand), var(--shadow)}
+  .sched-card.today .sc-date{background:var(--brand);border-color:var(--brand);color:#fff}
+  .sched-card.today .sc-date .scd-dow,.sched-card.today .sc-date .scd-mon{color:#fff}
   .sc-body{flex:1;min-width:0}
   .sc-title{font-weight:800;font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
   .sc-manual{font-size:10.5px;font-weight:800;background:#eef1f5;color:#5a6675;border-radius:5px;padding:2px 7px}
@@ -611,7 +621,7 @@
   .rem-grp.blue{background:#e7eefc;color:#1d4fb8}
   .rem-grp.amber{background:#fbf0db;color:#8a5a10}
   .rem-grp.green{background:#e3f5e8;color:#1f7a40}
-  .rem-item{display:flex;align-items:flex-start;gap:11px;background:#fff;border:1px solid var(--line2);border-inline-start:5px solid var(--gray);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;text-align:start}
+  .rem-item{display:flex;align-items:flex-start;gap:11px;background:#fff;border:1px solid var(--line2);border-inline-start:5px solid var(--gray);border-radius:11px;padding:11px 13px;cursor:pointer;transition:.12s;text-align:start;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
   .rem-item:hover{border-color:var(--brand);box-shadow:var(--shadow)}
   .rem-item.red{border-inline-start-color:#b3261e}
   .rem-item.amber{border-inline-start-color:#d68a17}
@@ -647,7 +657,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v193</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v200</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -673,7 +683,7 @@
 <div id="remindersModal" class="modal-bg" style="display:none;z-index:97">
   <div class="modal" style="max-width:480px">
     <div class="modal-h" id="remModalTitle">🔔 תזכורות חשובות</div>
-    <p class="sub" style="margin:2px 0 12px">דברים שדורשים טיפול לפני / ביום האירוע. לחצי על תזכורת כדי לקפוץ ישר למקום הרלוונטי.</p>
+    <p class="sub" style="margin:2px 0 12px">דברים שדורשים טיפול לפני / ביום האירוע. לחצי על תזכורת כדי לקפוץ ישר למקום הרלוונטי · לחיצה ארוכה (3 שניות) מוחקת תזכורת.</p>
     <div id="remModalBody"></div>
     <div class="modal-foot">
       <button id="remClose" class="btn primary">הבנתי</button>
@@ -860,7 +870,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v193';
+const APP_VERSION = 'v200';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1256,7 +1266,10 @@ const WEEKDAYS_SH=['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 const STATUS_NAME={draft:'טיוטה',filled:'מולא',confirmed:'אושר ע״י לקוח'};
 
 const F=(key,label,type,opts={})=>({key,label,type,...opts});
-const ATTRACTIONS=['עמדת צילום','Virtual Reality','פלייסטיישן 5','מאפרת פול-מון','כדורגל שולחן'];
+const ATTRACTIONS_LOUIE=['עמדת צילום','Virtual Reality','פלייסטיישן 5','מאפרת פול-מון','כדורגל שולחן'];
+const ATTRACTIONS_KAMILION=['כדורגל','הוקי','פול-מון','סוני','עמדת צילום'];
+function attractionsFor(brand){ return (brand==='kamilion')?ATTRACTIONS_KAMILION:ATTRACTIONS_LOUIE; }
+const ATTRACTIONS=ATTRACTIONS_LOUIE;
 const TOFES101_URL='https://tofes101.co.il/forms/itc-101/submit/';
 const SEC_DETAILS={title:'פרטי האירוע',kind:'info',fields:[
   F('eventDate','תאריך האירוע','date',{req:true}),
@@ -1675,7 +1688,15 @@ function renderHebCal(){
   body.querySelectorAll('[data-iso]').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
 }
 function pickHebDate(iso){
-  if(!current) return; current.fields[HEBCAL.key]=iso; markDirty(); closeHebCal();
+  if(!current) return;
+  if(HEBCAL.key==='eventDate'){
+    closeHebCal();
+    const inp=document.querySelector('input[data-key="eventDate"]');
+    if(inp){ inp.value=iso; if(typeof inp.oninput==='function'){ inp.oninput(); } else { inp.dispatchEvent(new Event('input')); } }
+    else { current.fields.eventDate=iso; markDirty(); }
+    return;
+  }
+  current.fields[HEBCAL.key]=iso; markDirty(); closeHebCal();
   const btn=document.querySelector('.hebdate-btn[data-key="'+HEBCAL.key+'"]');
   if(btn){ btn.classList.add('has'); btn.textContent='📅 '+hebDateText(iso); const fc=btn.closest('.field'); if(fc) fc.classList.remove('missing'); }
 }
@@ -1746,10 +1767,18 @@ function supPhoneDocHTML(name,key){
 }
 /* ===== דוח סוף אירוע: משיכת צוות (ספקים + עובדים) מהדוח לפני-אירוע ===== */
 // שמות שעבד בפועל נמשכים אוטומטית; כל שורה עם סימון ✓ היה / ✗ לא היה + שדה "אחר" לכל קבוצה.
+function findPreEventReport(date){
+  date=String(date||'').trim(); if(!date || !current) return null;
+  const all=(MEM.reports||[]).filter(r=> r && r.type!=='endreport' && String((r.fields&&r.fields.eventDate)||'').trim()===date);
+  if(!all.length) return null;
+  const same=all.filter(r=>r.brand===current.brand);
+  if(same.length) return same[0];
+  if(all.length===1) return all[0]; // גיבוי: התאמה לפי תאריך בלבד אם יש דוח יחיד (חוסר התאמת מותג)
+  return null;
+}
 function eeTeamSources(){
   const f=current.fields; const date=String(f.eventDate||'').trim();
-  const rep=(MEM.reports||[]).find(r=> r && r.brand===current.brand && r.type!=='endreport'
-      && String((r.fields&&r.fields.eventDate)||'').trim()===date && date);
+  const rep=findPreEventReport(date);
   const a=(MEM.assignments||[]).find(x=>x.date===date && x.brand===current.brand);
   const rf=(rep&&rep.fields)||{};
   const nm=v=> (v!=null && roleState(v)==='set') ? String(v).trim() : '';
@@ -1869,11 +1898,10 @@ function bindEeTeam(c){
   bindApprove();
 }
 function autofillEndDetails(){
-  if(!current || current.type!=='endreport') return;
-  const date=String(current.fields.eventDate||'').trim(); if(!date) return;
-  const rep=(MEM.reports||[]).find(r=> r && r.brand===current.brand && r.type!=='endreport'
-      && String((r.fields&&r.fields.eventDate)||'').trim()===date);
-  if(!rep) return;
+  if(!current || current.type!=='endreport') return false;
+  const date=String(current.fields.eventDate||'').trim(); if(!date) return false;
+  const rep=findPreEventReport(date);
+  if(!rep) return false;
   const rf=rep.fields||{};
   const nm=v=>(v!=null && roleState(v)==='set')?String(v).trim():'';
   const ETYPE={bat:'בר/בת מצווה ילדים',bar:'בר/בת מצווה ילדים',meshulav:'אירוע משולב',shulchan:'מבוגרים',cocktail:'קוקטייל בר/מסיבה'};
@@ -1885,6 +1913,7 @@ function autofillEndDetails(){
     if(el){ el.value=v; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(v,k); } }
   });
   if(filled) markDirty();
+  return true;
 }
 function autofillEndStaff(){
   if(!current || current.type!=='endreport') return;
@@ -1892,10 +1921,7 @@ function autofillEndStaff(){
   eeTeamData(true);
   const c=document.querySelector('.eeteam');
   if(c){ c.innerHTML=eeTeamInner(c.dataset.key); bindEeTeam(c); }
-  const t=current.fields.ee_team;
-  const n=((t&&t.sup)||[]).filter(r=>r.name).length+((t&&t.staff)||[]).filter(r=>r.name).length;
   markDirty();
-  if(n) toast('הצוות נמשך מהדוח לפני-אירוע — סמנו מי היה בפועל');
 }
 
 function renderPicker(){
@@ -1914,7 +1940,7 @@ function renderPicker(){
 function newReport(type){
   _dupWarnedFor=''; NEW_REPORT=true;
   current={id:uid(),brand:BRAND,type,status:'draft',fields:{eventKind:EVENT_TYPES[type].name},createdAt:Date.now(),updatedAt:Date.now()};
-  if(['bat','bar','meshulav'].indexOf(type)>=0) current.fields.attractions=ATTRACTIONS.slice();
+  if(['bat','bar','meshulav'].indexOf(type)>=0) current.fields.attractions=attractionsFor(BRAND).slice();
   EDITING=true; renderForm();
 }
 function newEndReport(){
@@ -2149,7 +2175,8 @@ function fieldHTML(fld,val){
   }
   if(fld.type==='checks'){
     const sel=Array.isArray(val)?val:[]; const none=sel.indexOf('__none__')>=0;
-    const opts=(fld.opts||[]).map(o=>{ const on=sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}${none?' disabled':''}><span>${esc(o)}</span></label>`; }).join('');
+    const optList=(fld.key==='attractions')?attractionsFor(current&&current.brand):(fld.opts||[]);
+    const opts=optList.map(o=>{ const on=sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}${none?' disabled':''}><span>${esc(o)}</span></label>`; }).join('');
     const noneBtn=`<label class="chk-opt none${none?' on':''}"><input type="checkbox" data-opt="__none__" ${none?'checked':''}><span>ללא אטרקציות</span></label>`;
     return `<div class="field full"><label>${esc(fld.label)} <span class="hint">(מינימום ${fld.min||3} · או "ללא")</span></label><div class="checks" data-key="${fld.key}">${opts}${noneBtn}</div></div>`;
   }
@@ -2337,7 +2364,7 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    const _commitInput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport'){ autofillEndStaff(); autofillEndDetails(); } };
+    const _commitInput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport'){ autofillEndStaff(); const _found=autofillEndDetails(); toast(_found?'✓ המידע נמשך אוטומטית מהדוח לפני-אירוע':'לא נמצא דוח לפני-אירוע תואם לתאריך הזה — אפשר למלא ידנית'); } };
     el.oninput=()=>{
       if(el.dataset.key==='eventDate' && current && current.type!=='endreport' && !NEW_REPORT){
         if(el._dateAsk) return;
@@ -2738,6 +2765,37 @@ function preparePdf(r){
   return {el,opt,fileName};
 }
 function downloadBlob(blob,name){ const u=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),5000); }
+// תצוגה מקדימה של PDF לפני שליחה — קודם רואים את החתימה/המסמך, ואז מחליטים אם לשלוח
+function previewPdfBlob(blob, fileName, title, shareText, waNumber){
+  const url=URL.createObjectURL(blob);
+  let ov=document.getElementById('pdfPrevModal');
+  if(!ov){ ov=document.createElement('div'); ov.id='pdfPrevModal'; ov.className='modal-bg'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="pdfprev-card">'
+    +'<div class="pdfprev-head">📄 '+esc(title||'תצוגת PDF')+'</div>'
+    +'<iframe class="pdfprev-frame" src="'+url+'"></iframe>'
+    +'<div class="pdfprev-hint">בדקו שהחתימה והפרטים נכונים, ואז שלחו.</div>'
+    +'<div class="pdfprev-btns">'
+      +'<button type="button" class="big" id="pdfPrevShare">📲 שלח / שתף בוואטסאפ</button>'
+      +'<button type="button" class="btn" id="pdfPrevOpen">🔎 פתח בכרטיסייה</button>'
+      +'<button type="button" class="btn ghost" id="pdfPrevClose">סגור</button>'
+    +'</div></div>';
+  ov.style.display='flex';
+  const cleanup=()=>{ ov.style.display='none'; try{ URL.revokeObjectURL(url); }catch(e){} ov.innerHTML=''; };
+  const byId=id=>document.getElementById(id);
+  byId('pdfPrevClose').onclick=cleanup;
+  byId('pdfPrevOpen').onclick=()=>{ try{ const w=window.open(url,'_blank'); if(!w) downloadBlob(blob,fileName); }catch(e){ downloadBlob(blob,fileName); } };
+  byId('pdfPrevShare').onclick=async()=>{
+    const file=new File([blob],fileName,{type:'application/pdf'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      try{ await navigator.share({files:[file],title:title,text:shareText}); cleanup(); }
+      catch(e){ if(e&&e.name==='AbortError'){ return; } downloadBlob(blob,fileName); if(waNumber){ window.open('https://wa.me/'+waNumber,'_blank'); } }
+    } else {
+      downloadBlob(blob,fileName);
+      if(waNumber){ window.open('https://wa.me/'+waNumber,'_blank'); toast('הקובץ ירד — נפתח וואטסאפ לצירוף'); }
+      else { toast('הקובץ ירד — אפשר לצרפו לוואטסאפ'); }
+    }
+  };
+}
 
 function downloadPDF(){
   if(dirty) saveReport(false);
@@ -2890,8 +2948,13 @@ function computeReminders(){
   });
   const rank={red:0,amber:1,green:2};
   out.sort((a,b)=>((a.grp||0)-(b.grp||0)) || (rank[a.level]-rank[b.level]) || (a.sort||'').localeCompare(b.sort||''));
-  return out;
+  const dis=remDismissedSet();
+  out.forEach(rm=>{ rm.uid=remUid(rm); });
+  return out.filter(rm=>!dis.has(rm.uid));
 }
+function remUid(rm){ return (rm.kind||'')+'|'+(rm.rid||'')+'|'+(rm.sort||''); }
+function remDismissedSet(){ try{ const raw=localStorage.getItem('louie_rem_dismissed'); const arr=raw?JSON.parse(raw):[]; return new Set(Array.isArray(arr)?arr:[]); }catch(e){ return new Set(); } }
+function dismissReminder(uid){ try{ const set=remDismissedSet(); set.add(uid); localStorage.setItem('louie_rem_dismissed', JSON.stringify([...set])); }catch(e){} }
 function remItemHTML(rm,i){
   const wcls=rm.wlevel==='red'?'red':(rm.wlevel==='green'?'green':'amber');
   return '<button type="button" class="rem-item '+(rm.clr||rm.level)+'" data-ri="'+i+'">'
@@ -2979,7 +3042,19 @@ function openReminders(filter){
     html+='</div>';
     body.innerHTML=html;
   }
-  body.querySelectorAll('.rem-item').forEach(b=>b.onclick=()=>{ const rm=REM_CACHE[+b.dataset.ri]; if(rm) goToReminder(rm); });
+  body.querySelectorAll('.rem-item').forEach(b=>{
+    const rm=REM_CACHE[+b.dataset.ri];
+    let timer=null, longFired=false;
+    const cancelHold=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+    b.addEventListener('pointerdown',()=>{ longFired=false; cancelHold(); timer=setTimeout(async()=>{ timer=null; longFired=true;
+      const ok=await askConfirm('🗑️ למחוק את התזכורת הזו?\n\n"'+(rm?rm.problem:'')+'"\n'+(rm?rm.name:'')+'\n\nהתזכורת תוסר מהרשימה ולא תופיע שוב.');
+      if(ok && rm){ dismissReminder(rm.uid); toast('התזכורת נמחקה'); openReminders(f); refreshBell(); }
+    },3000); });
+    b.addEventListener('pointerup',cancelHold);
+    b.addEventListener('pointerleave',cancelHold);
+    b.addEventListener('pointercancel',cancelHold);
+    b.onclick=()=>{ if(longFired){ longFired=false; return; } if(rm) goToReminder(rm); };
+  });
   const close=$('#remClose'); if(close) close.onclick=closeReminders; // אבטחה — סגירה ב"הבנתי"
   const m=$('#remindersModal'); if(m) m.style.display='flex';
 }
@@ -3087,7 +3162,7 @@ function renderSchedList(){
     return `<div class="sc-role"><b>${lbl}</b> ${inner}</div>`; };
   const cardHTML=(row)=>{ const a=row.a||{}; const sd=fmtDateShort(row.date);
     const need=[row.op,row.dj,row.photog].some(v=>roleState(v)==='need'); const manual=!row.reportId;
-    return `<div class="sched-card${need?' need':' done'}" data-rid="${row.reportId||''}" data-aid="${a.id||''}">
+    return `<div class="sched-card${need?' need':' done'}${row.date===todayIsoStr()?' today':''}" data-rid="${row.reportId||''}" data-aid="${a.id||''}">
       <div class="sc-date"><span class="scd-dow">${sd.w}</span><span class="scd-day">${sd.d}</span><span class="scd-mon">${sd.m}</span></div>
       <div class="sc-body">
         <div class="sc-title">${esc(row.type||'אירוע')}${manual?'<span class="sc-manual">ידני</span>':''}${row.name?' · '+esc(row.name):''}</div>
@@ -3470,10 +3545,7 @@ async function openSignedSupplierPDF(id){
   catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
   if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
   const file=new File([blob],fileName,{type:'application/pdf'});
-  const shareData={files:[file],title:'חוזה ספק חתום',text:'חוזה ספק חתום'+(c.supplierName?' — '+c.supplierName:'')};
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    try{ await navigator.share(shareData); }catch(e){ if(e&&e.name==='AbortError') return; downloadBlob(blob,fileName); }
-  } else { downloadBlob(blob,fileName); toast('הקובץ ירד'); }
+  previewPdfBlob(blob, fileName, 'חוזה ספק חתום'+(c.supplierName?' — '+c.supplierName:''), 'חוזה ספק חתום'+(c.supplierName?' — '+c.supplierName:''), c?waNum(c.supplierPhone):'');
 }
 function supplierContractsListHTML(){
   const list=(MEM.supplierContracts||[]).slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
@@ -3643,9 +3715,7 @@ async function openSignedClientPDF(id){
   catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
   if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
   const file=new File([blob],fileName,{type:'application/pdf'});
-  const shareData={files:[file],title:'אישור לקוח חתום',text:'אישור לקוח חתום'+(a.clientName?' — '+a.clientName:'')};
-  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share(shareData); }catch(e){ if(e&&e.name==='AbortError') return; downloadBlob(blob,fileName); } }
-  else { downloadBlob(blob,fileName); toast('הקובץ ירד'); }
+  previewPdfBlob(blob, fileName, 'אישור לקוח חתום'+(a.clientName?' — '+a.clientName:''), 'אישור לקוח חתום'+(a.clientName?' — '+a.clientName:''), waNum(a.clientPhone));
 }
 /* ---- צד הלקוח: מסך חתימה עצמאי דרך קישור ---- */
 function renderClientSignScreen(a){
@@ -4295,8 +4365,8 @@ document.addEventListener('click', function(e){
   if(typeof EDITING!=='undefined' && !EDITING) return;
   const fc = dr.closest('.field'); if(!fc) return;
   const inp = fc.querySelector('input[data-key="eventDate"]'); if(!inp || inp.readOnly) return;
-  try{ if(typeof inp.showPicker==='function'){ inp.showPicker(); } else { inp.focus(); inp.click(); } }
-  catch(_){ try{ inp.focus(); }catch(__){} }
+  // דסקטופ: בורר ה-native לא אמין → פותחים את לוח השנה העברי המובנה. במובייל ה-input תופס את הקליק ופותח בורר native.
+  openHebCal('eventDate');
 });
 function pendingSignId(){ const h=location.hash||''; let m=h.match(/sign=([A-Za-z0-9_-]+)/); if(m) return m[1]; const s=location.search||''; m=s.match(/[?&]sign=([A-Za-z0-9_-]+)/); return m?m[1]:''; }
 (function(){ const _cid=pendingClientSignId(); if(_cid){ startClientSigningMode(_cid); return; } const _sid=pendingSignId(); if(_sid){ startSigningMode(_sid); return; }
