@@ -514,14 +514,14 @@
   .sup-phone:empty{display:none}
   .sup-phone a{color:#1f8a4c;font-weight:800;text-decoration:none;direction:ltr;display:inline-block}
   .hebdate-btn[disabled]{opacity:1;cursor:default}
-  .modal.hebcal{max-width:340px}
+  .modal.hebcal{width:min(360px,94vw);max-width:360px}
   .hc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
   .hc-title{font-weight:800;font-size:17px;color:var(--ink)}
   .hc-nav{background:var(--brand-soft);border:1px solid var(--brand);color:var(--brand);border-radius:9px;width:40px;height:40px;font-size:22px;font-weight:800;line-height:1;cursor:pointer;font-family:inherit}
   .hc-dows{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:3px;margin-bottom:5px}
   .hc-dows span{text-align:center;font-size:12px;font-weight:800;color:var(--muted);padding:4px 0}
   .hc-grid{display:grid;grid-template-columns:repeat(7,1fr);direction:rtl;gap:4px}
-  .hc-cell{aspect-ratio:1;border:0;background:#f3f5f8;border-radius:10px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+  .hc-cell{height:44px;min-height:44px;border:0;background:#f3f5f8;border-radius:10px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
   .hc-cell.empty{background:transparent;pointer-events:none}
   .hc-cell.today{outline:2px solid var(--brand);outline-offset:-2px}
   .hc-cell.sel{background:var(--brand);color:#fff}
@@ -657,7 +657,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v200</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small id="verTag" style="opacity:.5;font-weight:600">v203</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -870,7 +870,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v200';
+const APP_VERSION = 'v203';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -907,7 +907,7 @@ let CONTRACTS_UNLOCKED = false;
 let CONTRACTS_LOCKED = false;
 let CHEF_TAB = 'kids';
 let CHEF_COLLAPSED = {};
-let HEBCAL = {key:'',y:0,m:0};
+let HEBCAL = {key:'',y:0,m:0,archiveId:null};
 /* ============================================================== */
 
 let MEM=null, usingMemoryOnly=false, CLOUD=false;
@@ -1661,7 +1661,7 @@ function dateReadout(iso){
 function docDate(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return 'יום '+WEEKDAYS_FULL[d.getDay()]+' · <bdi>'+dd+'.'+mm+'.'+d.getFullYear()+'</bdi>'; }
 function dmy(iso){ if(!iso) return 'ללא תאריך'; const d=new Date(iso+'T00:00'); if(isNaN(d.getTime())) return iso; const dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0'); return dd+'.'+mm+'.'+d.getFullYear(); }
 function openHebCal(key){
-  HEBCAL.key=key;
+  HEBCAL.key=key; HEBCAL.archiveId=null;
   const cur=current&&current.fields&&current.fields[key];
   let d=cur?new Date(cur+'T00:00'):new Date(); if(isNaN(d.getTime())) d=new Date();
   HEBCAL.y=d.getFullYear(); HEBCAL.m=d.getMonth();
@@ -1674,7 +1674,9 @@ function renderHebCal(){
   const y=HEBCAL.y,m=HEBCAL.m;
   const startDow=new Date(y,m,1).getDay();
   const days=new Date(y,m+1,0).getDate();
-  const sel=current&&current.fields&&current.fields[HEBCAL.key];
+  const sel = (HEBCAL.key==='__archiveDate')
+    ? (function(){ const r=(MEM.reports||[]).find(x=>x.id===HEBCAL.archiveId); return r&&r.fields&&r.fields.eventDate; })()
+    : (current&&current.fields&&current.fields[HEBCAL.key]);
   const todayIso=new Date().toISOString().slice(0,10);
   let cells='';
   for(let i=0;i<startDow;i++) cells+='<div class="hc-cell empty"></div>';
@@ -1688,6 +1690,7 @@ function renderHebCal(){
   body.querySelectorAll('[data-iso]').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
 }
 function pickHebDate(iso){
+  if(HEBCAL.key==='__archiveDate'){ archiveApplyDate(iso); return; }
   if(!current) return;
   if(HEBCAL.key==='eventDate'){
     closeHebCal();
@@ -1701,9 +1704,40 @@ function pickHebDate(iso){
   if(btn){ btn.classList.add('has'); btn.textContent='📅 '+hebDateText(iso); const fc=btn.closest('.field'); if(fc) fc.classList.remove('missing'); }
 }
 function hebCalClear(){
+  if(HEBCAL.key==='__archiveDate'){ closeHebCal(); return; }
   if(!current) return; current.fields[HEBCAL.key]=''; markDirty(); closeHebCal();
   const btn=document.querySelector('.hebdate-btn[data-key="'+HEBCAL.key+'"]');
   if(btn){ btn.classList.remove('has'); btn.textContent='📅 בחר/י תאריך'; }
+}
+// ===== שינוי תאריך אירוע ישירות מהארכיון (למנהלת המשרד — כשלקוחה מזיזה אירוע) =====
+function archiveChangeDate(id){
+  const r=(MEM.reports||[]).find(x=>x.id===id); if(!r) return;
+  HEBCAL.key='__archiveDate'; HEBCAL.archiveId=id;
+  const cur=r.fields&&r.fields.eventDate;
+  let d=cur?new Date(cur+'T00:00'):new Date(); if(isNaN(d.getTime())) d=new Date();
+  HEBCAL.y=d.getFullYear(); HEBCAL.m=d.getMonth();
+  const m=$('#hebCalModal'); if(!m) return; m.style.display='flex'; renderHebCal();
+}
+async function archiveApplyDate(iso){
+  const id=HEBCAL.archiveId;
+  const r=(MEM.reports||[]).find(x=>x.id===id);
+  if(!r){ closeHebCal(); return; }
+  if((r.fields&&r.fields.eventDate)===iso){ closeHebCal(); return; }
+  // אזהרת כפילות — רכה (לא חוסמת): מתריעה אבל נותנת להעביר בכל זאת
+  const others=(MEM.reports||[]).filter(x=> x && x.id!==id && x.brand===r.brand && x.type!=='endreport'
+      && String((x.fields&&x.fields.eventDate)||'').trim()===iso);
+  if(others.length){
+    const p=iso.split('-'); const nice=p[2]+'.'+p[1]+'.'+p[0];
+    const ok=await askConfirm('⚠️ כבר קיים אירוע בתאריך '+nice+'.\nלהעביר את האירוע לתאריך הזה בכל זאת?');
+    if(!ok) return; // משאיר את היומן פתוח לבחירת תאריך אחר
+  }
+  r.fields=r.fields||{}; r.fields.eventDate=iso; r.updatedAt=Date.now();
+  closeHebCal();
+  const res=await persist(r, true);
+  if(!res || !res.ok){ toast('שינוי התאריך לא נשמר בענן — נסה שוב כשיש רשת'); }
+  else { const p=iso.split('-'); toast('📅 התאריך עודכן ל-'+p[2]+'.'+p[1]+'.'+p[0]); }
+  if(typeof refreshBell==='function') refreshBell();
+  const sb=$('#searchBox'); buildTree(sb?sb.value.trim():'', false);
 }
 const SUPPLIER_KEYS=['dj','photographer','operator','bartender','eventManager','additionalManager','ee_manager','ee_floorManager','ee_photographer','ee_operator','ee_digi'];
 // תווית לפי תפקיד — כדי שיהיה ברור של מי המספר (מנהל / די-ג׳יי / צלם וכו׳)
@@ -2636,6 +2670,7 @@ function buildTree(q,autoScroll){
                 <div class="who"><div class="nm">${r.type==='endreport'?'<span class="end-badge">📋 סוף אירוע</span> ':''}${esc(nm)}</div>
                   <div class="meta"><span>${esc(typeLabel(r))}</span>${r.fields.contact?'• '+esc(r.fields.contact):''}${r.fields.eventTime?'• '+esc(r.fields.eventTime):''}</div></div>
                 <span class="st ${r.status}">${STATUS_NAME[r.status]}</span>
+                <button class="btn sm" data-movedate="${r.id}" title="שנה תאריך אירוע">📅</button>
                 <button class="btn sm" data-pdf="${r.id}" title="צור PDF">PDF</button>
                 <button class="btn sm rdel" data-del="${r.id}" title="מחק דוח">🗑</button>
               </div>`; }).join('')}
@@ -2646,9 +2681,10 @@ function buildTree(q,autoScroll){
   tree.querySelectorAll('.load-old').forEach(b=>b.onclick=()=>{ SHOW_OLD.archive=!SHOW_OLD.archive; buildTree(q); });
   tree.querySelectorAll('.year-head').forEach(h=>h.onclick=()=>{ const y=h.dataset.y; const cur=h.dataset.open==='1'; archState['y'+y]=!cur; buildTree(q,false); });
   tree.querySelectorAll('.month-head').forEach(h=>h.onclick=()=>{ const mEl=h.parentElement; const mid=mEl.dataset.m; mEl.classList.toggle('collapsed'); archState['m'+mid]=!mEl.classList.contains('collapsed'); });
+  tree.querySelectorAll('[data-movedate]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); archiveChangeDate(b.dataset.movedate); });
   tree.querySelectorAll('[data-del]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); deleteById(b.dataset.del); });
   tree.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); openById(b.dataset.pdf,true); });
-  tree.querySelectorAll('.row').forEach(row=>row.onclick=(e)=>{ if(e.target.closest('[data-del],[data-pdf]')) return; openById(row.dataset.id,false); });
+  tree.querySelectorAll('.row').forEach(row=>row.onclick=(e)=>{ if(e.target.closest('[data-del],[data-pdf],[data-movedate]')) return; openById(row.dataset.id,false); });
   if(autoScroll && !q){
     // מתחילים מראש הדף — האירועים העדכניים ממילא בראש הרשימה
     try{ window.scrollTo({top:0,behavior:'auto'}); }catch(e){}
@@ -3907,13 +3943,23 @@ function toReportSeed(e,i){ const f=Object.assign({},e.fields); f.eventKind=TYPE
   return {id,brand:'louie',type:e.type,status:'filled',fields:f,createdAt:Date.now(),updatedAt:Date.now()}; }
 const JULY26=[{"type":"meshulav","fields":{"eventDate":"2026-07-01","contact":"שני","phone":"0542037111","eventTime":"19:30","celebrant":"יובל","balloons":"ורוד לבן","kidsCount":"60","kidsMenu":"בריוש אסאדו + פסטה + שניצלים (במקום המבורגר)","vegMeals":"1","glutenLactose":"3","wheelchair":"1 עם הליכון צריכה רמפה","externalSupplier":"לא","bus":"no","galiBook":"no","presentation":"כן יביאו","managerNotes":"דיסק און קי: לפני האירוע","usbDate":"","acum":"תשלם","securityCheck":"","eventKind":"משולב"}},{"type":"bat","fields":{"eventDate":"2026-07-02","contact":"הדר","phone":"05243188822","eventTime":"","celebrant":"","balloons":"","kidsCount":"","kidsMenu":"","vegMeals":"","glutenLactose":"","wheelchair":"","externalSupplier":"","bus":"","galiBook":"","presentation":"","usbDate":"","acum":"","securityCheck":"","eventKind":"בת מצווה"}}];
 function toJulySeed(e,i){ const f=Object.assign({},e.fields); const id='jul26_'+String(f.eventDate||'').replace(/-/g,'')+'_'+((String(f.phone||'').replace(/\D/g,''))||('x'+i)); const ready=(f.contact&&f.celebrant&&f.eventTime&&f.phone); return {id,brand:'louie',type:e.type,status:ready?'filled':'draft',fields:f,createdAt:Date.now(),updatedAt:Date.now()}; }
+async function seedDoneCloud(key){
+  if(!(CLOUD && fb.db)) return false;
+  try{ const m=await fb.db.collection('meta').doc(key).get(); return !!(m && m.exists); }catch(e){ return false; }
+}
+async function markSeedDoneCloud(key){
+  if(!(CLOUD && fb.db)) return;
+  try{ await fb.db.collection('meta').doc(key).set({done:true, at:Date.now()}); }catch(e){}
+}
 async function seedJuly(){
   try{
     if(localStorage.getItem('seed_jul26a')==='1') return;
+    if(await seedDoneCloud('seed_jul26a')){ try{ localStorage.setItem('seed_jul26a','1'); }catch(e){} return; }
     const reps=JULY26.map((e,i)=>toJulySeed(e,i));
     for(const r of reps){ const ix=MEM.reports.findIndex(x=>x.id===r.id); if(ix>=0) MEM.reports[ix]=r; else MEM.reports.push(r);
       if(CLOUD && fb.db){ try{ await fb.db.collection('reports').doc(r.id).set(JSON.parse(JSON.stringify(r))); }catch(e){ console.warn('seedJuly',e); } } }
     if(!CLOUD){ try{ if(window.storage) await window.storage.set(KEY, JSON.stringify(MEM)); }catch(e){} }
+    await markSeedDoneCloud('seed_jul26a');
     try{ localStorage.setItem('seed_jul26a','1'); }catch(e){}
     toast('יובאו '+reps.length+' אירועי יולי לארכיון ✓');
   }catch(e){ console.warn('seedJuly',e); }
@@ -3921,6 +3967,7 @@ async function seedJuly(){
 async function seedJune(){
   try{
     if(localStorage.getItem('seed_jun26f')==='1') return;
+    if(await seedDoneCloud('seed_jun26f')){ try{ localStorage.setItem('seed_jun26f','1'); }catch(e){} return; }
     const reps=JUNE26.map((e,i)=>toReportSeed(e,i));
     for(const r of reps){
       const ix=MEM.reports.findIndex(x=>x.id===r.id);
@@ -3928,6 +3975,7 @@ async function seedJune(){
       if(CLOUD && fb.db){ try{ await fb.db.collection('reports').doc(r.id).set(JSON.parse(JSON.stringify(r))); }catch(e){ console.warn('seed',e); } }
     }
     if(!CLOUD){ try{ if(window.storage) await window.storage.set(KEY, JSON.stringify(MEM)); }catch(e){} }
+    await markSeedDoneCloud('seed_jun26f');
     try{ localStorage.setItem('seed_jun26f','1'); }catch(e){}
     toast('יובאו '+reps.length+' אירועי יוני לארכיון ✓');
   }catch(e){ console.warn('seedJune',e); }
@@ -4368,6 +4416,56 @@ document.addEventListener('click', function(e){
   // דסקטופ: בורר ה-native לא אמין → פותחים את לוח השנה העברי המובנה. במובייל ה-input תופס את הקליק ופותח בורר native.
   openHebCal('eventDate');
 });
+/* ===== כלי אבחון כפתורים — בודק בזמן-ריצה אילו כפתורים במסך הנוכחי לא לחיצים =====
+   הפעלה: 3 לחיצות מהירות על מספר הגרסה (verTag), או כתובת עם #btnaudit */
+function runButtonAudit(){
+  const VW=window.innerWidth, VH=window.innerHeight;
+  const blocked=[], noHandler=[];
+  document.querySelectorAll('button').forEach(b=>{
+    const r=b.getBoundingClientRect(); const cs=getComputedStyle(b);
+    const onScreen = r.width>1 && r.height>1 && cs.display!=='none' && cs.visibility!=='hidden' && b.offsetParent!==null;
+    if(!onScreen) return;                       // לא במסך הנוכחי — מדלגים
+    const inView = b.closest('.viewmode');       // במצב צפייה חלק מהכפתורים נעולים בכוונה
+    const label=((b.textContent||'').trim().slice(0,28))||b.className||'(ללא טקסט)';
+    const why=[];
+    if(b.disabled) why.push('נעול (disabled)');
+    if(cs.pointerEvents==='none' && !inView) why.push('pointer-events:none');
+    // האם מכוסה ע״י אלמנט אחר? (בודקים את מרכז הכפתור)
+    const cx=Math.min(VW-2,Math.max(2,r.left+r.width/2)), cy=Math.min(VH-2,Math.max(2,r.top+r.height/2));
+    const top=document.elementFromPoint(cx,cy);
+    if(top && top!==b && !b.contains(top) && !top.contains(b) && !inView){
+      why.push('מכוסה ע״י «'+((top.className&&typeof top.className==='string'?top.className.split(' ')[0]:top.tagName))+'»');
+    }
+    if(why.length) blocked.push({label,why});
+    else {
+      // בדיקת handler (best-effort בלבד — כפתורים מסוימים מחווטים בהאצלה)
+      let h=!!b.onclick, p=b.parentElement, hops=0;
+      while(!h && p && hops<6){ if(p.onclick) h=true; p=p.parentElement; hops++; }
+      if(!h && !inView) noHandler.push(label);
+    }
+  });
+  // תצוגה
+  let ov=document.getElementById('btnAuditOv');
+  if(!ov){ ov=document.createElement('div'); ov.id='btnAuditOv'; document.body.appendChild(ov); }
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(15,22,32,.55);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl;font-family:inherit';
+  const total=document.querySelectorAll('button').length;
+  const item=(t)=>'<div style="padding:7px 9px;border:1px solid #eee;border-radius:8px;margin:4px 0;font-size:13px;background:#fff">'+t+'</div>';
+  const blkHtml = blocked.length
+    ? blocked.map(x=>item('<b>'+esc(x.label)+'</b><br><span style="color:#b3331f;font-size:12px">'+x.why.map(esc).join(' · ')+'</span>')).join('')
+    : '<div style="color:#1f7a44;font-weight:700;padding:6px 2px">✓ אין כפתורים חסומים במסך הזה</div>';
+  const nhHtml = noHandler.length
+    ? '<div style="margin-top:10px;font-weight:800;color:#16456f">ייתכן ללא פעולה ('+noHandler.length+') — לבדיקה ידנית:</div>'+noHandler.map(t=>item(esc(t))).join('')
+    : '';
+  ov.innerHTML='<div style="background:#fff;border-radius:14px;max-width:420px;width:100%;max-height:88vh;overflow:auto;padding:16px 16px 18px;box-shadow:0 20px 60px rgba(0,0,0,.3)">'
+    +'<div style="font-weight:800;font-size:16px;margin-bottom:2px">🔍 אבחון כפתורים</div>'
+    +'<div style="color:#5a6675;font-size:12.5px;margin-bottom:10px">נבדקו '+total+' כפתורים במסך הנוכחי. כפתורים "חסומים" הם אלו שלא ייתפסו ללחיצה.</div>'
+    +'<div style="font-weight:800;color:#b3331f">חסומים ('+blocked.length+'):</div>'+blkHtml
+    +nhHtml
+    +'<button type="button" onclick="document.getElementById(\'btnAuditOv\').remove()" style="margin-top:14px;width:100%;padding:11px;border:0;border-radius:9px;background:#16456f;color:#fff;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit">סגור</button>'
+    +'</div>';
+}
+try{ window.btnAudit=runButtonAudit; }catch(e){}
+(function(){ const vt=document.getElementById('verTag'); if(vt){ vt.style.cursor='pointer'; let n=0,tm; vt.addEventListener('click',()=>{ n++; clearTimeout(tm); tm=setTimeout(()=>{n=0;},600); if(n>=3){ n=0; runButtonAudit(); } }); } if((location.hash||'').toLowerCase().includes('btnaudit')) setTimeout(runButtonAudit,500); })();
 function pendingSignId(){ const h=location.hash||''; let m=h.match(/sign=([A-Za-z0-9_-]+)/); if(m) return m[1]; const s=location.search||''; m=s.match(/[?&]sign=([A-Za-z0-9_-]+)/); return m?m[1]:''; }
 (function(){ const _cid=pendingClientSignId(); if(_cid){ startClientSigningMode(_cid); return; } const _sid=pendingSignId(); if(_sid){ startSigningMode(_sid); return; }
 if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ ROLE=role; CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
