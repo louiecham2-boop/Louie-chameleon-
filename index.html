@@ -421,6 +421,14 @@
   .eet-cstat{font-weight:800}
   .eet-confirm.done .eet-cstat{color:#1f7a44}
   .field.missing .eet-confirm{background:#fdeaea;border-top:0;border-radius:9px;padding:9px 10px}
+  .clientsign{border:1px solid var(--line2);border-radius:11px;padding:12px;background:#fcfdfe;display:flex;flex-direction:column;gap:10px}
+  .cs-status{font-weight:800;font-size:14px}
+  .cs-status.done{color:#1f7a44}
+  .cs-status.pend{color:#a86400}
+  .cs-status.none{color:#5a6675}
+  .cs-row{display:flex;gap:8px;flex-wrap:wrap}
+  .cs-btn{background:var(--brand);color:#fff;border:0;border-radius:9px;padding:11px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+  .cs-sub{background:#eef4fb;border:1px solid #d3e2f0;color:#16456f;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
   .cm-note{font-size:12px;font-weight:600;color:#8a6d1a;background:#fff7e0;border:1px solid #ecd793;border-radius:7px;padding:4px 8px;margin-top:5px}
   .cm-tabs{display:flex;gap:8px;margin-bottom:8px}
   .cm-tab{flex:1;border:1px solid var(--line2);background:#fff;border-radius:9px;padding:10px;font-weight:800;cursor:pointer;color:var(--muted);font-size:14px}
@@ -639,7 +647,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v188</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v191</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -852,7 +860,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v188';
+const APP_VERSION = 'v191';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -947,7 +955,7 @@ async function loadHistory(){
   HIST_LOADED=true; return true;
 }
 async function dbLoad(){
-  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[],tastings:[],contracts:[],supplierContracts:[]};
+  if(MEM) return MEM; MEM={reports:[],assignments:[],workers:[],catering:[],tastings:[],contracts:[],supplierContracts:[],clientApprovals:[]};
   if(CLOUD && fb.db){
     const cutoff=histCutoff();
     try{ const s=await fb.db.collection('reports').where('fields.eventDate','>=',cutoff).get(); MEM.reports=s.docs.map(d=>d.data()); }
@@ -961,6 +969,8 @@ async function dbLoad(){
     try{ const sk=await fb.db.collection('contracts').get(); MEM.contracts=sk.docs.map(d=>d.data()); }
     catch(e){ console.warn(e); }
     try{ const ss=await fb.db.collection('supplierContracts').get(); MEM.supplierContracts=ss.docs.map(d=>d.data()); }
+    catch(e){ console.warn(e); }
+    try{ const sca=await fb.db.collection('clientApprovals').get(); MEM.clientApprovals=sca.docs.map(d=>d.data()); }
     catch(e){ console.warn(e); }
     try{ const sc=await fb.db.collection('catering').where('date','>=',cutoff).get(); MEM.catering=sc.docs.map(d=>d.data()); }
     catch(e){ try{ const sc=await fb.db.collection('catering').get(); MEM.catering=sc.docs.map(d=>d.data()); }catch(_){} }
@@ -976,6 +986,7 @@ async function dbLoad(){
   if(!MEM.catering) MEM.catering=[];
   if(!MEM.tastings) MEM.tastings=[];
   if(!MEM.supplierContracts) MEM.supplierContracts=[];
+  if(!MEM.clientApprovals) MEM.clientApprovals=[];
   return MEM;
 }
 async function persist(report, force){
@@ -1086,6 +1097,16 @@ function subscribeCloud(){
     try{ MEM.supplierContracts.forEach(c=>{ const before=prev.find(x=>x.id===c.id); if(c.status==='signed' && (!before || before.status!=='signed')){ toast('✅ '+(c.supplierName||'ספק')+' חתם/ה על החוזה'); } }); }catch(e){}
     if(VIEW==='sched' && SCHEDTAB==='workers' && modalsClosed()) renderWorkers();
   }, err=>console.warn('snapshot sc',err));
+  fb.db.collection('clientApprovals').onSnapshot(snap=>{
+    const prev=(MEM.clientApprovals||[]).slice();
+    MEM.clientApprovals=snap.docs.map(d=>d.data());
+    try{ MEM.clientApprovals.forEach(a=>{ const before=prev.find(x=>x.id===a.id); if(a.status==='signed' && (!before||before.status!=='signed')){
+      toast('✅ הלקוח אישר וחתם: '+(a.clientName||''));
+      const r=MEM.reports.find(rr=>rr.id===a.reportId);
+      if(r && r.fields && r.fields.clientApproved!=='yes'){ r.fields.clientApproved='yes'; persistDoc('reports',r); if(current && current.id===r.id){ current.fields.clientApproved='yes'; if(VIEW==='new' && modalsClosed()) renderForm(); } }
+    } }); }catch(e){}
+    if(current && VIEW==='new' && modalsClosed()){ const c=document.querySelector('.clientsign'); if(c){ c.innerHTML=clientSignInner(c.dataset.key); bindClientSign(c); } }
+  }, err=>console.warn('snapshot ca',err));
   fb.db.collection('catering').where('date','>=',cutoff).onSnapshot(snap=>{
     mergeWin('catering', snap.docs.map(d=>d.data()), rowInWin); afterCloudSync();
   }, err=>{ console.warn('snapshot c',err); fb.db.collection('catering').onSnapshot(s=>{ MEM.catering=s.docs.map(d=>d.data()); afterCloudSync(); }, e2=>console.warn(e2)); });
@@ -1276,7 +1297,6 @@ const OPS_FIELDS=[
   F('rigger1','ראגר','text'),
   F('rigger2','ראגר שני','text'),
   F('bartender','ברמנית','text'),
-  F('rolls','כמות לחמניות שהוזמנו','number'),
   F('managerNotes','הערות נוספות למנהל האירוע','textarea',{full:true}),
 ];
 const SEC_ADULTSMENU={title:'תפריט מבוגרים (אם יש)',kind:'info',fields:[
@@ -1291,6 +1311,7 @@ const SEC_BAT_ADULTS={title:'מבוגרים באירוע (אם מגיעים)',ki
 ]};
 const SEC_APPROVAL={title:'אישור וסיכום',kind:'ok',fields:[
   F('clientApproved','הלקוח/ה אישר/ה את הסיכום?','yesno',{req:true,hint:'חובה — יש לקבל אישור מהלקוח/ה לסיכום שנשלח לפני האירוע'}),
+  F('clientSign','אישור וחתימה דיגיטלית של הלקוח','clientsign',{full:true,hint:'שליחת אישור פרטי האירוע ללקוח/ה בוואטסאפ — לחתימה דיגיטלית מרחוק'}),
   F('inspector','חתימת מבקר','text'),
 ]};
 const CHEF_MENUS={
@@ -2108,6 +2129,10 @@ function fieldHTML(fld,val){
     const rq=fld.req?'<span class="reqm"> *</span>':'';
     return `<div class="field full"><label>${esc(fld.label)}${rq}${hh}</label><div class="eeteam" data-key="${fld.key}">${eeTeamInner(fld.key)}</div></div>`;
   }
+  if(fld.type==='clientsign'){
+    const hh=fld.hint?`<span class="hint">${esc(fld.hint)}</span>`:'';
+    return `<div class="field full"><label>${esc(fld.label)}${hh}</label><div class="clientsign" data-key="${fld.key}">${clientSignInner(fld.key)}</div></div>`;
+  }
   if(fld.type==='allergens'){
     const v=allergVal(val);
     const opts=ALLERG_OPTS.map(o=>{ const on=v.sel.indexOf(o)>=0; return `<label class="chk-opt${on?' on':''}"><input type="checkbox" data-opt="${esc(o)}" ${on?'checked':''}><span>${esc(o)}</span></label>`; }).join('');
@@ -2334,6 +2359,7 @@ function bindInputs(app){
   app.querySelectorAll('.hebdate-btn:not([disabled])').forEach(b=>b.onclick=()=>openHebCal(b.dataset.key));
   app.querySelectorAll('.chefmenu').forEach(c=>bindChefmenu(c));
   app.querySelectorAll('.eeteam').forEach(c=>bindEeTeam(c));
+  app.querySelectorAll('.clientsign').forEach(c=>bindClientSign(c));
   app.querySelectorAll('.checklist').forEach(g=>{
     const key=g.dataset.key; const total=g.querySelectorAll('input[type=checkbox]').length;
     const upd=()=>{ const st=g.querySelector('.cl-status'); if(!st) return; const n=(Array.isArray(current.fields[key])?current.fields[key]:[]).length; if(n>=total){ st.className='cl-status ok'; st.textContent='✓ הכל סומן'; } else { st.className='cl-status miss'; st.textContent='סומנו '+n+' מתוך '+total; } };
@@ -2633,6 +2659,13 @@ function buildDocHTML(r){
       if(fld.type==='checks'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const none=sel.indexOf('__none__')>=0; const html=none?nbidi('ללא'):sel.map(x=>nbidi(x)).join(' · '); const has=none||sel.length; return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(has?'':'empty')+'">'+(has?html:'—')+'</td></tr>'; }
       if(fld.type==='checklist'){ const sel=Array.isArray(f[fld.key])?f[fld.key]:[]; const opts=(fld.opts||[]); const html=opts.map(o=>{ const on=sel.indexOf(o)>=0; return '<div style="'+(on?'color:#1f7a44;font-weight:700':'color:#b3331f')+'">'+(on?'☑':'☐')+' '+nbidi(o)+'</div>'; }).join(''); const allok=opts.length&&opts.every(o=>sel.indexOf(o)>=0); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v">'+html+(allok?'':'<div style="color:#b3331f;font-weight:800;margin-top:3px">⚠ לא הושלמה הסגירה</div>')+'</td></tr>'; }
       if(fld.type==='allergens'){ const t=allergText(f[fld.key]); return '<tr><td class="k">'+lbl(fld.label)+'</td><td class="v '+(t?'':'empty')+'">'+(t?bidi(t):'—')+'</td></tr>'; }
+      if(fld.type==='clientsign'){
+        const a=(MEM.clientApprovals||[]).filter(x=>x.reportId===r.id).sort((p,q)=>(q.createdAt||0)-(p.createdAt||0))[0];
+        let txt='— טרם נשלח —';
+        if(a && a.status==='signed') txt='✅ הלקוח/ה אישר/ה וחתם/ה דיגיטלית'+(a.signerName?' · '+a.signerName:'')+(a.signedAt?' · '+new Date(a.signedAt).toLocaleDateString('he-IL'):'');
+        else if(a) txt='⏳ נשלח ללקוח/ה — ממתין לחתימה';
+        return '<tr><td class="k">'+lbl('אישור לקוח (חתימה דיגיטלית)')+'</td><td class="v">'+nbidi(txt)+'</td></tr>';
+      }
       if(fld.type==='eeteam'){
         const t=(f.ee_team&&typeof f.ee_team==='object')?f.ee_team:{sup:[],staff:[],otherSup:'',otherStaff:''};
         const mark=ok=> ok===false
@@ -3480,9 +3513,164 @@ async function startSigningMode(id){
     renderSignScreen(snap.data());
   }catch(e){ console.error(e); ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">שגיאה בטעינת החוזה. נסו לרענן.</p></div></div>'; }
 }
+/* ===================== אישור לקוח + חתימה דיגיטלית מרחוק (כמו אצל ספקים) ===================== */
+function clientApprovalFor(reportId){
+  return (MEM.clientApprovals||[]).filter(x=>x.reportId===reportId).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0]||null;
+}
+function clientSignLink(id){ return location.origin + location.pathname + '#csign=' + id; }
+function clientName(){ const f=current.fields||{}; return String(f.celebrant||f.contact||'').trim(); }
+function buildClientApprovalText(){
+  const f=current.fields||{}; const co=CONTRACT_COMPANY[current.brand]||CONTRACT_COMPANY.louie;
+  const tName=(EVENT_TYPES[current.type]&&EVENT_TYPES[current.type].name)||'';
+  const L=[];
+  L.push('אישור פרטי אירוע — '+co.name);
+  if(clientName()) L.push('לקוח/ה: '+clientName());
+  if(f.eventDate) L.push('תאריך האירוע: '+f.eventDate);
+  if(f.eventTime) L.push('שעת התחלה: '+f.eventTime);
+  if(tName) L.push('סוג האירוע: '+tName);
+  if(f.kidsCount) L.push('כמות ילדים: '+f.kidsCount);
+  if(f.adultsCount) L.push('כמות מבוגרים: '+f.adultsCount);
+  L.push('');
+  L.push(ALLERGY_NOTICE);
+  L.push('');
+  L.push('בחתימתי מטה אני מאשר/ת כי קראתי את פרטי האירוע ואת האמור לעיל, וכי הם נכונים ומוסכמים עליי.');
+  return L.join('\n');
+}
+function buildClientApprovalHTML(text, brand, sig, signerName){
+  const co=CONTRACT_COMPANY[brand]||CONTRACT_COMPANY.louie;
+  const sigImg=d=> d ? '<img src="'+d+'" style="max-height:48px;max-width:92%;display:block;margin:0 auto 4px">' : '<div class="line"></div>';
+  return '<div class="doc">'+
+    '<div class="d-head"><div class="d-brand">'+esc(co.name)+'</div><div class="d-sub">אישור פרטי אירוע וחתימת לקוח</div></div>'+
+    '<div style="font-size:13px;line-height:1.6;text-align:right">'+bidiLines(text)+'</div>'+
+    '<div class="d-foot">'+
+      '<div class="sig">'+sigImg(sig)+'<div class="lbl">'+nbidi('חתימת '+(signerName||'הלקוח/ה'))+'</div></div>'+
+    '</div></div>';
+}
+function clientSignInner(key){
+  const a=clientApprovalFor(current&&current.id);
+  const ed=(typeof EDITING!=='undefined'&&EDITING);
+  if(a && a.status==='signed'){
+    const when=a.signedAt?new Date(a.signedAt).toLocaleDateString('he-IL'):'';
+    return '<div class="cs-status done">✅ הלקוח/ה אישר/ה וחתם/ה דיגיטלית'+(a.signerName?' · '+esc(a.signerName):'')+(when?' · '+when:'')+'</div>'+
+      '<div class="cs-row"><button type="button" class="cs-sub" data-act="pdf">📄 PDF חתום</button>'+(ed?'<button type="button" class="cs-sub" data-act="resend">שלח שוב</button>':'')+'</div>';
+  }
+  if(a){
+    return '<div class="cs-status pend">⏳ נשלח ללקוח/ה — ממתין לחתימה דיגיטלית</div>'+
+      (ed?'<div class="cs-row"><button type="button" class="cs-sub" data-act="copy">🔗 העתק קישור</button><button type="button" class="cs-sub" data-act="resend">↻ שלח שוב בוואטסאפ</button></div>':'');
+  }
+  return (ed?'<button type="button" class="cs-btn" data-act="send">✍️ שלח ללקוח/ה לאישור וחתימה בוואטסאפ</button>':'<div class="cs-status none">— טרם נשלח ללקוח —</div>');
+}
+function bindClientSign(c){
+  const re=()=>{ c.innerHTML=clientSignInner(c.dataset.key); bindClientSign(c); };
+  const a=clientApprovalFor(current&&current.id);
+  const send=c.querySelector('[data-act="send"]'); if(send) send.onclick=()=>sendClientApproval().then(re);
+  const rs=c.querySelector('[data-act="resend"]'); if(rs) rs.onclick=()=>sendClientApproval(a&&a.id).then(re);
+  const cp=c.querySelector('[data-act="copy"]'); if(cp&&a) cp.onclick=()=>{ const link=clientSignLink(a.id); try{ navigator.clipboard.writeText(link); toast('הקישור הועתק'); }catch(e){ window.prompt('העתיקו את הקישור:',link); } };
+  const pf=c.querySelector('[data-act="pdf"]'); if(pf&&a) pf.onclick=()=>openSignedClientPDF(a.id);
+}
+async function sendClientApproval(reuseId){
+  if(!current || current.type==='endreport'){ toast('זמין רק בדוח לפני-אירוע'); return; }
+  if(!CLOUD||!fb.db){ toast('נדרש חיבור לענן כדי לשלוח לחתימה מרחוק'); return; }
+  const phone=String(current.fields.phone||'').trim();
+  let doc;
+  if(reuseId){ doc=(MEM.clientApprovals||[]).find(x=>x.id===reuseId); }
+  if(!doc){
+    doc={ id:uid(), brand:current.brand, reportId:current.id, text:buildClientApprovalText(),
+      clientName:clientName(), clientPhone:phone, sig:'', signerName:'', status:'pending', createdAt:Date.now(), signedAt:0 };
+    toast('יוצר קישור לחתימה…');
+    try{ await persistDoc('reports',current); }catch(e){}
+    await persistDoc('clientApprovals', doc);
+    if(!MEM.clientApprovals) MEM.clientApprovals=[];
+    if(!MEM.clientApprovals.some(x=>x.id===doc.id)) MEM.clientApprovals.push(doc);
+  }
+  const co=CONTRACT_COMPANY[current.brand]||CONTRACT_COMPANY.louie;
+  const link=clientSignLink(doc.id);
+  const msg='שלום'+(doc.clientName?' '+doc.clientName:'')+', מצורף אישור פרטי האירוע מול '+co.name+'.\nנא לקרוא, ולאשר בחתימה דיגיטלית בקישור הבא:\n'+link;
+  const num=waNum(phone);
+  const aEl=document.createElement('a'); aEl.href='https://wa.me/'+(num||'')+'?text='+encodeURIComponent(msg); aEl.target='_blank'; aEl.rel='noopener'; document.body.appendChild(aEl); aEl.click(); document.body.removeChild(aEl);
+  toast(num?'נפתח וואטסאפ — שלח/י את הקישור ללקוח/ה':'נפתח וואטסאפ — בחר/י נמען ושלח/י את הקישור');
+}
+async function openSignedClientPDF(id){
+  const a=(MEM.clientApprovals||[]).find(x=>x.id===id); if(!a) return;
+  const area=$('#pdfArea'); area.innerHTML=buildClientApprovalHTML(a.text,a.brand,a.sig,a.signerName);
+  const bEl=area.querySelector('.d-brand'); if(bEl) bEl.style.color=(a.brand==='kamilion')?'#4f2c79':'#16456f';
+  const hEl=area.querySelector('.d-head'); if(hEl) hEl.style.borderBottomColor=(a.brand==='kamilion')?'#6b3fa0':'#1e5b9c';
+  const el=area.firstElementChild;
+  const fileName=(a.brand==='kamilion'?'kamilion':'louie')+'_client_approval_signed.pdf';
+  const opt={margin:[8,8,8,8],filename:fileName,image:{type:'jpeg',quality:0.96},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',width:794,windowWidth:794,x:0,y:0,scrollX:0,scrollY:0,imageTimeout:0,
+      onclone:(cdoc)=>{ const a2=cdoc.getElementById('pdfArea'); if(a2){ a2.style.left='0'; a2.style.top='0'; a2.style.position='static'; a2.style.width='794px'; } const d=cdoc.querySelector('#pdfArea .doc'); if(d){ d.style.width='794px'; d.style.margin='0'; } }},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}};
+  if(typeof html2pdf==='undefined'){ toast('שגיאה: רכיב ה-PDF לא נטען'); return; }
+  toast('מכין PDF חתום…');
+  if(document.fonts&&document.fonts.ready){ try{ await document.fonts.ready; }catch(e){} }
+  try{ void el.offsetHeight; }catch(e){}
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await new Promise(r=>setTimeout(r,150));
+  let blob;
+  try{ const worker=html2pdf().set(opt).from(el); const pdf=await worker.toPdf().get('pdf'); blob=pdf.output('blob'); }
+  catch(e){ console.error(e); toast('שגיאה ביצירת PDF'); return; }
+  if(!blob||blob.size<800){ toast('יצירת ה-PDF נכשלה — נסה שוב'); return; }
+  const file=new File([blob],fileName,{type:'application/pdf'});
+  const shareData={files:[file],title:'אישור לקוח חתום',text:'אישור לקוח חתום'+(a.clientName?' — '+a.clientName:'')};
+  if(navigator.canShare && navigator.canShare({files:[file]})){ try{ await navigator.share(shareData); }catch(e){ if(e&&e.name==='AbortError') return; downloadBlob(blob,fileName); } }
+  else { downloadBlob(blob,fileName); toast('הקובץ ירד'); }
+}
+/* ---- צד הלקוח: מסך חתימה עצמאי דרך קישור ---- */
+function renderClientSignScreen(a){
+  let ov=document.getElementById('signOverlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='signOverlay'; document.body.appendChild(ov); }
+  const co=CONTRACT_COMPANY[a.brand]||CONTRACT_COMPANY.louie;
+  const color=signBrandColor(a.brand);
+  if(a.status==='signed'){
+    ov.innerHTML='<div class="sign-wrap"><div class="sign-head" style="background:'+color+'"><h1>'+esc(co.name)+'</h1><p>האישור נחתם</p></div>'+
+      '<div class="sign-card"><p style="text-align:center;font-weight:700;font-size:16px">✅ האישור נחתם בהצלחה'+(a.signedAt?' · '+new Date(a.signedAt).toLocaleDateString('he-IL'):'')+'</p>'+
+      '<p style="text-align:center;color:var(--muted);font-size:13px">תודה רבה. אפשר לסגור את החלון.</p></div></div>';
+    return;
+  }
+  ov.innerHTML='<div class="sign-wrap">'+
+    '<div class="sign-head" style="background:'+color+'"><h1>'+esc(co.name)+'</h1><p>אישור פרטי האירוע — נא לקרוא ולחתום</p></div>'+
+    '<div class="sign-card"><div class="sign-text">'+esc(a.text||'')+'</div></div>'+
+    '<div class="sign-card">'+
+      '<label>שם מלא של החותם/ת</label><input id="signName" type="text" placeholder="שם מלא" value="'+esc(a.clientName||'')+'">'+
+      '<label>חתימה (חתמו באצבע במסגרת)</label>'+
+      '<div class="sigpad-wrap"><canvas id="signSigPad" class="sigpad" width="760" height="240"></canvas><button type="button" class="btn sm ghost sigclear" id="signClear">נקה חתימה</button></div>'+
+      '<button id="signConfirm" class="big" style="background:'+color+';margin-top:14px">אני מאשר/ת וחותם/ת</button>'+
+      '<div id="signErr" style="color:#c0392b;font-size:13px;margin-top:8px;text-align:center"></div>'+
+    '</div></div>';
+  initSigPad('signSigPad');
+  const cl=document.getElementById('signClear'); if(cl) cl.onclick=()=>clearSigPad('signSigPad');
+  const cf=document.getElementById('signConfirm'); if(cf) cf.onclick=()=>submitClientSignature(a);
+}
+async function submitClientSignature(a){
+  const nmEl=document.getElementById('signName'); const errEl=document.getElementById('signErr');
+  const nm=(nmEl&&nmEl.value||'').trim();
+  const sig=sigData('signSigPad');
+  if(!sig){ if(errEl) errEl.textContent='נא לחתום במסגרת לפני האישור'; return; }
+  if(!nm){ if(errEl) errEl.textContent='נא להזין שם מלא'; return; }
+  const btn=document.getElementById('signConfirm'); if(btn){ btn.disabled=true; btn.textContent='שומר…'; }
+  try{
+    await fb.db.collection('clientApprovals').doc(a.id).set({sig:sig, signerName:nm, status:'signed', signedAt:Date.now()}, {merge:true});
+    a.sig=sig; a.signerName=nm; a.status='signed'; a.signedAt=Date.now();
+    renderClientSignScreen(a);
+  }catch(e){ console.error(e); if(errEl) errEl.textContent='השמירה נכשלה: '+((e&&(e.code||e.message))||'שגיאה לא ידועה'); if(btn){ btn.disabled=false; btn.textContent='אני מאשר/ת וחותם/ת'; } }
+}
+async function startClientSigningMode(id){
+  let ov=document.getElementById('signOverlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='signOverlay'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">טוען אישור…</p></div></div>';
+  document.body.classList.remove('locked');
+  await initCloud();
+  if(!CLOUD||!fb.db){ ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">לא ניתן להתחבר כעת. נסו שוב מאוחר יותר.</p></div></div>'; return; }
+  try{
+    const snap=await fb.db.collection('clientApprovals').doc(id).get();
+    if(!snap.exists){ ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">הקישור אינו תקין או שהאישור הוסר.</p></div></div>'; return; }
+    renderClientSignScreen(snap.data());
+  }catch(e){ console.error(e); ov.innerHTML='<div class="sign-wrap"><div class="sign-card"><p style="text-align:center">שגיאה בטעינת האישור. נסו לרענן.</p></div></div>'; }
+}
+function pendingClientSignId(){ const h=location.hash||''; let m=h.match(/csign=([A-Za-z0-9_-]+)/); if(m) return m[1]; const s=location.search||''; m=s.match(/[?&]csign=([A-Za-z0-9_-]+)/); return m?m[1]:''; }
 async function saveWorker(){
   const name=$('#wName').value.trim();
-  if(!name){ toast('יש להזין שם'); return; }
   let w=editingWorker?MEM.workers.find(x=>x.id===editingWorker):null;
   if(!w){ w={id:uid(),createdAt:Date.now()}; MEM.workers.push(w); }
   w.name=name; w.role=$('#wRole').value; w.phone=$('#wPhone').value.trim(); w.contract=$('#wContract').checked; w.form101=$('#w101').checked; w.form101url=$('#w101url').value.trim(); w.notes=$('#wNotes').value.trim(); w.updatedAt=Date.now();
@@ -4080,7 +4268,7 @@ document.addEventListener('click', function(e){
   catch(_){ try{ inp.focus(); }catch(__){} }
 });
 function pendingSignId(){ const h=location.hash||''; let m=h.match(/sign=([A-Za-z0-9_-]+)/); if(m) return m[1]; const s=location.search||''; m=s.match(/[?&]sign=([A-Za-z0-9_-]+)/); return m?m[1]:''; }
-(function(){ const _sid=pendingSignId(); if(_sid){ startSigningMode(_sid); return; }
+(function(){ const _cid=pendingClientSignId(); if(_cid){ startClientSigningMode(_cid); return; } const _sid=pendingSignId(); if(_sid){ startSigningMode(_sid); return; }
 if(APP_PASSCODE){ let ok=false,role='manager'; try{ ok=localStorage.getItem('louie_auth')==='1'; role=localStorage.getItem('louie_role')||'manager'; }catch(e){} if(ok){ ROLE=role; CHEF_MODE=(role==='chef'); startApp(); } else { document.body.classList.add('locked'); renderGate(); } } else { startApp(); }
 })();
 </script>
