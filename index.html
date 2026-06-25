@@ -647,7 +647,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v191</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small style="opacity:.5;font-weight:600">v193</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -860,7 +860,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v191';
+const APP_VERSION = 'v193';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -2337,7 +2337,23 @@ function applyFieldDeps(root){
 function bindInputs(app){
   app.querySelectorAll('input[data-key],textarea[data-key]').forEach(el=>{
     try{ if(el.type!=='number'&&el.type!=='tel'&&el.type!=='date'&&el.type!=='time'){ el.setAttribute('autocomplete','off'); el.setAttribute('autocorrect','off'); el.setAttribute('autocapitalize','off'); el.spellcheck=false; } }catch(e){}
-    el.oninput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport'){ autofillEndStaff(); autofillEndDetails(); } };
+    const _commitInput=()=>{ current.fields[el.dataset.key]=el.value; const fc=el.closest('.field'); if(fc){ fc.classList.remove('missing'); if(SUPPLIER_KEYS.indexOf(el.dataset.key)>=0){ const sp=fc.querySelector('.sup-phone'); if(sp) sp.innerHTML=supPhoneHTML(el.value,el.dataset.key); } if(el.dataset.key==='eventDate'){ const dr=fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(el.value); const v=el.value; if(/^\d{4}-\d{2}-\d{2}$/.test(v)){ if(NEW_REPORT && current && current.type!=='endreport' && _dupWarnedFor!==v && eventsOnDate(v,current.id).length){ _dupWarnedFor=v; dupDateAlert(v,current.id).then(ok=>{ if(!ok){ el.value=''; current.fields.eventDate=''; const dr2=fc.querySelector('.date-readout'); if(dr2) dr2.outerHTML=dateReadout(''); _dupWarnedFor=''; markDirty(); } }); } } else { _dupWarnedFor=''; } } } markDirty(); if(el.dataset.key==='eventDate' && current && current.type==='endreport'){ autofillEndStaff(); autofillEndDetails(); } };
+    el.oninput=()=>{
+      if(el.dataset.key==='eventDate' && current && current.type!=='endreport' && !NEW_REPORT){
+        if(el._dateAsk) return;
+        const oldv=String(current.fields.eventDate||''); const nv=el.value;
+        if(oldv && nv!==oldv && /^\d{4}-\d{2}-\d{2}$/.test(nv)){
+          el._dateAsk=true;
+          askConfirm('⚠️ שינוי תאריך האירוע הוא פעולה רגישה — הוא עלול להשפיע על שיבוצים, קייטרינג ואישורים/הודעות שכבר יצאו ללקוח.\n\nבטוח/ה שברצונך לשנות את תאריך האירוע?').then(ok=>{
+            el._dateAsk=false;
+            if(ok){ _commitInput(); moveAssignmentForDateChange(oldv,nv); }
+            else { el.value=oldv; const fc=el.closest('.field'); const dr=fc&&fc.querySelector('.date-readout'); if(dr) dr.outerHTML=dateReadout(oldv); }
+          });
+          return;
+        }
+      }
+      _commitInput();
+    };
     if(el.type==='date' && el.dataset.key==='eventDate'){ el.onchange=el.oninput; }
   });
   app.querySelectorAll('.etime').forEach(g=>{
@@ -3168,6 +3184,21 @@ async function saveAssign(){
   a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.other=$('#aOther').value.trim(); a.waiters=collectWaiters(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
   closeAssign(); renderSched(); toast('השיבוץ נשמר ✓');
   await persistAssignment(a);
+}
+function moveAssignmentForDateChange(oldDate,newDate){
+  if(!current) return;
+  let list=(MEM.assignments||[]).filter(a=> a && a.reportId && a.reportId===current.id);
+  if(!list.length) list=(MEM.assignments||[]).filter(a=> a && a.date===oldDate && a.brand===current.brand);
+  if(!list.length) return;
+  let cleared=0;
+  list.forEach(a=>{
+    const had = (a.op||a.dj||a.photog||a.other||(Array.isArray(a.waiters)&&a.waiters.some(w=>String(w||'').trim())));
+    a.date=newDate; a.op=''; a.dj=''; a.photog=''; a.other=''; a.waiters=[]; a.updatedAt=Date.now();
+    if(had) cleared++;
+    persistAssignment(a);
+  });
+  if(VIEW==='sched' && modalsClosed()) renderSched();
+  toast(cleared?'⚠️ השיבוץ הועבר לתאריך החדש — שימו לב: הספקים נמחקו, יש לשבץ מחדש':'השיבוץ הועבר לתאריך החדש');
 }
 async function deleteAssign(id){
   const a=MEM.assignments.find(x=>x.id===id); if(!a) return;
