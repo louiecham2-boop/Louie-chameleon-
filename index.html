@@ -526,6 +526,7 @@
   .hc-cell{height:44px;min-height:44px;border:0;background:#f3f5f8;border-radius:10px;font-size:16px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;position:relative}
   .hc-cell.empty{background:transparent;pointer-events:none}
   .hc-cell.past{opacity:.4;color:var(--muted);font-weight:600}
+  .hc-cell.dis{opacity:.28;color:var(--muted);cursor:default;pointer-events:none}
   .hc-cell.today{background:var(--brand-soft)}
   .hc-cell.today::after{content:"";position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:7px;height:7px;background:var(--brand);border-radius:2px}
   .hc-cell.sel{background:var(--brand);color:#fff}
@@ -585,6 +586,27 @@
   .cf-sub{font-weight:800;font-size:16px;color:var(--ink);margin:2px 0 4px}
   .cf-line{font-size:15.5px;color:var(--ink);margin-top:5px;line-height:1.65}
   .cf-empty{color:#9aa6b3;font-size:13px}
+  /* כפתור פתיחת תפריט בכרטיס + חלון תפריט גדול וברור לאורן */
+  .cf-openbtn{width:100%;margin:8px 0 2px;background:#fff;border:1.5px solid var(--brand);color:var(--brand);font-weight:800;font-size:16px;border-radius:12px;padding:13px 14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+  .cf-openbtn:active{transform:scale(.99)}
+  .cf-openbtn .cf-openhint{font-weight:700;font-size:12.5px;color:var(--muted)}
+  .cfm-modal{max-width:min(580px,96vw)!important;padding:0!important;overflow:hidden!important;display:flex;flex-direction:column}
+  .cfm-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px 10px;background:var(--brand);color:#fff}
+  .cfm-title{font-weight:800;font-size:21px}
+  .cfm-x{background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;font-weight:800;width:34px;height:34px;border-radius:50%;cursor:pointer;flex:0 0 auto;line-height:1}
+  .cfm-sub{padding:9px 18px 4px;font-size:14.5px;font-weight:700;color:var(--muted)}
+  .cfm-scroll{padding:6px 18px 4px;overflow:auto;-webkit-overflow-scrolling:touch}
+  .cfm-sec{margin:14px 0;padding-bottom:13px;border-bottom:1px dashed var(--line2)}
+  .cfm-sec:last-child{border-bottom:none}
+  .cfm-h{font-size:14px;font-weight:800;color:var(--brand);margin-bottom:5px}
+  .cfm-big{font-size:19px;color:var(--ink);white-space:pre-wrap;line-height:1.9;font-weight:600}
+  .cfm-body{font-size:18px;color:var(--ink);white-space:pre-wrap;line-height:1.85}
+  .cfm-missing{background:#fff4e0;border:1px solid #f0cf8c;color:#9a6a00;font-weight:800;font-size:15px;border-radius:10px;padding:10px 13px;margin:12px 0}
+  .cfm-diet{font-size:15.5px;color:var(--ink);font-weight:700;margin:10px 0 2px;padding:10px 13px;background:#fff7e8;border:1px solid #f0d9a8;border-radius:10px}
+  .cfm-modal .cf-sub{font-size:20px;margin:4px 0 6px}
+  .cfm-modal .cf-line{font-size:18px;line-height:1.85;margin-top:8px}
+  .cfm-modal .cf-empty{font-size:16px}
+  .cfm-modal .modal-foot{margin:6px 18px 18px}
   .cf-done{width:100%;margin-top:12px;background:#fff;border:1.5px solid var(--brand);color:var(--brand);font-weight:800}
   .cf-done.on{background:#1f9d57;border-color:#1f9d57;color:#fff}
   .cf-doneat{text-align:center;font-size:12px;color:var(--muted);margin-top:6px}
@@ -663,7 +685,7 @@
 <body class="locked">
 <header class="bar">
   <div class="bar-in">
-    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small id="verTag" style="opacity:.5;font-weight:600">v205</small></span></div>
+    <div class="logo"><span class="dot"></span><span>דוחות טרום-אירוע <small id="verTag" style="opacity:.5;font-weight:600">v209</small></span></div>
     <span class="conn" id="conn">● מצב מקומי</span>
     <div class="spacer"></div>
     <div class="brand-switch" id="brandSwitch">
@@ -726,6 +748,20 @@
     </div>
   </div>
 </div>
+<div id="chefMenuModal" class="modal-bg" style="display:none;z-index:95">
+  <div class="modal cfm-modal">
+    <div class="cfm-head">
+      <div class="cfm-title" id="cfmTitle"></div>
+      <button type="button" id="cfmClose" class="cfm-x" aria-label="סגור">✕</button>
+    </div>
+    <div class="cfm-sub" id="cfmSub"></div>
+    <div class="cfm-scroll">
+      <div id="cfmBody"></div>
+      <div id="cfmDiet"></div>
+    </div>
+    <div class="modal-foot"><button type="button" id="cfmCloseBtn" class="btn primary">סגור</button></div>
+  </div>
+</div>
 <div id="inputModal" class="modal-bg" style="display:none;z-index:90">
   <div class="modal" style="max-width:340px">
     <div class="modal-h" id="inputMsg">הזן/י שם</div>
@@ -757,6 +793,7 @@
     <label>מפעיל / הגברה</label><select id="aOp" dir="rtl"></select>
     <label>די-ג׳יי</label><select id="aDj" dir="rtl"></select>
     <label>צלם / וידאו</label><select id="aPhotog" dir="rtl"></select>
+    <label>מנהל קומה (לא חובה)</label><select id="aFloor" dir="rtl"></select>
     <label>אחר (רישום ידני)</label><input id="aOther" type="text" dir="rtl" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="תפקיד / שם נוסף — חופשי">
     <label>מלצרים</label>
     <div id="aWaiters"></div>
@@ -876,7 +913,7 @@
 
 <script>
 /* ===== עדכון אוטומטי לגרסה האחרונה (פותר תקיעת קאש במסך הבית של iOS) ===== */
-const APP_VERSION = 'v205';
+const APP_VERSION = 'v209';
 (function(){
   try{ if(sessionStorage.getItem('__verChecked')==='1') return; }catch(e){}
   var base = location.origin + location.pathname;
@@ -1459,7 +1496,7 @@ const EVENT_TYPES={
       F('ee_manager','שם מנהל האירוע','text',{req:true}),
       F('celebrant','שם הלקוח (כפי שמופיע בחשבונית)','text',{req:true}),
       F('ee_etype','סוג האירוע','select',{req:true,opts:['בר/בת מצווה ילדים','אירוע משולב','מבוגרים','השכרת מקום','קוקטייל בר/מסיבה']}),
-      F('ee_floorManager','מנהל נוסף / מנהל קומה','text',{req:true}),
+      F('ee_floorManager','מנהל נוסף / מנהל קומה','text',{hint:'לא חובה — יימשך אוטומטית אם קיים בדוח טרום-אירוע'}),
     ]},
     {title:'כמויות',kind:'ops',fields:[
       F('ee_adultsReserve','האם הייתה רזרבה? (מנות מבוגרים)','yesnonote',{noteOn:'yes',notePh:'כמה רזרבה?',dep:{key:'ee_etype',val:['מבוגרים','אירוע משולב']}}),
@@ -1683,18 +1720,22 @@ function renderHebCal(){
     ? (function(){ const r=(MEM.reports||[]).find(x=>x.id===HEBCAL.archiveId); return r&&r.fields&&r.fields.eventDate; })()
     : (current&&current.fields&&current.fields[HEBCAL.key]);
   const todayIso=new Date().toISOString().slice(0,10);
+  const endMode=(HEBCAL.key==='eventDate' && current && current.type==='endreport');
   let cells='';
   for(let i=0;i<startDow;i++) cells+='<div class="hc-cell empty"></div>';
   for(let dnum=1;dnum<=days;dnum++){
     const iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(dnum).padStart(2,'0');
-    const cls=['hc-cell']; if(iso===sel) cls.push('sel'); if(iso===todayIso) cls.push('today'); if(iso<todayIso) cls.push('past');
-    cells+=`<button type="button" class="${cls.join(' ')}" data-iso="${iso}">${dnum}</button>`;
+    const cls=['hc-cell']; if(iso===sel) cls.push('sel'); if(iso===todayIso) cls.push('today');
+    let disabled=false;
+    if(endMode && iso>todayIso){ disabled=true; cls.push('dis'); }  /* דוח סוף אירוע: תאריך עתידי חסום */
+    cells+=`<button type="button" class="${cls.join(' ')}" data-iso="${iso}"${disabled?' disabled':''}>${dnum}</button>`;
   }
   const t=$('#hebCalTitle'); if(t) t.textContent=MONTHS[m]+' '+y;
   body.innerHTML=cells;
-  body.querySelectorAll('[data-iso]').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
+  body.querySelectorAll('[data-iso]:not([disabled])').forEach(b=>b.onclick=()=>pickHebDate(b.dataset.iso));
 }
 function pickHebDate(iso){
+  if(current && current.type==='endreport' && HEBCAL.key==='eventDate' && iso>new Date().toISOString().slice(0,10)){ toast('בדוח סוף אירוע לא ניתן לבחור תאריך עתידי'); return; }
   if(HEBCAL.key==='__archiveDate'){ archiveApplyDate(iso); return; }
   if(!current) return;
   if(HEBCAL.key==='eventDate'){
@@ -1943,8 +1984,9 @@ function autofillEndDetails(){
   if(!rep) return false;
   const rf=rep.fields||{};
   const nm=v=>(v!=null && roleState(v)==='set')?String(v).trim():'';
+  const a=(MEM.assignments||[]).find(x=>x.date===date && x.brand===current.brand);
   const ETYPE={bat:'בר/בת מצווה ילדים',bar:'בר/בת מצווה ילדים',meshulav:'אירוע משולב',shulchan:'מבוגרים',cocktail:'קוקטייל בר/מסיבה'};
-  const map={ celebrant:String(rf.celebrant||'').trim(), ee_manager:nm(rf.eventManager), ee_floorManager:nm(rf.additionalManager), ee_etype:ETYPE[rep.type]||'' };
+  const map={ celebrant:String(rf.celebrant||'').trim(), ee_manager:nm(rf.eventManager), ee_floorManager:(nm(a&&a.floorManager)||nm(rf.additionalManager)), ee_etype:ETYPE[rep.type]||'' };
   let filled=0;
   Object.keys(map).forEach(k=>{ const v=map[k]; if(!v) return;
     current.fields[k]=v; filled++;
@@ -2031,7 +2073,7 @@ function renderForm(){
       ${def.endReport?'':`<button class="btn pdf" id="pdfBtnTop">📲 שלח בוואטסאפ / שמור PDF</button>`}
     </div>
     ${!EDITING?`<div class="view-banner">👁 מצב צפייה — השדות נעולים מפני שינוי בטעות.<button class="btn mini-edit" id="editTop">✏️ ערוך / עדכן</button></div>`:''}
-    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); if(a.other)p.push('➕ אחר: '+esc(a.other)); if(a.waiters&&a.waiters.length)p.push('🍽️ מלצרים: '+esc(a.waiters.join(', '))); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
+    ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===current.fields.eventDate&&x.brand===current.brand); if(!a) return ''; const p=[]; if(a.op)p.push('🎛️ מפעיל: '+esc(a.op)); if(a.dj)p.push('🎧 DJ: '+esc(a.dj)); if(a.photog)p.push('📷 צלם: '+esc(a.photog)); if(a.floorManager)p.push('🧭 מנהל קומה: '+esc(a.floorManager)); if(a.other)p.push('➕ אחר: '+esc(a.other)); if(a.waiters&&a.waiters.length)p.push('🍽️ מלצרים: '+esc(a.waiters.join(', '))); return p.length?`<div class="dj-banner">צוות משובץ לתאריך זה: ${p.join('  ·  ')}</div>`:''; })()}
     ${current.type==='bat'?`<div class="convert-bar"><button class="btn convert" id="toMeshulav">➕ להוסיף אירוע מבוגרים — להפוך למשולב</button></div>`:''}
     <div id="sections">
       ${def.sections.map((sec,si)=>`
@@ -2042,7 +2084,7 @@ function renderForm(){
     </div>
     <div class="form-foot">
       ${EDITING?`<button class="btn primary" id="saveBtn">${def.endReport?'💾 שמור במערכת':'שמירה בתיקייה'}</button>`:`<button class="btn primary" id="editBtn">✏️ ערוך / עדכן דוח</button>`}
-      ${def.endReport?`<button class="btn ${f.summarySent?'sent':'pdf'}" id="pdfBtnEnd" style="padding:9px 13px;font-size:13.5px">${f.summarySent?'✓ נשלח בוואטסאפ':'📲 שלח כ-PDF בוואטסאפ'}</button>`:`<button class="btn pdf" id="pdfBtn">📄 צור PDF (לשמירה / שליחה)</button>`}
+      ${def.endReport?`<button class="btn ${f.summarySent?'sent':'pdf'}" id="pdfBtnEnd" style="padding:9px 13px;font-size:13.5px">${f.summarySent?'✓ נשלח בוואטסאפ':'📲 שלח סיכום (פנימי) בוואטסאפ'}</button>`:`<button class="btn pdf" id="pdfBtn">📄 צור PDF (לשמירה / שליחה)</button>`}
       ${def.endReport?`<button class="btn ${current.reviewed?'revok':'revpend'}" id="mgrReviewBtn" style="padding:9px 13px;font-size:13.5px">${current.reviewed?'✔️ אושר ע״י מנהל — מלא ותקין':'🔍 אישור מנהל — עברתי על הדוח'}</button>`:''}
       <button class="btn ghost" id="backBtn">חזרה</button>
       ${(EDITING && MEM.reports.some(r=>r.id===current.id))?`<button class="btn del" id="delBtn">🗑 מחק דוח</button>`:''}
@@ -2261,7 +2303,7 @@ function fieldHTML(fld,val){
     const t=fld.type==='number'?'number':fld.type==='date'?'date':fld.type==='time'?'time':fld.type==='tel'?'tel':'text';
     const dirA=(t==='text')?'rtl':'ltr';
     let extra='';
-    if(t==='date'&&fld.key==='eventDate'&&!(current&&current.type==='endreport')){ extra+=` min="${new Date().toISOString().slice(0,10)}"`; }
+    if(t==='date'&&fld.key==='eventDate'){ const _td=new Date().toISOString().slice(0,10); if(current&&current.type==='endreport'){ extra+=` max="${_td}"`; } /* דוח טרום-אירוע: ללא הגבלה — מותר גם תאריך עבר. דוח סוף אירוע: רק עד היום (לא ניתן למלא לפני האירוע) */ }
     if(fld.lock) extra+=' readonly';
     const xcls=[fld.lock?'locked':'',fld.key==='eventDate'?'evdate':''].filter(Boolean).join(' ');
     control=`<input type="${t}" data-key="${fld.key}" dir="${dirA}"${xcls?` class="${xcls}"`:''} autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" value="${esc(val)}"${extra}>`;
@@ -2783,7 +2825,7 @@ function buildDocHTML(r){
       <div class="m-cell"><span class="m-l">${nbidi('איש קשר')}</span><span class="m-v">${f.contact?bidi(f.contact):'—'}${f.phone?' · '+bidi(f.phone):''}</span></div>
       <div class="m-cell"><span class="m-l">${nbidi('סטטוס')}</span><span class="m-v">${STATUS_NAME[r.status]}</span></div>
       <div class="m-cell"><span class="m-l">${nbidi('הופק בתאריך')}</span><span class="m-v"><bdi dir="ltr">${esc(today)}</bdi></span></div>
-      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+bidi(a.op)); if(a.dj)p.push('DJ: '+bidi(a.dj)); if(a.photog)p.push('צלם: '+bidi(a.photog)); if(a.other)p.push('אחר: '+bidi(a.other)); if(a.waiters&&a.waiters.length)p.push('מלצרים: '+bidi(a.waiters.join(', '))); return p.length?`<div class="m-cell m-wide"><span class="m-l">${nbidi('צוות משובץ')}</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
+      ${(()=>{ const a=((MEM&&MEM.assignments)||[]).find(x=>x.date&&x.date===f.eventDate&&x.brand===r.brand); if(!a) return ''; const p=[]; if(a.op)p.push('מפעיל: '+bidi(a.op)); if(a.dj)p.push('DJ: '+bidi(a.dj)); if(a.photog)p.push('צלם: '+bidi(a.photog)); if(a.floorManager)p.push('מנהל קומה: '+bidi(a.floorManager)); if(a.other)p.push('אחר: '+bidi(a.other)); if(a.waiters&&a.waiters.length)p.push('מלצרים: '+bidi(a.waiters.join(', '))); return p.length?`<div class="m-cell m-wide"><span class="m-l">${nbidi('צוות משובץ')}</span><span class="m-v">${p.join('  ·  ')}</span></div>`:''; })()}
     </div>
     ${secs}
     <div class="d-foot"><div class="sig"><div class="line"></div><div class="lbl">${nbidi('חתימת מנהל/ת המשרד')}</div></div><div class="sig"><div class="line"></div><div class="lbl">${nbidi('חתימת מנהל/ת האירוע')}</div></div><div class="sig"><div class="line"></div><div class="lbl">${nbidi('אישור לקוח')}</div></div></div>
@@ -2898,6 +2940,10 @@ async function sharePDF(){
   const file=new File([blob],fileName,{type:'application/pdf'});
   const isEnd=(current && current.type==='endreport');
   const docTitle=isEnd?'דוח סיכום אירוע':'דוח טרום-אירוע';
+  if(isEnd){
+    const okEnd=await askConfirm('⚠️ דוח סיכום אירוע הוא דוח פנימי לניהול בלבד.\nאין לשלוח אותו ללקוח/ה!\n\nלהמשיך לשיתוף הקובץ (למשרד / לצוות)?');
+    if(!okEnd) return;
+  }
   const shareData={files:[file],title:docTitle,text:docTitle+' — '+(current.fields.celebrant||'')};
   if(navigator.canShare && navigator.canShare({files:[file]})){
     try{ await navigator.share(shareData); }
@@ -2906,7 +2952,12 @@ async function sharePDF(){
     downloadBlob(blob,fileName);
     toast('הקובץ ירד — אפשר לצרפו לוואטסאפ/מייל');
   }
-  if(isEnd) await markSummarySent();
+  if(isEnd){
+    // לא לסמן "נשלח" אוטומטית — רק אם המשתמש מאשר ששלח בפועל (מונע סימון שגוי)
+    const sentOk=await askConfirm('האם שלחת בפועל את דוח הסיכום בוואטסאפ?\n\nסמן/י "נשלח" רק אם הקובץ אכן נשלח (למשרד / לצוות — לא ללקוח/ה).');
+    if(sentOk) await markSummarySent();
+    else toast('הדוח לא סומן כ"נשלח" — אפשר לשלוח ולסמן בהמשך');
+  }
 }
 
 /* ===================== תזכורות מנהלת המשרד ===================== */
@@ -3237,7 +3288,7 @@ function openAssignForRow(rid,aid){
   $('#aTime').value=(r&&r.fields.eventTime&&/^[0-9]/.test(r.fields.eventTime))?r.fields.eventTime:'';
   $('#aBrand').value=r?r.brand:BRAND;
   $('#aLabel').value=r?(((EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'')+(r.fields.celebrant?' · '+r.fields.celebrant:'')):'';
-  setCrewSel($('#aOp'),'operator', r?r.fields.operator:''); setCrewSel($('#aDj'),'dj', r?r.fields.dj:''); setCrewSel($('#aPhotog'),'photographer', r?r.fields.photographer:''); $('#aOther').value=(r&&r.fields&&r.fields.ee_other)||''; $('#aNotes').value='';
+  setCrewSel($('#aOp'),'operator', r?r.fields.operator:''); setCrewSel($('#aDj'),'dj', r?r.fields.dj:''); setCrewSel($('#aPhotog'),'photographer', r?r.fields.photographer:''); setCrewSel($('#aFloor'),'manager', (r&&r.fields&&r.fields.additionalManager)||''); $('#aOther').value=(r&&r.fields&&r.fields.ee_other)||''; $('#aNotes').value='';
   $('#aDel').style.display='none';
   $('#aModalTitle').textContent='שיבוץ צוות לאירוע';
   const sm=$('#schedModal'); sm.dataset.reportId=rid||''; sm.style.display='flex';
@@ -3281,6 +3332,7 @@ function openAssign(id,presetDate){
   setCrewSel($('#aOp'),'operator', a?a.op:'');
   setCrewSel($('#aDj'),'dj', a?a.dj:'');
   setCrewSel($('#aPhotog'),'photographer', a?a.photog:'');
+  setCrewSel($('#aFloor'),'manager', a?a.floorManager:'');
   $('#aOther').value=a?(a.other||''):'';
   renderWaiterInputs(a&&Array.isArray(a.waiters)?a.waiters:[]);
   $('#aNotes').value=a?(a.notes||''):'';
@@ -3298,7 +3350,7 @@ async function saveAssign(){
   if(!date){ toast('יש לבחור תאריך'); return; }
   let a=editingAssign?MEM.assignments.find(x=>x.id===editingAssign):null;
   if(!a){ a={id:uid(),createdAt:Date.now(),reportId:(($('#schedModal').dataset.reportId)||'')}; MEM.assignments.push(a); }
-  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.other=$('#aOther').value.trim(); a.waiters=collectWaiters(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
+  a.date=date; a.time=$('#aTime').value; a.brand=$('#aBrand').value; a.label=$('#aLabel').value.trim(); a.op=$('#aOp').value.trim(); a.dj=$('#aDj').value.trim(); a.photog=$('#aPhotog').value.trim(); a.floorManager=$('#aFloor').value.trim(); a.other=$('#aOther').value.trim(); a.waiters=collectWaiters(); a.notes=$('#aNotes').value.trim(); a.updatedAt=Date.now();
   closeAssign(); renderSched(); toast('השיבוץ נשמר ✓');
   await persistAssignment(a);
 }
@@ -3310,7 +3362,7 @@ function moveAssignmentForDateChange(oldDate,newDate){
   let cleared=0;
   list.forEach(a=>{
     const had = (a.op||a.dj||a.photog||a.other||(Array.isArray(a.waiters)&&a.waiters.some(w=>String(w||'').trim())));
-    a.date=newDate; a.op=''; a.dj=''; a.photog=''; a.other=''; a.waiters=[]; a.updatedAt=Date.now();
+    a.date=newDate; a.op=''; a.dj=''; a.photog=''; a.floorManager=''; a.other=''; a.waiters=[]; a.updatedAt=Date.now();
     if(had) cleared++;
     persistAssignment(a);
   });
@@ -3930,8 +3982,9 @@ document.querySelectorAll('#brandSwitch button').forEach(b=>b.onclick=async()=>{
 });
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
 { const m=$('#hebCalModal'); if(m){ const p=$('#hcPrev'),n=$('#hcNext'),cc=$('#hcCancel'),cl=$('#hcClear'); if(p)p.onclick=()=>hebCalNav(-1); if(n)n.onclick=()=>hebCalNav(1); if(cc)cc.onclick=closeHebCal; if(cl)cl.onclick=hebCalClear; m.onclick=e=>{ if(e.target===m) closeHebCal(); }; } }
+{ const m=$('#chefMenuModal'); if(m){ const x=$('#cfmClose'),c=$('#cfmCloseBtn'); if(x)x.onclick=closeChefMenu; if(c)c.onclick=closeChefMenu; m.onclick=e=>{ if(e.target===m) closeChefMenu(); }; } }
 { const m=$('#schedModal'); if(m){ $('#aSave').onclick=saveAssign; $('#aCancel').onclick=closeAssign; $('#aDel').onclick=()=>{ if(editingAssign) deleteAssign(editingAssign); }; { const aw=$('#aAddWaiter'); if(aw) aw.onclick=()=>addWaiterRow(''); } m.onclick=(e)=>{ if(e.target===m) closeAssign(); };
-  ['#aOp','#aDj','#aPhotog'].forEach(id=>{ const s=$(id); if(s) s.onchange=()=>guardCrewSelect(s); });
+  ['#aOp','#aDj','#aPhotog','#aFloor'].forEach(id=>{ const s=$(id); if(s) s.onchange=()=>guardCrewSelect(s); });
 } }
 function setCrewSel(el,roleKey,val){ if(!el) return; el.innerHTML=crewOptionsHTML(roleKey, val||''); el.dataset.prev=el.value; }
 { const b=$('#notifyOk'); if(b) b.onclick=()=>{ const m=$('#notifyModal'); if(m) m.style.display='none'; }; const m=$('#notifyModal'); if(m) m.onclick=e=>{ if(e.target===m) m.style.display='none'; }; }
@@ -4054,8 +4107,7 @@ function kidsCardHTML(r){
   const aLine=adultBuf?(esc(f.batAdultsFood)+(aQty?(' · '+esc(aQty)+' מנות'):'')):'';
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
-    <div class="cf-sec"><div class="cf-h">תפריט ילדים</div><div class="cf-big">${esc(f.kidsMenu)}</div></div>
-    ${aLine?`<div class="cf-sec"><div class="cf-h">מבוגרים באירוע (לא נכלל בכמות הילדים)</div><div class="cf-big">${aLine}</div></div>`:''}
+    <button type="button" class="cf-openbtn" data-menu="${r.id}" data-tab="kids">🧒 הצג תפריט ילדים <span class="cf-openhint">(לחצו לצפייה)</span></button>
     ${diet.length?`<div class="cf-diet">${diet.join(' · ')}</div>`:''}
     <button type="button" class="btn cf-done ${done?'on':''}" data-done="${r.id}" data-tab="kids">${done?'✓ הוכן / אושר':'סמן כהוכן / אושר'}</button>
     ${done&&f.chefDoneKidsAt?`<div class="cf-doneat">סומן: ${esc(f.chefDoneKidsAt)}</div>`:''}
@@ -4075,15 +4127,53 @@ function adultsCardHTML(r){
   return `<div class="chef-card ${done?'done':''}" data-id="${r.id}" data-date="${r.fields.eventDate||''}">
     ${chefCardHead(r)}
     ${missing.length?`<div class="cf-missing">⛔ חסרה בחירה בתפריט — ${missing.join(' · ')}</div>`:''}
-    ${adults?`<div class="cf-sec"><div class="cf-h">תפריט מבוגרים</div><div class="cf-big">${adults}</div></div>`:''}
-    ${foodLine.length?`<div class="cf-sec"><div class="cf-h">מבוגרים — כמויות</div><div class="cf-big">${foodLine.join(' · ')}</div></div>`:''}
-    ${f.sides?`<div class="cf-sec"><div class="cf-h">תוספות</div><div class="cf-big">${esc(f.sides)}</div></div>`:''}
-    ${(f.adultsNotes||f.batAdultsNotes)?`<div class="cf-sec"><div class="cf-h">הערות מבוגרים</div><div class="cf-body">${esc(f.adultsNotes||f.batAdultsNotes)}</div></div>`:''}
+    <button type="button" class="cf-openbtn" data-menu="${r.id}" data-tab="adults">🍽️ הצג תפריט מבוגרים <span class="cf-openhint">(לחצו לצפייה)</span></button>
     ${diet.length?`<div class="cf-diet">${diet.join(' · ')}</div>`:''}
     <button type="button" class="btn cf-done ${done?'on':''}" data-done="${r.id}" data-tab="adults">${done?'✓ הוכן / אושר':'סמן כהוכן / אושר'}</button>
     ${done&&f.chefDoneAdultsAt?`<div class="cf-doneat">סומן: ${esc(f.chefDoneAdultsAt)}</div>`:''}
   </div>`;
 }
+/* ===== חלון תפריט גדול וברור לאורן — נפתח בלחיצה על כפתור התפריט בכרטיס ===== */
+function chefKidsMenuBody(f){
+  const adultBuf=(f.batAdultsFood&&f.batAdultsFood.indexOf('מביאים')<0);
+  const aQty=f.batAdultsChefQty||f.batAdultsCount;
+  const aLine=adultBuf?(esc(f.batAdultsFood)+(aQty?(' · '+esc(aQty)+' מנות'):'')):'';
+  let h='<div class="cfm-sec"><div class="cfm-h">תפריט ילדים</div><div class="cfm-big">'+esc(f.kidsMenu||'—')+'</div></div>';
+  if(aLine) h+='<div class="cfm-sec"><div class="cfm-h">מבוגרים באירוע (לא נכלל בכמות הילדים)</div><div class="cfm-big">'+aLine+'</div></div>';
+  return h;
+}
+function chefAdultsMenuBody(f){
+  const adults=chefAdultsHTML(f.adultsMenuPick);
+  const missing=chefMissing(f.adultsMenuPick);
+  const foodLine=[];
+  if(f.adultsChefQty) foodLine.push('כמות לשף: '+esc(f.adultsChefQty)+' מנות');
+  if(f.adultsCount) foodLine.push('כמות מבוגרים: '+esc(f.adultsCount));
+  let h='';
+  if(missing.length) h+='<div class="cfm-missing">⛔ חסרה בחירה בתפריט — '+missing.join(' · ')+'</div>';
+  if(adults) h+='<div class="cfm-sec"><div class="cfm-h">תפריט מבוגרים</div><div>'+adults+'</div></div>';
+  if(foodLine.length) h+='<div class="cfm-sec"><div class="cfm-h">מבוגרים — כמויות</div><div class="cfm-big">'+foodLine.join(' · ')+'</div></div>';
+  if(f.sides) h+='<div class="cfm-sec"><div class="cfm-h">תוספות</div><div class="cfm-big">'+esc(f.sides)+'</div></div>';
+  if(f.adultsNotes||f.batAdultsNotes) h+='<div class="cfm-sec"><div class="cfm-h">הערות מבוגרים</div><div class="cfm-body">'+esc(f.adultsNotes||f.batAdultsNotes)+'</div></div>';
+  if(!h) h='<div class="cf-empty">עדיין לא נבחר תפריט מבוגרים</div>';
+  return h;
+}
+function openChefMenu(id,tab){
+  const r=MEM.reports.find(x=>x.id===id); if(!r) return;
+  const f=r.fields||{};
+  const et=(EVENT_TYPES[r.type]&&EVENT_TYPES[r.type].name)||'';
+  const d=fmtDateShort(f.eventDate);
+  const diet=[];
+  { const _a=allergText(f.glutenLactose)||allergText(f.sensitivities); if(_a) diet.push('רגישויות: '+esc(_a)); }
+  if(tab==='adults'){ if(f.vegPersonal) diet.push('צמחוני: '+esc(f.vegPersonal)); if(f.veganPersonal) diet.push('טבעוני: '+esc(f.veganPersonal)); }
+  else { if(f.vegMeals) diet.push('צמחוני: '+esc(f.vegMeals)); }
+  const tEl=$('#cfmTitle'), sEl=$('#cfmSub'), bEl=$('#cfmBody'), dEl=$('#cfmDiet');
+  if(tEl) tEl.textContent=(tab==='adults'?'🍽️ תפריט מבוגרים':'🧒 תפריט ילדים');
+  if(sEl) sEl.textContent=(f.celebrant||'—')+' · '+et+' · '+d.w+' '+d.d+' '+d.m+(CHEF_MODE?(' · '+(BRAND_NAME[r.brand]||'')):'');
+  if(bEl) bEl.innerHTML=(tab==='adults')?chefAdultsMenuBody(f):chefKidsMenuBody(f);
+  if(dEl) dEl.innerHTML=diet.length?('<div class="cfm-diet">'+diet.join(' · ')+'</div>'):'';
+  const m=$('#chefMenuModal'); if(m){ m.style.display='flex'; const sc=m.querySelector('.cfm-scroll'); if(sc) sc.scrollTop=0; }
+}
+function closeChefMenu(){ const m=$('#chefMenuModal'); if(m) m.style.display='none'; }
 let CHEF_REM_CACHE=[];
 function chefMenuReminders(){
   const out=[]; if(!MEM||!MEM.reports) return out;
@@ -4269,6 +4359,7 @@ function renderChef(){
   app.querySelectorAll('.chef-mhead[data-mon]').forEach(h=>h.onclick=()=>{ const k=h.dataset.mon; const grp=h.parentElement; const nowCol=grp.classList.contains('collapsed'); CHEF_COLLAPSED[k]=!nowCol; grp.classList.toggle('collapsed',!nowCol); });
   app.querySelectorAll('[data-done]').forEach(b=>b.onclick=()=>chefToggleDone(b.dataset.done,b.dataset.tab));
   app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>chefEditReport(b.dataset.edit));
+  app.querySelectorAll('[data-menu]').forEach(b=>b.onclick=()=>openChefMenu(b.dataset.menu,b.dataset.tab));
   { const ab=$('#addTasting'); if(ab) ab.onclick=()=>openTasting(null); }
   app.querySelectorAll('[data-tedit]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); openTasting(b.dataset.tedit); });
   app.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=e=>{ e.stopPropagation(); deleteTasting(b.dataset.tdel); });
